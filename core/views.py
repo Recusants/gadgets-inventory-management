@@ -154,15 +154,11 @@ def setup_initialize(request):
     - Sets is_customized = True
     """
     from django.db import transaction
-    from inventory.models import Category, Supplier
     from sales.models import Customer
-    from expenses.models import ExpenseCategory
 
     is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
     company_name = request.POST.get('company_name', '').strip()
     phone = request.POST.get('phone', '').strip()
-    category_name = request.POST.get('category_name', '').strip()
-    supplier_name = request.POST.get('supplier_name', '').strip()
 
     errors = {}
     if not company_name:
@@ -200,37 +196,13 @@ def setup_initialize(request):
         settings_obj.is_customized = True
         settings_obj.save()
 
-        # 2. Create Initial Category
-        if category_name:
-            Category.objects.get_or_create(
-                name=category_name,
-                defaults={"description": f"Initial product category for {company_name}"}
-            )
-
-        # 3. Create Initial Supplier
-        if supplier_name:
-            Supplier.objects.get_or_create(
-                name=supplier_name,
-                defaults={
-                    "phone": request.POST.get('supplier_phone', '').strip(),
-                    "notes": "Initial registered supplier created during setup wizard."
-                }
-            )
-
-        # 4. Ensure Default Customer
+        # Ensure Default Walk-in Customer for retail counter operations
         Customer.get_default_customer()
-
-        # 5. Create Initial ExpenseCategory
-        exp_name = request.POST.get('expense_category_name', '').strip() or 'General & Operational Expenses'
-        ExpenseCategory.objects.get_or_create(
-            name=exp_name,
-            defaults={"description": "Standard business operations and overheads"}
-        )
 
     if is_ajax:
         return success_response(
             title="Store Initialized",
-            message=f'Welcome to {settings_obj.company_name}! Mandatory foundational data has been configured.',
+            message=f'Welcome to {settings_obj.company_name}! Operating store profile has been calibrated.',
             data={"reload": True}
         )
     return redirect('dashboard:index')
