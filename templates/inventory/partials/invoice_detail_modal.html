@@ -1,0 +1,97 @@
+{% load humanize %}
+<!-- Invoice Detail Modal Partial -->
+<div class="p-6 sm:p-7">
+  
+  <div class="flex items-center justify-between pb-4 border-b border-slate-200">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center text-lg shadow-sm">
+        <i class="fas fa-file-invoice"></i>
+      </div>
+      <div>
+        <h3 class="text-lg font-black tracking-tight text-slate-900">Invoice: {{ invoice_number }}</h3>
+        <p class="text-xs text-slate-500">Supplier: <span class="font-bold text-slate-700">{{ supplier_name }}</span> | Date: <span class="font-semibold">{{ date_received|date:"d M Y" }}</span></p>
+      </div>
+    </div>
+    
+    <button type="button" data-modal-close class="text-slate-400 hover:text-slate-600 p-1.5 rounded-xl hover:bg-slate-100 transition-colors">
+      <i class="fas fa-times text-base"></i>
+    </button>
+  </div>
+
+  <div class="py-5 space-y-4 text-xs">
+    
+    <!-- Invoice Summary Stats -->
+    <div class="grid grid-cols-3 gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center">
+      <div>
+        <span class="text-slate-500 text-[10px] uppercase font-bold block">Total Received</span>
+        <span class="text-lg font-black text-slate-900 mt-0.5 block">
+          {{ total_qty }} units
+        </span>
+      </div>
+      <div>
+        <span class="text-slate-500 text-[10px] uppercase font-bold block">Available Units</span>
+        <span class="text-lg font-black text-emerald-600 mt-0.5 block">
+          {{ total_rem }} units
+        </span>
+      </div>
+      <div>
+        <span class="text-slate-500 text-[10px] uppercase font-bold block">Total Invoice Cost</span>
+        <span class="text-lg font-black text-blue-700 mt-0.5 block font-mono">
+          ${{ total_cost|intcomma }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Batches on this Invoice Table -->
+    <div>
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center">
+          <i class="fas fa-layer-group text-blue-600 mr-1.5"></i> Products &amp; Batches in this Invoice
+        </span>
+      </div>
+
+      <div class="border border-slate-200 rounded-xl overflow-hidden max-h-56 overflow-y-auto custom-scrollbar">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-100 text-slate-800 font-bold border-b border-slate-200 sticky top-0">
+            <tr>
+              <th class="py-2.5 px-3">Batch #</th>
+              <th class="py-2.5 px-3">Product Name</th>
+              <th class="py-2.5 px-3">Category</th>
+              <th class="py-2.5 px-3 font-mono">Unit Cost</th>
+              <th class="py-2.5 px-3 text-center">Qty Recv</th>
+              <th class="py-2.5 px-3 text-center">Qty Avail</th>
+              <th class="py-2.5 px-3 font-mono">Total Cost</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            {% for b in batches %}
+              <tr class="hover:bg-slate-50">
+                <td class="py-2 px-3 font-mono font-bold text-blue-700">#{{ b.id }}</td>
+                <td class="py-2 px-3 font-black text-slate-900">{{ b.product.name }}</td>
+                <td class="py-2 px-3 text-slate-600">{{ b.product.category.name }}</td>
+                <td class="py-2 px-3 font-mono font-bold text-slate-900">${{ b.cost_price|intcomma }}</td>
+                <td class="py-2 px-3 text-center font-bold text-slate-900">{{ b.quantity_received }}</td>
+                <td class="py-2 px-3 text-center font-bold {% if b.quantity_remaining > 0 %}text-emerald-700{% else %}text-slate-400{% endif %}">
+                  {{ b.quantity_remaining }}
+                </td>
+                <td class="py-2 px-3 font-mono font-bold text-slate-900">
+                  ${% widthratio b.cost_price 1 b.quantity_received as line_cost %}{{ b.cost_price }} &times; {{ b.quantity_received }}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="pt-4 border-t border-slate-200 flex justify-end">
+    <button type="button" 
+            data-modal-close
+            class="px-5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition-colors">
+      Close
+    </button>
+  </div>
+
+</div>

@@ -1,0 +1,67 @@
+{% load humanize %}
+
+<div class="p-6">
+  <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+    <div class="flex items-center space-x-3">
+      <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center">
+        <i class="fas fa-receipt"></i>
+      </div>
+      <div>
+        <h3 class="text-base font-black text-slate-900">Expense Details</h3>
+        <p class="text-xs text-slate-400">Ref: EXP-{{ expense.id }}</p>
+      </div>
+    </div>
+    <button type="button" onclick="closeModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+      <i class="fas fa-times text-base"></i>
+    </button>
+  </div>
+
+  <div class="mt-4 space-y-3 text-xs">
+    <div class="bg-blue-50/50 p-3.5 rounded-xl border border-blue-100 flex items-center justify-between">
+      <div>
+        <div class="text-[10px] font-bold uppercase text-blue-600">Total Expense</div>
+        <div class="text-xl font-black font-mono text-slate-900 mt-0.5">${{ expense.amount|intcomma }}</div>
+      </div>
+      <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
+        {{ expense.category.name }}
+      </span>
+    </div>
+
+    <div class="grid grid-cols-2 gap-2 text-slate-600">
+      <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200/60">
+        <div class="text-[10px] uppercase text-slate-400 font-bold">Expense Title</div>
+        <div class="font-bold text-slate-900 mt-0.5">{{ expense.title }}</div>
+      </div>
+      <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200/60">
+        <div class="text-[10px] uppercase text-slate-400 font-bold">Date Incurred</div>
+        <div class="font-bold text-slate-900 mt-0.5">{{ expense.date|date:"Y-m-d" }}</div>
+      </div>
+      <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200/60">
+        <div class="text-[10px] uppercase text-slate-400 font-bold">Payment Method</div>
+        <div class="font-bold text-slate-900 mt-0.5">{{ expense.payment_method }}</div>
+      </div>
+      <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200/60">
+        <div class="text-[10px] uppercase text-slate-400 font-bold">Reference #</div>
+        <div class="font-mono font-bold text-slate-900 mt-0.5">{{ expense.reference_number|default:"None" }}</div>
+      </div>
+    </div>
+
+    {% if expense.notes %}
+    <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200/60">
+      <div class="text-[10px] uppercase text-slate-400 font-bold">Notes / Description</div>
+      <div class="text-slate-800 font-medium mt-0.5 whitespace-pre-wrap">{{ expense.notes }}</div>
+    </div>
+    {% endif %}
+
+    <div class="text-[11px] text-slate-400 pt-1 flex justify-between">
+      <span>Recorded by: <strong>{{ expense.recorded_by.username|default:"System Admin" }}</strong></span>
+      <span>Created: {{ expense.created_at|date:"M d, Y H:i" }}</span>
+    </div>
+  </div>
+
+  <div class="pt-4 mt-4 border-t border-slate-100 flex items-center justify-end">
+    <button type="button" onclick="closeModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all">
+      Close
+    </button>
+  </div>
+</div>

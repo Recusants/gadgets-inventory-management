@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Stock Batches{% endblock %}
+
+{% block content %}
+<div class="flex-1 flex flex-col min-h-0 overflow-hidden space-y-3">
+
+  <!-- Header Card -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-1 flex-shrink-0">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-xl shadow-md shadow-blue-600/20">
+        <i class="fas fa-layer-group"></i>
+      </div>
+      <div>
+        <h1 class="text-xl font-black tracking-tight text-slate-900">Stock Batches</h1>
+        <p class="text-xs text-slate-500">Track purchase batches, unit costs, supplier shipments, and remaining quantities</p>
+      </div>
+    </div>
+
+    <div class="mt-3 sm:mt-0 flex items-center space-x-2.5 flex-shrink-0">
+      <button type="button" 
+              data-modal-url="{% url 'inventory:receive_invoice_modal' %}"
+              data-modal-size="max-w-3xl"
+              class="inline-flex items-center px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md shadow-blue-600/20 transition-all">
+        <i class="fas fa-file-invoice-dollar mr-2 text-xs"></i> Receive Stock / Invoice
+      </button>
+    </div>
+  </div>
+
+  <!-- Batches Table Card -->
+  <div class="app-card bg-white rounded-2xl border border-slate-200 shadow-sm flex-1 min-h-0 flex flex-col overflow-hidden">
+    <div class="flex-1 min-h-0 overflow-y-auto">
+      <table class="w-full text-left border-collapse text-xs">
+        <thead class="sticky top-0 z-20 bg-slate-100 border-b border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
+          <tr>
+            <th class="py-3 px-4">Batch #</th>
+            <th class="py-3 px-4">Date Received</th>
+            <th class="py-3 px-4">Product Name</th>
+            <th class="py-3 px-4">Supplier Invoice #</th>
+            <th class="py-3 px-4">Supplier Name</th>
+            <th class="py-3 px-4 text-right">Unit Cost</th>
+            <th class="py-3 px-4 text-center">Qty Received</th>
+            <th class="py-3 px-4 text-center">Qty Remaining</th>
+            <th class="py-3 px-4 text-center">Status</th>
+            <th class="py-3 px-4 text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+          {% for b in batches %}
+            <tr class="hover:bg-blue-50/50 transition-colors">
+              <td class="py-3 px-4 font-mono font-bold text-blue-700 whitespace-nowrap">
+                #{{ b.id }}
+              </td>
+              <td class="py-3 px-4 font-mono text-[11px] text-slate-500 whitespace-nowrap">
+                {{ b.date_received|date:"Y-m-d" }}
+              </td>
+              <td class="py-3 px-4 font-bold text-slate-900">
+                {{ b.product.name }}
+              </td>
+              <td class="py-3 px-4 font-mono font-bold text-slate-700 whitespace-nowrap">
+                {{ b.supplier_invoice_number|default:"—" }}
+              </td>
+              <td class="py-3 px-4 text-slate-600 whitespace-nowrap">
+                {{ b.supplier_name|default:"—" }}
+              </td>
+              <td class="py-3 px-4 font-bold font-mono text-slate-900 text-right whitespace-nowrap">
+                ${{ b.cost_price|intcomma }}
+              </td>
+              <td class="py-3 px-4 font-bold text-center whitespace-nowrap">
+                {{ b.quantity_received }}
+              </td>
+              <td class="py-3 px-4 font-black text-center whitespace-nowrap">
+                <span class="{% if b.quantity_remaining > 0 %}text-blue-700 font-black{% else %}text-slate-400{% endif %}">
+                  {{ b.quantity_remaining }}
+                </span>
+              </td>
+              <td class="py-3 px-4 text-center whitespace-nowrap">
+                {% if b.is_active and b.quantity_remaining > 0 %}
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">
+                    <span class="w-1.5 h-1.5 rounded-full bg-blue-600 mr-1.5"></span> Active
+                  </span>
+                {% else %}
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">
+                    Exhausted
+                  </span>
+                {% endif %}
+              </td>
+              <td class="py-3 px-4 text-center whitespace-nowrap">
+                <div class="inline-flex items-center justify-center space-x-1.5">
+                  <button type="button" 
+                          data-modal-url="{% url 'inventory:batch_detail_modal' b.id %}"
+                          data-modal-size="max-w-xl"
+                          title="View Batch Details"
+                          class="w-7 h-7 rounded-lg bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center text-xs shadow-sm transition-all">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button type="button" 
+                          data-modal-url="{% url 'inventory:batch_quantity_edit_modal' b.id %}"
+                          data-modal-size="max-w-md"
+                          title="Edit Quantities"
+                          class="w-7 h-7 rounded-lg bg-blue-800 hover:bg-blue-900 text-white flex items-center justify-center text-xs shadow-sm transition-all">
+                    <i class="fas fa-boxes-stacked"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="10" class="py-12 text-center text-slate-400">
+                <div class="flex flex-col items-center justify-center">
+                  <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
+                    <i class="fas fa-layer-group text-lg"></i>
+                  </div>
+                  <p class="font-bold text-slate-600">No stock batches found</p>
+                  <p class="text-xs text-slate-400">Receive an invoice to add stock batches.</p>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

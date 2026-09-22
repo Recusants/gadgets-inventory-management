@@ -1,0 +1,96 @@
+<div class="p-6">
+  <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+    <div class="flex items-center space-x-3">
+      <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center">
+        <i class="fas fa-truck-loading"></i>
+      </div>
+      <div>
+        <h3 class="text-base font-black text-slate-900">Add Supplier / Vendor</h3>
+        <p class="text-xs text-slate-400">Register hardware suppliers for invoice intakes</p>
+      </div>
+    </div>
+    <button type="button" onclick="closeModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+      <i class="fas fa-times text-base"></i>
+    </button>
+  </div>
+
+  <form id="supplier-add-form" action="{% url 'inventory:supplier_create' %}" method="POST" class="mt-5 space-y-4">
+    {% csrf_token %}
+
+    <div>
+      <label class="block text-xs font-bold text-slate-700 mb-1">Company / Supplier Name *</label>
+      <input type="text" name="name" required placeholder="e.g. Apex Hardware Ltd, TechZone Global"
+             class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-blue-500 outline-none">
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">Contact Person</label>
+        <input type="text" name="contact_person" placeholder="e.g. John Doe, Accounts Rep"
+               class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-blue-500 outline-none">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">Phone Number</label>
+        <input type="text" name="phone" placeholder="+263 77 123 4567"
+               class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-blue-500 outline-none">
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-xs font-bold text-slate-700 mb-1">Email Address</label>
+      <input type="email" name="email" placeholder="orders@supplier.com"
+             class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-blue-500 outline-none">
+    </div>
+
+    <div>
+      <label class="block text-xs font-bold text-slate-700 mb-1">Physical Address / City</label>
+      <input type="text" name="address" placeholder="102 Commerce Street, Industrial Park"
+             class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-medium focus:ring-2 focus:ring-blue-500 outline-none">
+    </div>
+
+    <div>
+      <label class="block text-xs font-bold text-slate-700 mb-1">Notes / Terms (Optional)</label>
+      <textarea name="notes" rows="2" placeholder="Payment terms, bank account info, delivery notes..."
+                class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-medium focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+    </div>
+
+    <div class="pt-3 border-t border-slate-100 flex items-center justify-end space-x-2">
+      <button type="button" onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all">
+        Cancel
+      </button>
+      <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md shadow-blue-600/20 transition-all">
+        <i class="fas fa-save mr-1.5"></i> Save Supplier
+      </button>
+    </div>
+  </form>
+</div>
+
+<script>
+  $('#supplier-add-form').on('submit', function (e) {
+    e.preventDefault();
+    const $form = $(this);
+    const $submit = $form.find('button[type="submit"]');
+    $submit.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Saving...');
+
+    $.ajax({
+      url: $form.attr('action'),
+      type: 'POST',
+      data: $form.serialize(),
+      success: function (res) {
+        if (res.status === 'success') {
+          closeModal();
+          showNotification(res.message, 'success');
+          refreshTable('#supplier-table-container');
+        } else {
+          $submit.prop('disabled', false).html('<i class="fas fa-save mr-1.5"></i> Save Supplier');
+          showNotification(res.message || 'Error occurred', 'error');
+        }
+      },
+      error: function (xhr) {
+        $submit.prop('disabled', false).html('<i class="fas fa-save mr-1.5"></i> Save Supplier');
+        showNotification(xhr.responseJSON?.message || 'Server error occurred', 'error');
+      }
+    });
+  });
+</script>

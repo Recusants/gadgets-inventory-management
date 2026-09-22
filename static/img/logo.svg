@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 60" width="240" height="60" fill="none">
+  <defs>
+    <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="slash-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ec4899"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+  </defs>
+  <!-- 21 VOID text with graphic styling -->
+  <g>
+    <!-- Stylized 21 -->
+    <text x="5" y="32" font-family="'Inter', system-ui, sans-serif" font-weight="900" font-size="28" fill="#3b82f6" letter-spacing="-1">21</text>
+    <!-- Angled dynamic slash -->
+    <polygon points="46,6 54,6 40,38 32,38" fill="url(#slash-grad)" />
+    <!-- VOID -->
+    <text x="55" y="32" font-family="'Inter', system-ui, sans-serif" font-weight="900" font-size="28" fill="#ffffff" letter-spacing="1">VOID</text>
+  </g>
+  <!-- Subtitle -->
+  <text x="6" y="48" font-family="'Inter', system-ui, sans-serif" font-weight="600" font-size="11" fill="#94a3b8" letter-spacing="0.5">21 Void Technologies</text>
+</svg>

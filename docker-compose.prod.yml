@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: twentyone_void_prod_db
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-twentyone_void_prod_db}
+      POSTGRES_USER: ${POSTGRES_USER:-twentyone_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ChangeThisSecureProdPassword2026!}
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-twentyone_user} -d ${POSTGRES_DB:-twentyone_void_prod_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: twentyone_void_prod_web
+    restart: always
+    command: >
+      sh -c "python manage.py migrate --settings=config.settings.docker_prod &&
+             gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120"
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.docker_prod
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-prod-hardened-key-21void-technologies-2026-secure}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1,web}
+      - POSTGRES_DB=${POSTGRES_DB:-twentyone_void_prod_db}
+      - POSTGRES_USER=${POSTGRES_USER:-twentyone_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-ChangeThisSecureProdPassword2026!}
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+    depends_on:
+      db:
+        condition: service_healthy
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: twentyone_void_prod_nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - static_volume:/app/staticfiles:ro
+      - media_volume:/app/media:ro
+    depends_on:
+      - web
+
+volumes:
+  postgres_prod_data:
+  static_volume:
+  media_volume:

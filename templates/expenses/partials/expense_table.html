@@ -1,0 +1,118 @@
+{% load humanize %}
+
+<div class="flex-1 min-h-0 overflow-y-auto">
+  <table class="w-full text-left border-collapse text-xs">
+    <thead class="sticky top-0 z-20 bg-slate-100 border-b border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
+      <tr>
+        <th class="py-3 px-4">Date</th>
+        <th class="py-3 px-4">Expense Title</th>
+        <th class="py-3 px-4">Category</th>
+        <th class="py-3 px-4">Ref / Receipt #</th>
+        <th class="py-3 px-4">Method</th>
+        <th class="py-3 px-4 text-right">Amount</th>
+        <th class="py-3 px-4 text-center">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+      {% for exp in expenses %}
+      <tr class="hover:bg-blue-50/50 transition-colors">
+        <td class="py-3 px-4 whitespace-nowrap font-mono text-slate-500 text-[11px]">
+          {{ exp.date|date:"Y-m-d" }}
+        </td>
+        <td class="py-3 px-4">
+          <div class="font-bold text-slate-900">{{ exp.title }}</div>
+          {% if exp.notes %}
+            <div class="text-[10px] text-slate-400 truncate max-w-xs">{{ exp.notes }}</div>
+          {% endif %}
+        </td>
+        <td class="py-3 px-4 whitespace-nowrap">
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">
+            <i class="fas fa-tag mr-1 text-[9px]"></i> {{ exp.category.name }}
+          </span>
+        </td>
+        <td class="py-3 px-4 whitespace-nowrap font-mono text-slate-500">
+          {{ exp.reference_number|default:"-" }}
+        </td>
+        <td class="py-3 px-4 whitespace-nowrap">
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700">
+            {{ exp.payment_method }}
+          </span>
+        </td>
+        <td class="py-3 px-4 whitespace-nowrap text-right font-black font-mono text-slate-900 text-sm">
+          ${{ exp.amount|intcomma }}
+        </td>
+        <td class="py-3 px-4 whitespace-nowrap text-center">
+          <div class="inline-flex items-center justify-center space-x-1.5">
+            <!-- Blue shades with white text for table action buttons -->
+            <button type="button"
+                    data-modal-url="{% url 'expenses:expense_detail_modal' exp.pk %}"
+                    data-modal-size="max-w-md"
+                    title="View Details"
+                    class="w-7 h-7 rounded-lg bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center text-xs shadow-sm transition-all">
+              <i class="fas fa-eye"></i>
+            </button>
+            <button type="button"
+                    data-modal-url="{% url 'expenses:expense_edit_modal' exp.pk %}"
+                    data-modal-size="max-w-lg"
+                    title="Edit Expense"
+                    class="w-7 h-7 rounded-lg bg-blue-700 hover:bg-blue-800 text-white flex items-center justify-center text-xs shadow-sm transition-all">
+              <i class="fas fa-pen"></i>
+            </button>
+            <button type="button"
+                    data-action-url="{% url 'expenses:expense_delete' exp.pk %}"
+                    data-confirm-title="Delete Expense?"
+                    data-confirm-message="Are you sure you want to delete expense '{{ exp.title }}'? This cannot be undone."
+                    data-refresh-target="#expense-table-container"
+                    title="Delete Expense"
+                    class="btn-delete-confirm w-7 h-7 rounded-lg bg-blue-900 hover:bg-red-600 text-white flex items-center justify-center text-xs shadow-sm transition-all">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="7" class="py-12 text-center text-slate-400">
+          <div class="flex flex-col items-center justify-center">
+            <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
+              <i class="fas fa-receipt text-lg"></i>
+            </div>
+            <p class="font-bold text-slate-600">No expenses found</p>
+            <p class="text-xs text-slate-400">Try adjusting your search criteria or click 'Record Expense' to add one.</p>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Pagination / Footer info -->
+{% if paginator.num_pages > 1 %}
+<div class="py-2.5 px-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 flex-shrink-0">
+  <div>
+    Showing <span class="font-bold text-slate-700">{{ expenses.start_index }}</span> to 
+    <span class="font-bold text-slate-700">{{ expenses.end_index }}</span> of 
+    <span class="font-bold text-slate-700">{{ total_count }}</span> entries
+  </div>
+  <div class="inline-flex space-x-1">
+    {% if expenses.has_previous %}
+      <button type="button" 
+              onclick="paginateTable('#expense-table-container', {{ expenses.previous_page_number }})"
+              class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all">
+        <i class="fas fa-chevron-left mr-1"></i> Prev
+      </button>
+    {% endif %}
+    <span class="px-2.5 py-1 text-xs font-bold text-slate-700">
+      Page {{ expenses.number }} of {{ paginator.num_pages }}
+    </span>
+    {% if expenses.has_next %}
+      <button type="button" 
+              onclick="paginateTable('#expense-table-container', {{ expenses.next_page_number }})"
+              class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all">
+        Next <i class="fas fa-chevron-right ml-1"></i>
+      </button>
+    {% endif %}
+  </div>
+</div>
+{% endif %}

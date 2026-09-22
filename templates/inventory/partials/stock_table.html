@@ -1,0 +1,145 @@
+{% load humanize %}
+
+<div class="flex-1 min-h-0 overflow-y-auto">
+  <table class="w-full text-left border-collapse text-xs">
+    <thead class="sticky top-0 z-20 bg-slate-100 border-b border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
+      <tr>
+        <th class="py-3 px-4">Product Name</th>
+        <th class="py-3 px-4">Category</th>
+        <th class="py-3 px-4">SKU / Code</th>
+        <th class="py-3 px-4 text-center">Available Units</th>
+        <th class="py-3 px-4 text-right">Selling Price</th>
+        <th class="py-3 px-4 text-right">Valuation</th>
+        <th class="py-3 px-4 text-center">Status</th>
+        <th class="py-3 px-4 text-center">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+      {% for stock in stocks %}
+        <tr class="hover:bg-blue-50/50 transition-colors">
+          
+          <!-- Product Name -->
+          <td class="py-3 px-4">
+            <div class="truncate max-w-xs font-bold text-slate-900">{{ stock.product.name }}</div>
+          </td>
+
+          <!-- Category -->
+          <td class="py-3 px-4 whitespace-nowrap">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">
+              {{ stock.product.category.name }}
+            </span>
+          </td>
+
+          <!-- SKU -->
+          <td class="py-3 px-4 whitespace-nowrap font-mono text-slate-500">
+            {{ stock.product.sku|default:"—" }}
+          </td>
+
+          <!-- Available Units -->
+          <td class="py-3 px-4 whitespace-nowrap text-center font-bold font-mono">
+            <span class="text-sm {% if stock.quantity_available == 0 %}text-slate-400{% elif stock.quantity_available <= 5 %}text-blue-700{% else %}text-slate-900{% endif %}">
+              {{ stock.quantity_available }}
+            </span>
+          </td>
+
+          <!-- Selling Price -->
+          <td class="py-3 px-4 whitespace-nowrap text-right">
+            <div class="inline-flex items-center space-x-1.5">
+              <span class="font-black text-slate-900 font-mono text-sm">
+                ${{ stock.selling_price|intcomma }}
+              </span>
+              <button type="button" 
+                      data-modal-url="{% url 'inventory:stock_price_modal' stock.id %}"
+                      data-modal-size="max-w-md"
+                      title="Edit Selling Price"
+                      class="px-2 py-0.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all text-[11px] font-bold flex items-center space-x-1 shadow-sm">
+                <i class="fas fa-pen text-[9px]"></i>
+                <span>Edit</span>
+              </button>
+            </div>
+          </td>
+
+          <!-- Stock Valuation (Available * Selling Price) -->
+          <td class="py-3 px-4 whitespace-nowrap text-right font-mono font-black text-blue-600 text-xs">
+            {% widthratio stock.selling_price 1 stock.quantity_available as val %}
+            ${{ val|intcomma }}
+          </td>
+
+          <!-- Status -->
+          <td class="py-3 px-4 whitespace-nowrap text-center">
+            {% if stock.quantity_available > 5 %}
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">
+                <span class="w-1.5 h-1.5 rounded-full bg-blue-600 mr-1.5"></span> In Stock
+              </span>
+            {% elif stock.quantity_available > 0 %}
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5"></span> Low Stock
+              </span>
+            {% else %}
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">
+                Out of Stock
+              </span>
+            {% endif %}
+          </td>
+
+          <!-- Actions (All Blue Shades & White Text) -->
+          <td class="py-3 px-4 whitespace-nowrap text-center">
+            <div class="inline-flex items-center justify-center space-x-1.5">
+              <button type="button" 
+                      data-modal-url="{% url 'inventory:product_detail_modal' stock.product.id %}"
+                      data-modal-size="max-w-2xl"
+                      title="View Product Details & Batches"
+                      class="w-7 h-7 rounded-lg bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center text-xs shadow-sm transition-all">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+          </td>
+
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="8" class="py-12 text-center text-slate-400">
+            <div class="flex flex-col items-center justify-center">
+              <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
+                <i class="fas fa-cubes text-lg"></i>
+              </div>
+              <p class="font-bold text-slate-600">No stock records found</p>
+              <p class="text-xs text-slate-400">Receive stock invoices to populate available stock.</p>
+            </div>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Pagination Footer -->
+{% if paginator.num_pages > 1 %}
+<div class="py-2.5 px-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 flex-shrink-0">
+  <div>
+    Showing <span class="font-bold text-slate-700">{{ stocks.start_index|default:0 }}</span> to <span class="font-bold text-slate-700">{{ stocks.end_index|default:0 }}</span> of <span class="font-bold text-slate-700">{{ total_count|default:0 }}</span> items
+  </div>
+
+  <div class="inline-flex space-x-1">
+    {% if stocks.has_previous %}
+      <button type="button" 
+              onclick="refreshTable('#stock-table-container', {page: {{ stocks.previous_page_number }}})"
+              class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all">
+        <i class="fas fa-chevron-left mr-1"></i> Prev
+      </button>
+    {% endif %}
+
+    <span class="px-2.5 py-1 text-xs font-bold text-slate-700">
+      Page {{ stocks.number }} of {{ paginator.num_pages }}
+    </span>
+
+    {% if stocks.has_next %}
+      <button type="button" 
+              onclick="refreshTable('#stock-table-container', {page: {{ stocks.next_page_number }}})"
+              class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all">
+        Next <i class="fas fa-chevron-right ml-1"></i>
+      </button>
+    {% endif %}
+  </div>
+</div>
+{% endif %}

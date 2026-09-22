@@ -1,0 +1,102 @@
+{% load humanize %}
+<!-- Batch Detail Modal Partial -->
+<div class="p-6 sm:p-7">
+  
+  <div class="flex items-center justify-between pb-4 border-b border-slate-200">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center text-lg shadow-sm">
+        <i class="fas fa-layer-group"></i>
+      </div>
+      <div>
+        <h3 class="text-lg font-black tracking-tight text-slate-900">Batch #{{ batch.id }} Details</h3>
+        <p class="text-xs text-slate-500">Product: <span class="font-bold text-slate-800">{{ batch.product.name }}</span></p>
+      </div>
+    </div>
+    
+    <button type="button" data-modal-close class="text-slate-400 hover:text-slate-600 p-1.5 rounded-xl hover:bg-slate-100 transition-colors">
+      <i class="fas fa-times text-base"></i>
+    </button>
+  </div>
+
+  <div class="py-5 space-y-4 text-xs">
+    
+    <!-- Status Banner -->
+    <div class="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+      <div>
+        <span class="text-slate-500 block font-medium">Batch State</span>
+        <span class="font-bold text-sm text-slate-900">{% if batch.is_active and batch.quantity_remaining > 0 %}Active In Inventory{% else %}Exhausted / Sold Out{% endif %}</span>
+      </div>
+      <div>
+        {% if batch.quantity_remaining > 0 %}
+          <span class="px-3 py-1 rounded-full font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+            Available for Sale
+          </span>
+        {% else %}
+          <span class="px-3 py-1 rounded-full font-bold bg-slate-200 text-slate-700">
+            Fully Depleted
+          </span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Batch Metadata Grid (Labels Black, Details Blue) -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div class="p-3.5 rounded-xl border border-slate-200 bg-white">
+        <div class="text-slate-950 uppercase tracking-wider font-black text-[10px]">Date Received</div>
+        <div class="font-black text-blue-700 mt-1 text-xs">{{ batch.date_received|date:"d M Y" }}</div>
+      </div>
+      <div class="p-3.5 rounded-xl border border-slate-200 bg-white">
+        <div class="text-slate-950 uppercase tracking-wider font-black text-[10px]">Unit Cost Price</div>
+        <div class="font-black text-blue-700 mt-1 font-mono text-sm">${{ batch.cost_price|intcomma }}</div>
+      </div>
+      <div class="p-3.5 rounded-xl border border-slate-200 bg-white">
+        <div class="text-slate-950 uppercase tracking-wider font-black text-[10px]">Qty Received</div>
+        <div class="font-black text-blue-700 mt-1 font-mono text-sm">{{ batch.quantity_received }} units</div>
+      </div>
+      <div class="p-3.5 rounded-xl border border-slate-200 bg-white">
+        <div class="text-slate-950 uppercase tracking-wider font-black text-[10px]">Qty Available</div>
+        <div class="font-black text-blue-700 mt-1 font-mono text-sm">{{ batch.quantity_remaining }} units</div>
+      </div>
+    </div>
+
+    <!-- Supplier & Invoice Details -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div class="p-3.5 rounded-xl border border-slate-200 bg-white">
+        <div class="text-slate-950 uppercase tracking-wider font-black text-[10px]">Supplier Name</div>
+        <div class="font-bold text-blue-700 mt-1 text-xs">{{ batch.supplier_name|default:"Direct / Unknown" }}</div>
+      </div>
+      <div class="p-3.5 rounded-xl border border-slate-200 bg-white">
+        <div class="text-slate-950 uppercase tracking-wider font-black text-[10px]">Supplier Invoice #</div>
+        <div class="font-mono font-black text-blue-700 mt-1 text-xs">{{ batch.supplier_invoice_number|default:"N/A" }}</div>
+      </div>
+    </div>
+
+    <!-- Notes & Audit -->
+    {% if batch.notes %}
+      <div class="p-3.5 rounded-xl border border-slate-200 bg-white">
+        <div class="text-slate-950 uppercase tracking-wider font-black text-[10px] mb-1">Batch Notes &amp; Adjustment History</div>
+        <div class="text-blue-900 font-mono text-[11px] whitespace-pre-line">{{ batch.notes }}</div>
+      </div>
+    {% endif %}
+
+    <div class="text-[11px] text-slate-500 font-medium flex items-center justify-between pt-1">
+      <span>Logged: {{ batch.created_at|date:"d M Y, H:i" }}</span>
+      <span>Received by: {% if batch.created_by %}{{ batch.created_by.get_full_name|default:batch.created_by.username }}{% else %}System Admin{% endif %}</span>
+    </div>
+
+  </div>
+
+  <div class="pt-4 border-t border-slate-200 flex justify-end space-x-2">
+    <button type="button" 
+            data-modal-url="{% url 'inventory:batch_quantity_edit_modal' batch.id %}"
+            data-modal-size="max-w-md"
+            class="btn-primary text-xs">
+      <i class="fas fa-edit mr-1.5"></i> Edit Quantities
+    </button>
+    <button type="button" 
+            data-modal-close
+            class="btn-secondary text-xs">
+      Close
+    </button>
+  </div>
+</div>

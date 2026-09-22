@@ -1,0 +1,38 @@
+# ==============================================================================
+# 21 Void Technologies - Dockerfile (Production Mode)
+# Multi-worker Gunicorn application server
+# ==============================================================================
+
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+# Install system runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python requirements
+COPY requirements.txt /app/
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Copy application source code
+COPY . /app/
+
+# Environment variable for static compilation
+ENV DJANGO_SETTINGS_MODULE=config.settings.docker_prod
+ENV DJANGO_SECRET_KEY=build-time-secret-key-for-collectstatic-only
+
+# Collect static files for Nginx to serve
+RUN python manage.py collectstatic --noinput --settings=config.settings.docker_prod
+
+EXPOSE 8000
+
+# Gunicorn production entrypoint
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "120"]

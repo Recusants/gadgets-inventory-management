@@ -1,0 +1,139 @@
+{% load static %}
+<aside id="app-sidebar" class="flex flex-col h-full text-white select-none border-r border-slate-800 bg-[#0a192f] flex-shrink-0">
+  
+  <!-- Navigation Menu -->
+  <nav class="flex-1 px-3 py-3 space-y-1 overflow-y-auto custom-scrollbar">
+    
+    <!-- Dashboard -->
+    <a href="{% url 'dashboard:index' %}" 
+       title="Dashboard"
+       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if request.resolver_match.app_name == 'dashboard' %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
+      <i class="fas fa-home w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
+      <span class="sidebar-label truncate text-white font-bold text-xs">Dashboard</span>
+    </a>
+
+    <!-- POS Checkout (Outstanding High Priority Feature) -->
+    <a href="/sales/checkout/" 
+       title="POS Checkout"
+       class="sidebar-link flex items-center px-3.5 py-3 rounded-2xl transition-all duration-200 my-1.5 {% if 'checkout' in request.path %}bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black shadow-xl shadow-blue-500/40 ring-2 ring-blue-400{% else %}bg-gradient-to-r from-blue-700/80 to-blue-900/90 text-white hover:from-blue-600 hover:to-indigo-600 font-black shadow-md shadow-blue-900/50 border border-blue-500/40 hover:scale-[1.02]{% endif %}">
+      <div class="w-6 h-6 rounded-lg bg-white/20 text-white flex items-center justify-center text-xs mr-2.5 flex-shrink-0">
+        <i class="fas fa-cash-register"></i>
+      </div>
+      <span class="sidebar-label truncate text-white font-black text-xs uppercase tracking-wider">POS Checkout</span>
+      <span class="ml-auto w-2 h-2 rounded-full bg-emerald-400 animate-pulse sidebar-label" title="POS Ready"></span>
+    </a>
+
+    <!-- Products -->
+    <a href="/inventory/products/" 
+       title="Products"
+       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if '/inventory/products/' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
+      <i class="fas fa-box-open w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
+      <span class="sidebar-label truncate text-white font-bold text-xs">Products</span>
+    </a>
+
+    <!-- Stock & Pricing -->
+    <a href="/inventory/stock/" 
+       title="Stock & Pricing"
+       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if '/inventory/stock/' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
+      <i class="fas fa-cubes w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
+      <span class="sidebar-label truncate text-white font-bold text-xs">Stock (Prices)</span>
+    </a>
+
+    <!-- Stock Batches -->
+    <a href="/inventory/batches/" 
+       title="Stock Batches"
+       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if '/inventory/batches/' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
+      <i class="fas fa-layer-group w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
+      <span class="sidebar-label truncate text-white font-bold text-xs">Batches</span>
+    </a>
+
+    <!-- Invoices Received -->
+    <a href="/inventory/invoices/" 
+       title="Received Invoices"
+       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if '/inventory/invoices/' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
+      <i class="fas fa-file-invoice-dollar w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
+      <span class="sidebar-label truncate text-white font-bold text-xs">Invoices</span>
+    </a>
+
+    <!-- Suppliers (Dedicated Directory) -->
+    <a href="/inventory/suppliers/" 
+       title="Suppliers"
+       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if '/inventory/suppliers/' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
+      <i class="fas fa-truck-loading w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
+      <span class="sidebar-label truncate text-white font-bold text-xs">Suppliers</span>
+    </a>
+
+    <!-- Categories (Fixed Active Highlighting) -->
+    <a href="/inventory/categories/" 
+       title="Categories"
+       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if '/inventory/categories/' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
+      <i class="fas fa-tags w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
+      <span class="sidebar-label truncate text-white font-bold text-xs">Categories</span>
+    </a>
+
+    <!-- Sales Records -->
+    <a href="/sales/" 
+       title="Sales Records"
+       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if request.resolver_match.app_name == 'sales' and not 'checkout' in request.path and not 'customer' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
+      <i class="fas fa-shopping-cart w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
+      <span class="sidebar-label truncate text-white font-bold text-xs">Sales</span>
+    </a>
+
+    <!-- Expenses (New Module) -->
+    <a href="/expenses/" 
+       title="Expenses Tracking"
+       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if request.resolver_match.app_name == 'expenses' %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
+      <i class="fas fa-wallet w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
+      <span class="sidebar-label truncate text-white font-bold text-xs">Expenses</span>
+    </a>
+
+    <!-- Customers -->
+    <a href="/sales/customers/" 
+       title="Customers"
+       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if 'customer' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
+      <i class="fas fa-users w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
+      <span class="sidebar-label truncate text-white font-bold text-xs">Customers</span>
+    </a>
+
+    <!-- Notifications & Alerts -->
+    <a href="/notifications/" 
+       title="Notifications & Alerts"
+       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if 'notifications' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
+      <i class="fas fa-bell w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
+      <span class="sidebar-label truncate text-white font-bold text-xs">Alerts</span>
+      {% if unread_notifications_count > 0 %}
+        <span class="ml-auto px-1.5 py-0.5 rounded-full bg-blue-500 text-white text-[9px] font-black sidebar-label">
+          {{ unread_notifications_count }}
+        </span>
+      {% endif %}
+    </a>
+
+    <!-- Reports -->
+    <a href="/reports/" 
+       title="Reports & Analytics"
+       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if request.resolver_match.app_name == 'reports' %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
+      <i class="fas fa-chart-bar w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
+      <span class="sidebar-label truncate text-white font-bold text-xs">Reports</span>
+    </a>
+
+    <!-- Settings -->
+    <a href="/core/settings/" 
+       title="Company Settings"
+       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if 'settings' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
+      <i class="fas fa-cog w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
+      <span class="sidebar-label truncate text-white font-bold text-xs">Settings</span>
+    </a>
+
+  </nav>
+
+  <!-- Sidebar Footer: Dynamic company name, bottom collapse button removed -->
+  <div class="p-3 border-t border-slate-800/80 bg-[#071324] text-center flex-shrink-0">
+    <p class="sidebar-label text-[11px] text-blue-300 font-bold truncate leading-tight">
+      {{ company_settings.company_name }}
+    </p>
+    <p class="sidebar-label text-[9px] text-slate-400 truncate mt-0.5">
+      {{ company_settings.tagline }}
+    </p>
+  </div>
+
+</aside>

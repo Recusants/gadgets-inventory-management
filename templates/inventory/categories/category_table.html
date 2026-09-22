@@ -1,0 +1,74 @@
+<div class="flex-1 min-h-0 overflow-y-auto">
+  <table class="w-full text-left border-collapse text-xs">
+    <thead class="sticky top-0 z-20 bg-slate-100 border-b border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
+      <tr>
+        <th class="py-3 px-4">#</th>
+        <th class="py-3 px-4">Category Name</th>
+        <th class="py-3 px-4">Description</th>
+        <th class="py-3 px-4 text-center">Products Linked</th>
+        <th class="py-3 px-4 text-center">Actions</th>
+      </tr>
+    </thead>
+
+    <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+      {% for cat in categories %}
+        <tr class="hover:bg-blue-50/50 transition-colors">
+          <td class="py-3 px-4 whitespace-nowrap font-mono text-slate-400 text-[11px]">
+            {{ forloop.counter }}
+          </td>
+          <td class="py-3 px-4">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-100 text-blue-800">
+              <i class="fas fa-tag mr-1.5 text-[10px]"></i> {{ cat.name }}
+            </span>
+          </td>
+          <td class="py-3 px-4 text-slate-600">
+            {{ cat.description|default:"—" }}
+          </td>
+          <td class="py-3 px-4 whitespace-nowrap text-center">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-800">
+              {{ cat.products.count }} items
+            </span>
+          </td>
+          <td class="py-3 px-4 whitespace-nowrap text-center">
+            <div class="inline-flex items-center justify-center space-x-1.5">
+              <button type="button" 
+                      data-modal-url="{% url 'inventory:category_edit_modal' cat.id %}"
+                      data-modal-size="max-w-md"
+                      class="w-7 h-7 rounded-lg bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center text-xs shadow-sm transition-all"
+                      title="Edit Category">
+                <i class="fas fa-pen"></i>
+              </button>
+              <button type="button" 
+                      data-action-url="{% url 'inventory:category_delete' cat.id %}"
+                      data-confirm-title="Delete Category?"
+                      data-confirm-message="Are you sure you want to delete category '{{ cat.name }}'?"
+                      data-refresh-target="#category-table-container"
+                      class="btn-delete-confirm w-7 h-7 rounded-lg bg-blue-900 hover:bg-red-600 text-white flex items-center justify-center text-xs shadow-sm transition-all"
+                      title="Delete Category">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="5" class="py-12 text-center text-slate-400">
+            <div class="flex flex-col items-center justify-center">
+              <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
+                <i class="fas fa-tags text-lg"></i>
+              </div>
+              <p class="font-bold text-slate-600">No categories found</p>
+              <p class="text-xs text-slate-400">Click 'Add Category' to organize your products.</p>
+            </div>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if paginator.count > 0 %}
+<div class="px-4 py-2.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 flex-shrink-0">
+  <div>Total: <strong class="text-slate-700">{{ paginator.count }}</strong> categories</div>
+</div>
+{% endif %}

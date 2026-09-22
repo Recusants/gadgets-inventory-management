@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: twentyone_void_dev_db
+    environment:
+      POSTGRES_DB: twentyone_void_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d twentyone_void_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: twentyone_void_dev_web
+    command: >
+      sh -c "python manage.py wait_for_db --settings=config.settings.docker_dev 2>/dev/null || sleep 3 &&
+             python manage.py migrate --settings=config.settings.docker_dev &&
+             python manage.py runserver 0.0.0.0:8000 --settings=config.settings.docker_dev"
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.docker_dev
+      - DJANGO_SECRET_KEY=docker-dev-secret-key-21void-technologies-live
+      - POSTGRES_DB=twentyone_void_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgrespassword
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_dev_data:

@@ -1,0 +1,109 @@
+<div class="flex-1 min-h-0 overflow-y-auto">
+  <table class="w-full text-left border-collapse text-xs">
+    <thead class="sticky top-0 z-20 bg-slate-100 border-b border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
+      <tr>
+        <th class="py-3 px-4">Supplier Name</th>
+        <th class="py-3 px-4">Contact Person</th>
+        <th class="py-3 px-4">Phone</th>
+        <th class="py-3 px-4">Email</th>
+        <th class="py-3 px-4 text-center">Invoices</th>
+        <th class="py-3 px-4 text-center">Batches Supplied</th>
+        <th class="py-3 px-4 text-center">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+      {% for sup in suppliers %}
+      <tr class="hover:bg-blue-50/50 transition-colors">
+        <td class="py-3 px-4">
+          <div class="font-bold text-slate-900">{{ sup.name }}</div>
+          {% if sup.address %}
+            <div class="text-[10px] text-slate-400 truncate max-w-xs">{{ sup.address }}</div>
+          {% endif %}
+        </td>
+        <td class="py-3 px-4 whitespace-nowrap text-slate-600">
+          {{ sup.contact_person|default:"—" }}
+        </td>
+        <td class="py-3 px-4 whitespace-nowrap font-mono text-slate-700">
+          {{ sup.phone|default:"—" }}
+        </td>
+        <td class="py-3 px-4 whitespace-nowrap text-slate-500 font-mono text-[11px]">
+          {{ sup.email|default:"—" }}
+        </td>
+        <td class="py-3 px-4 whitespace-nowrap text-center">
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">
+            {{ sup.invoice_count }}
+          </span>
+        </td>
+        <td class="py-3 px-4 whitespace-nowrap text-center">
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-800">
+            {{ sup.batch_count }}
+          </span>
+        </td>
+        <td class="py-3 px-4 whitespace-nowrap text-center">
+          <div class="inline-flex items-center justify-center space-x-1.5">
+            <!-- Buttons in shades of blue with white text -->
+            <button type="button"
+                    data-modal-url="{% url 'inventory:supplier_edit_modal' sup.pk %}"
+                    data-modal-size="max-w-lg"
+                    title="Edit Supplier"
+                    class="w-7 h-7 rounded-lg bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center text-xs shadow-sm transition-all">
+              <i class="fas fa-pen"></i>
+            </button>
+            <button type="button"
+                    data-action-url="{% url 'inventory:supplier_delete' sup.pk %}"
+                    data-confirm-title="Delete Supplier?"
+                    data-confirm-message="Are you sure you want to delete supplier '{{ sup.name }}'?"
+                    data-refresh-target="#supplier-table-container"
+                    title="Delete Supplier"
+                    class="btn-delete-confirm w-7 h-7 rounded-lg bg-blue-900 hover:bg-red-600 text-white flex items-center justify-center text-xs shadow-sm transition-all">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="7" class="py-12 text-center text-slate-400">
+          <div class="flex flex-col items-center justify-center">
+            <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
+              <i class="fas fa-truck-loading text-lg"></i>
+            </div>
+            <p class="font-bold text-slate-600">No suppliers found</p>
+            <p class="text-xs text-slate-400">Click 'Add Supplier' to register vendors and suppliers.</p>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Pagination / Footer info -->
+{% if paginator.num_pages > 1 %}
+<div class="py-2.5 px-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 flex-shrink-0">
+  <div>
+    Showing <span class="font-bold text-slate-700">{{ suppliers.start_index }}</span> to 
+    <span class="font-bold text-slate-700">{{ suppliers.end_index }}</span> of 
+    <span class="font-bold text-slate-700">{{ total_count }}</span> entries
+  </div>
+  <div class="inline-flex space-x-1">
+    {% if suppliers.has_previous %}
+      <button type="button" 
+              onclick="paginateTable('#supplier-table-container', {{ suppliers.previous_page_number }})"
+              class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all">
+        <i class="fas fa-chevron-left mr-1"></i> Prev
+      </button>
+    {% endif %}
+    <span class="px-2.5 py-1 text-xs font-bold text-slate-700">
+      Page {{ suppliers.number }} of {{ paginator.num_pages }}
+    </span>
+    {% if suppliers.has_next %}
+      <button type="button" 
+              onclick="paginateTable('#supplier-table-container', {{ suppliers.next_page_number }})"
+              class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all">
+        Next <i class="fas fa-chevron-right ml-1"></i>
+      </button>
+    {% endif %}
+  </div>
+</div>
+{% endif %}

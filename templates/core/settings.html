@@ -1,0 +1,595 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}System Settings & Database Backups{% endblock %}
+
+{% block content %}
+<div class="h-full flex flex-col overflow-y-auto custom-scrollbar p-1">
+  <div class="max-w-4xl mx-auto w-full space-y-6 pb-16">
+    
+    <!-- Page Title Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-3 border-b border-slate-200">
+      <div>
+        <h1 class="text-2xl font-black tracking-tight text-slate-900 flex items-center">
+          <i class="fas fa-cog text-blue-600 mr-3 text-xl"></i> Company & System Settings
+        </h1>
+        <p class="text-xs text-slate-500 mt-0.5">
+          Configure company identity, printed receipt branding, and manage universal database backups
+        </p>
+      </div>
+      <div class="mt-3 sm:mt-0 flex items-center space-x-2">
+        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-800 border border-blue-200">
+          <i class="fas fa-database mr-1.5 text-blue-600"></i> Active Engine: Universal
+        </span>
+      </div>
+    </div>
+
+    <!-- Settings Form Card -->
+    <div class="app-card bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm">
+      <form action="{% url 'core:settings_save' %}" method="POST" data-ajax="true" class="space-y-6">
+        {% csrf_token %}
+
+        <!-- Section 1: Company Branding & Details -->
+        <div>
+          <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider mb-4 flex items-center">
+            <i class="fas fa-building text-blue-600 mr-2"></i> Company Information
+          </h3>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                Company Name <span class="text-red-500">*</span>
+              </label>
+              <input type="text" 
+                     name="company_name" 
+                     value="{{ settings.company_name }}" 
+                     required
+                     class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                Company Tagline
+              </label>
+              <input type="text" 
+                     name="tagline" 
+                     value="{{ settings.tagline }}" 
+                     class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+            </div>
+          </div>
+        </div>
+
+        <hr class="border-slate-100">
+
+        <!-- Section 2: Contact Details -->
+        <div>
+          <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider mb-4 flex items-center">
+            <i class="fas fa-phone-alt text-blue-600 mr-2"></i> Contact Details
+          </h3>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                Contact Phone <span class="text-red-500">*</span>
+              </label>
+              <input type="text" 
+                     name="phone" 
+                     value="{{ settings.phone }}" 
+                     required
+                     placeholder="+263 77 123 4567"
+                     class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                Official Email
+              </label>
+              <input type="email" 
+                     name="email" 
+                     value="{{ settings.email }}" 
+                     placeholder="info@21void.com"
+                     class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                Physical Address
+              </label>
+              <textarea name="address" 
+                        rows="2" 
+                        class="w-full px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-xs font-medium text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">{{ settings.address }}</textarea>
+            </div>
+          </div>
+        </div>
+
+        <hr class="border-slate-100">
+
+        <!-- Section 3: Financial & Printed PDF Receipt Details -->
+        <div>
+          <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider mb-4 flex items-center">
+            <i class="fas fa-file-invoice-dollar text-blue-600 mr-2"></i> Currency & Printed Receipt Customization
+          </h3>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                Currency Symbol <span class="text-red-500">*</span>
+              </label>
+              <input type="text" 
+                     name="currency_symbol" 
+                     value="{{ settings.currency_symbol }}" 
+                     required
+                     class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                Currency Code
+              </label>
+              <input type="text" 
+                     name="currency_code" 
+                     value="{{ settings.currency_code }}" 
+                     class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                Receipt Header Title
+              </label>
+              <input type="text" 
+                     name="receipt_header_note" 
+                     value="{{ settings.receipt_header_note }}" 
+                     class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                Receipt Footer Note / Guarantee Message
+              </label>
+              <textarea name="receipt_footer_note" 
+                        rows="2" 
+                        class="w-full px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-xs font-medium text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">{{ settings.receipt_footer_note }}</textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="pt-4 border-t border-slate-100 flex justify-end space-x-3">
+          <button type="reset" class="btn-default">
+            Reset Changes
+          </button>
+          <button type="submit" class="btn-primary">
+            <i class="fas fa-save mr-2"></i> Save Settings
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Section 4: Universal Database Backup & Restore Card -->
+    <div class="app-card bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div>
+          <h2 class="text-base font-black text-slate-900 flex items-center">
+            <i class="fas fa-database text-blue-600 mr-2.5"></i> Database Backups & Data Portability
+          </h2>
+          <p class="text-xs text-slate-400 mt-0.5">
+            Universal backup engine compatible with <b>SQLite</b>, <b>PostgreSQL</b>, and <b>Docker containers</b>
+          </p>
+        </div>
+      </div>
+
+      <!-- Download Backup Options -->
+      <div class="p-4 bg-blue-50/60 border border-blue-100 rounded-2xl space-y-3">
+        <div class="flex items-center space-x-2">
+          <i class="fas fa-download text-blue-600 text-sm"></i>
+          <h4 class="text-xs font-black text-blue-950 uppercase tracking-wider">Export & Download System Backup</h4>
+        </div>
+        <p class="text-xs text-blue-900 leading-relaxed">
+          Download a complete snapshot of your catalog, products, stock batches, customers, sales history, expenses, and system settings.
+        </p>
+
+        <div class="flex flex-wrap items-center gap-3 pt-1">
+          <!-- Universal JSON Backup -->
+          <a href="{% url 'core:backup_download' %}?format=json" 
+             class="btn-primary inline-flex items-center">
+            <i class="fas fa-file-code mr-2"></i> Download Universal JSON Backup
+          </a>
+
+          <!-- Raw SQLite Backup -->
+          <a href="{% url 'core:backup_download' %}?format=sqlite" 
+             class="btn-secondary inline-flex items-center">
+            <i class="fas fa-file-alt mr-2"></i> Download Raw SQLite Database
+          </a>
+        </div>
+        <p class="text-[11px] text-blue-800 font-medium">
+          <i class="fas fa-info-circle mr-1"></i> The <b>Universal JSON Backup</b> can be migrated across any server, operating system, PostgreSQL database, or Docker container seamlessly.
+        </p>
+      </div>
+
+      <!-- Import / Restore Database -->
+      <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
+        <div class="flex items-center space-x-2">
+          <i class="fas fa-upload text-blue-600 text-sm"></i>
+          <h4 class="text-xs font-black text-slate-900 uppercase tracking-wider">Import & Restore Backup</h4>
+        </div>
+        <p class="text-xs text-slate-500 leading-relaxed">
+          Restore data from a previously downloaded Universal JSON backup file (<code class="font-mono text-blue-600">.json</code>) or SQLite database file (<code class="font-mono text-blue-600">.sqlite3</code>).
+        </p>
+
+        <form id="db-restore-form" action="{% url 'core:backup_restore' %}" method="POST" enctype="multipart/form-data" class="space-y-4">
+          {% csrf_token %}
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                Select Backup File (.json or .sqlite3) <span class="text-red-500">*</span>
+              </label>
+              <input type="file" 
+                     name="backup_file" 
+                     id="backup_file_input"
+                     accept=".json,.sqlite3,.db" 
+                     required
+                     class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs font-medium text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+
+              <!-- Real-time File Selection Preview Badge -->
+              <div id="file-info-badge" class="hidden mt-2 p-2.5 rounded-xl bg-blue-50/80 border border-blue-200 flex items-center justify-between text-xs transition-all">
+                <div class="flex items-center space-x-2 text-blue-950 font-bold truncate mr-2">
+                  <i class="fas fa-file-code text-blue-600 flex-shrink-0"></i>
+                  <span id="file-badge-name" class="truncate font-mono">filename.json</span>
+                  <span id="file-badge-size" class="text-[10px] text-blue-700 bg-white px-2 py-0.5 rounded-md border border-blue-200 flex-shrink-0 font-mono">0 KB</span>
+                </div>
+                <span id="file-badge-type" class="text-[10px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md flex-shrink-0">Universal JSON</span>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                Restoration Mode <span class="text-red-500">*</span>
+              </label>
+              <div class="space-y-1.5 pt-1">
+                <label class="inline-flex items-center mr-4 cursor-pointer">
+                  <input type="radio" name="restore_mode" value="merge" checked class="text-blue-600 focus:ring-blue-500 w-4 h-4 mr-2">
+                  <span class="text-xs font-bold text-slate-800">Merge with Existing Data</span>
+                </label>
+                <label class="inline-flex items-center cursor-pointer">
+                  <input type="radio" name="restore_mode" value="overwrite" class="text-red-600 focus:ring-red-500 w-4 h-4 mr-2">
+                  <span class="text-xs font-bold text-red-700">Clean Overwrite (Replace All Data)</span>
+                </label>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-1">
+                <b>Merge</b> retains existing entries while adding missing records. <b>Overwrite</b> resets data cleanly before importing.
+              </p>
+            </div>
+          </div>
+
+          <div class="pt-2 flex justify-end">
+            <button type="submit" id="btn-submit-restore" class="btn-primary">
+              <i class="fas fa-sync-alt mr-2"></i> Confirm & Restore Database
+            </button>
+          </div>
+        </form>
+
+        <!-- Live Progress Band Container (Hidden until import starts) -->
+        <div id="db-restore-progress-container" class="hidden mt-4 p-5 bg-white border border-blue-200 rounded-2xl shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2.5">
+              <div class="w-7 h-7 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-xs">
+                <i class="fas fa-sync-alt fa-spin"></i>
+              </div>
+              <div>
+                <h5 class="text-xs font-black text-blue-950">Restoring Database</h5>
+                <p id="db-restore-status-text" class="text-[11px] text-blue-700 font-medium">Preparing restoration process...</p>
+              </div>
+            </div>
+            <span id="db-restore-pct" class="font-mono font-black text-xs text-blue-700 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-200">
+              0%
+            </span>
+          </div>
+
+          <!-- Progress Band Bar -->
+          <div class="w-full bg-blue-50 h-3 rounded-full overflow-hidden p-0.5 border border-blue-200 shadow-inner">
+            <div id="db-restore-progress-bar" 
+                 class="h-full bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 rounded-full transition-all duration-300 relative overflow-hidden" 
+                 style="width: 0%;">
+              <div class="absolute inset-0 bg-white/25 animate-[pulse_1s_infinite]"></div>
+            </div>
+          </div>
+
+          <!-- Process Stage Steps -->
+          <div class="grid grid-cols-4 gap-1 text-[10px] font-bold text-slate-400 pt-1 text-center">
+            <span id="step-upload" class="text-blue-700">1. Upload</span>
+            <span id="step-validate">2. Validate</span>
+            <span id="step-restore">3. Ingest Data</span>
+            <span id="step-finalize">4. Finalize</span>
+          </div>
+        </div>
+
+        <!-- Restoration Response Card (Hidden until done) -->
+        <div id="db-restore-result-container" class="hidden mt-4 p-5 bg-white border border-emerald-200 rounded-2xl shadow-md space-y-4">
+          <div class="flex items-start space-x-3 pb-3 border-b border-emerald-100">
+            <div class="w-9 h-9 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-base flex-shrink-0">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="flex-1">
+              <h4 class="text-sm font-black text-slate-900" id="result-title">Database Restored Successfully</h4>
+              <p class="text-xs text-slate-600 mt-0.5" id="result-message"></p>
+            </div>
+          </div>
+
+          <!-- Metadata Summary Grid -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+              <div class="text-[10px] uppercase font-bold text-slate-400">Restoration Mode</div>
+              <div id="res-meta-mode" class="font-bold text-xs text-blue-900 mt-0.5">-</div>
+            </div>
+            <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+              <div class="text-[10px] uppercase font-bold text-slate-400">Total Records</div>
+              <div id="res-meta-records" class="font-mono font-black text-xs text-slate-900 mt-0.5">-</div>
+            </div>
+            <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+              <div class="text-[10px] uppercase font-bold text-slate-400">Archive Size</div>
+              <div id="res-meta-size" class="font-mono font-bold text-xs text-slate-900 mt-0.5">-</div>
+            </div>
+            <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+              <div class="text-[10px] uppercase font-bold text-slate-400">Duration</div>
+              <div id="res-meta-time" class="font-mono font-bold text-xs text-emerald-700 mt-0.5">-</div>
+            </div>
+          </div>
+
+          <!-- Restored Models Breakdown -->
+          <div id="res-models-wrapper" class="space-y-1.5 hidden">
+            <div class="text-[11px] font-bold text-slate-700">Restored Entities Breakdown:</div>
+            <div id="res-models-container" class="flex flex-wrap gap-1.5"></div>
+          </div>
+
+          <!-- Reload System Confirmation Button -->
+          <div class="pt-2 flex items-center justify-between">
+            <span id="countdown-text" class="text-xs text-slate-500 font-medium">
+              Auto-reloading application in <b class="text-blue-700 font-mono" id="reload-timer">6</b>s...
+            </span>
+            <button type="button" onclick="window.location.reload()" class="btn-primary">
+              <i class="fas fa-rotate mr-2"></i> Reload Application Now
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function () {
+  let reloadInterval = null;
+
+  // Real-time file input preview badge
+  $('#backup_file_input').on('change', function () {
+    const file = this.files && this.files[0];
+    if (file) {
+      $('#file-badge-name').text(file.name);
+      $('#file-badge-size').text((file.size / 1024).toFixed(1) + ' KB');
+      const lowerName = file.name.toLowerCase();
+      const isJson = lowerName.endsWith('.json');
+      const isSqlite = lowerName.endsWith('.sqlite3') || lowerName.endsWith('.db');
+
+      const $badgeType = $('#file-badge-type');
+      if (isJson) {
+        $badgeType
+          .text('Universal JSON Backup')
+          .attr('class', 'text-[10px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md flex-shrink-0');
+      } else if (isSqlite) {
+        $badgeType
+          .text('Raw SQLite Database')
+          .attr('class', 'text-[10px] font-black text-blue-800 bg-blue-100 px-2 py-0.5 rounded-md flex-shrink-0');
+      } else {
+        $badgeType
+          .text('Unsupported Format')
+          .attr('class', 'text-[10px] font-black text-red-800 bg-red-100 px-2 py-0.5 rounded-md flex-shrink-0');
+      }
+      $('#file-info-badge').removeClass('hidden');
+    } else {
+      $('#file-info-badge').addClass('hidden');
+    }
+  });
+
+  // DB Restore Form Submission
+  $('#db-restore-form').on('submit', function (e) {
+    e.preventDefault();
+    const fileInput = document.getElementById('backup_file_input');
+    if (!fileInput.files || fileInput.files.length === 0) {
+      if (typeof notifySwal === 'function') {
+        notifySwal('No File Selected', 'Please select a backup file (.json or .sqlite3) to restore.', 'error');
+      } else {
+        alert('Please select a backup file (.json or .sqlite3) to restore.');
+      }
+      return;
+    }
+
+    const file = fileInput.files[0];
+    const mode = $('input[name="restore_mode"]:checked').val() || 'merge';
+    const modeLabel = mode === 'overwrite' ? 'Clean Overwrite' : 'Merge Mode';
+    const modeText = mode === 'overwrite' 
+      ? 'WARNING: Clean Overwrite will replace existing system records with the backup data!' 
+      : 'Merge Mode will import backup records on top of existing database data.';
+
+    const confirmMsg = `${modeText}\n\nSelected File: "${file.name}" (${(file.size / 1024).toFixed(1)} KB)\nRestoration Mode: ${modeLabel}.\n\nDo you wish to proceed?`;
+
+    const executeRestore = function () {
+      const formData = new FormData(document.getElementById('db-restore-form'));
+      const $btn = $('#btn-submit-restore');
+      const $progressContainer = $('#db-restore-progress-container');
+      const $progressBar = $('#db-restore-progress-bar');
+      const $pctText = $('#db-restore-pct');
+      const $statusText = $('#db-restore-status-text');
+      const $resultContainer = $('#db-restore-result-container');
+
+      // Update button state & show progress band
+      $btn.prop('disabled', true).addClass('opacity-60 pointer-events-none').html('<i class="fas fa-spinner fa-spin mr-2"></i> Restoring Database...');
+      $resultContainer.addClass('hidden');
+      $progressContainer.removeClass('hidden');
+
+      // Smooth scroll progress band into user view
+      const progressEl = document.getElementById('db-restore-progress-container');
+      if (progressEl && progressEl.scrollIntoView) {
+        progressEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      function updateProgress(pct, status, activeStep) {
+        $progressBar.css('width', pct + '%');
+        $pctText.text(pct + '%');
+        $statusText.text(status);
+        if (activeStep) {
+          $('.grid-cols-4 span').removeClass('text-blue-700 font-black').addClass('text-slate-400');
+          $(activeStep).addClass('text-blue-700 font-black');
+        }
+      }
+
+      updateProgress(10, 'Uploading backup archive package...', '#step-upload');
+
+      let simInterval = null;
+
+      $.ajax({
+        url: "{% url 'core:backup_restore' %}",
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        xhr: function () {
+          const xhr = new window.XMLHttpRequest();
+          xhr.upload.addEventListener('progress', function (evt) {
+            if (evt.lengthComputable) {
+              const percentComplete = Math.round((evt.loaded / evt.total) * 40);
+              updateProgress(Math.max(10, percentComplete), 'Uploading backup package (' + percentComplete + '%)...', '#step-upload');
+            }
+          }, false);
+          return xhr;
+        },
+        beforeSend: function () {
+          simInterval = setInterval(function () {
+            let current = parseInt($pctText.text()) || 10;
+            if (current < 45) {
+              // Uploading phase
+            } else if (current < 70) {
+              current += 4;
+              updateProgress(current, 'Validating schema and database integrity...', '#step-validate');
+            } else if (current < 92) {
+              current += 3;
+              updateProgress(current, 'Ingesting model fixtures and records...', '#step-restore');
+            } else if (current < 98) {
+              current += 1;
+              updateProgress(current, 'Finalizing constraints, foreign keys and caches...', '#step-finalize');
+            }
+          }, 250);
+        },
+        success: function (res) {
+          clearInterval(simInterval);
+          updateProgress(100, 'Restoration complete!', '#step-finalize');
+
+          if (res.status === 'success') {
+            setTimeout(function () {
+              $progressContainer.addClass('hidden');
+              $resultContainer.removeClass('hidden');
+
+              $('#result-title').text(res.title || 'Database Restored Successfully');
+              $('#result-message').text(res.message);
+
+              const meta = res.data || {};
+              $('#res-meta-mode').text(meta.mode || modeLabel);
+              $('#res-meta-records').text(meta.total_records ? meta.total_records.toLocaleString() : 'All Models');
+              $('#res-meta-size').text((meta.size_kb || (file.size / 1024).toFixed(1)) + ' KB');
+              $('#res-meta-time').text((meta.elapsed_seconds || 1.2) + 's');
+
+              // Render models breakdown
+              if (meta.model_counts && Object.keys(meta.model_counts).length > 0) {
+                const $modelsBox = $('#res-models-container');
+                $modelsBox.empty();
+                for (const [model, count] of Object.entries(meta.model_counts)) {
+                  $modelsBox.append(`
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
+                      ${model}: <b class="ml-1 font-mono">${count}</b>
+                    </span>
+                  `);
+                }
+                $('#res-models-wrapper').removeClass('hidden');
+              } else {
+                $('#res-models-wrapper').addClass('hidden');
+              }
+
+              // Smooth scroll result into user view
+              const resultEl = document.getElementById('db-restore-result-container');
+              if (resultEl && resultEl.scrollIntoView) {
+                resultEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+
+              if (typeof notifySwal === 'function') {
+                notifySwal(res.title || 'Database Restored', res.message, 'success', 3500);
+              }
+
+              // Start live countdown for reload
+              let timeLeft = 6;
+              $('#reload-timer').text(timeLeft);
+              if (reloadInterval) clearInterval(reloadInterval);
+              reloadInterval = setInterval(function () {
+                timeLeft--;
+                $('#reload-timer').text(timeLeft);
+                if (timeLeft <= 0) {
+                  clearInterval(reloadInterval);
+                  window.location.reload();
+                }
+              }, 1000);
+
+            }, 400);
+
+          } else {
+            $progressContainer.addClass('hidden');
+            $btn.prop('disabled', false).removeClass('opacity-60 pointer-events-none').html('<i class="fas fa-sync-alt mr-2"></i> Confirm & Restore Database');
+            if (typeof notifySwal === 'function') {
+              notifySwal(res.title || 'Restore Failed', res.message || 'Restoration failed', 'error');
+            } else {
+              alert(res.message || 'Restoration failed');
+            }
+          }
+        },
+        error: function (xhr) {
+          clearInterval(simInterval);
+          $progressContainer.addClass('hidden');
+          $btn.prop('disabled', false).removeClass('opacity-60 pointer-events-none').html('<i class="fas fa-sync-alt mr-2"></i> Confirm & Restore Database');
+          const errMsg = xhr.responseJSON?.message || 'Server error during restore process.';
+          if (typeof notifySwal === 'function') {
+            notifySwal('Restore Error', errMsg, 'error');
+          } else {
+            alert(errMsg);
+          }
+        }
+      });
+    };
+
+    // Both Promise and callback support
+    const swalResult = confirmSwal(
+      'Restore Database Confirmation',
+      confirmMsg,
+      'Proceed With Restore',
+      executeRestore
+    );
+
+    if (swalResult && typeof swalResult.then === 'function') {
+      swalResult.then(function (result) {
+        if (result && result.isConfirmed) {
+          // If onConfirm callback was already executed, executeRestore can guard against double run
+          // We can check if button is already disabled
+          if (!$('#btn-submit-restore').prop('disabled')) {
+            executeRestore();
+          }
+        }
+      });
+    }
+  });
+});
+</script>
+{% endblock %}

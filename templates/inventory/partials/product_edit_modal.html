@@ -1,0 +1,127 @@
+{% load static %}
+<div class="p-6">
+  
+  <!-- Modal Header -->
+  <div class="flex items-center justify-between pb-4 border-b border-gray-200">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-lg">
+        <i class="fas fa-edit"></i>
+      </div>
+      <div>
+        <h3 class="text-base font-black text-slate-900">Edit Product</h3>
+        <p class="text-xs text-slate-500 mt-0.5">Update product info and selling price</p>
+      </div>
+    </div>
+    <button type="button" 
+            data-modal-close 
+            class="p-2 text-slate-400 hover:text-slate-600 rounded-xl transition-all">
+      <i class="fas fa-times text-base"></i>
+    </button>
+  </div>
+
+  <!-- Form -->
+  <form id="product-edit-form" 
+        action="{% url 'inventory:product_update' product.id %}" 
+        method="POST" 
+        data-ajax="true"
+        class="mt-5 space-y-4">
+    {% csrf_token %}
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      
+      <!-- Product Name -->
+      <div class="sm:col-span-2">
+        <label class="block text-xs font-bold text-slate-700 mb-1.5">
+          Product Name <span class="text-red-500">*</span>
+        </label>
+        <input type="text" 
+               name="name" 
+               value="{{ product.name }}"
+               required 
+               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+      </div>
+
+      <!-- Category Searchable Combobox with Arrow Navigation -->
+      <div class="relative custom-searchable-combobox" id="edit-product-cat-combobox">
+        <label class="block text-xs font-bold text-slate-700 mb-1.5">
+          Category <span class="text-red-500">*</span>
+        </label>
+        <input type="text" 
+               class="combobox-input w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+               placeholder="Type to search or use arrows to select..." 
+               value="{{ product.category.name }}"
+               autocomplete="off">
+        <input type="hidden" name="category" class="combobox-hidden" value="{{ product.category.id }}" required>
+        
+        <div class="combobox-dropdown hidden absolute z-30 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto divide-y divide-slate-100">
+          {% for cat in categories %}
+            <div class="p-2.5 hover:bg-blue-50 cursor-pointer combobox-option text-xs flex justify-between items-center transition-colors {% if cat.id == product.category.id %}bg-blue-50/70 font-bold{% endif %}"
+                 data-id="{{ cat.id }}" 
+                 data-name="{{ cat.name }}">
+              <span class="font-bold text-slate-800">{{ cat.name }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- SKU / Code -->
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1.5">
+          SKU / Product Code
+        </label>
+        <input type="text" 
+               name="sku" 
+               value="{{ product.sku|default:'' }}"
+               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-mono text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+      </div>
+
+      <!-- Selling Price -->
+      <div class="sm:col-span-2">
+        <label class="block text-xs font-bold text-slate-700 mb-1.5">
+          Selling Price (USD) <span class="text-red-500">*</span>
+        </label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 font-bold">$</span>
+          <input type="number" 
+                 step="0.01" 
+                 min="0" 
+                 name="selling_price" 
+                 value="{{ product.current_selling_price }}"
+                 required 
+                 class="w-full pl-8 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-bold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="sm:col-span-2">
+        <label class="block text-xs font-bold text-slate-700 mb-1.5">
+          Description
+        </label>
+        <textarea name="description" 
+                  rows="2" 
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">{{ product.description }}</textarea>
+      </div>
+
+    </div>
+
+    <!-- Modal Footer with Standard Button System -->
+    <div class="pt-4 border-t border-gray-200 flex items-center justify-end space-x-3">
+      <button type="button" 
+              data-modal-close 
+              class="btn-secondary text-xs">
+        Cancel
+      </button>
+      <button type="submit" 
+              class="btn-primary text-xs">
+        <i class="fas fa-check mr-1.5"></i> Update Product
+      </button>
+    </div>
+
+  </form>
+</div>
+
+<script>
+  if (window.initSearchableCombobox) {
+    window.initSearchableCombobox('#edit-product-cat-combobox');
+  }
+</script>

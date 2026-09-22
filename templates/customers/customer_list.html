@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Customers{% endblock %}
+
+{% block content %}
+<div class="space-y-5">
+  
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-1">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-2xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xl shadow-sm">
+        <i class="fas fa-users"></i>
+      </div>
+      <div>
+        <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">Customers</h1>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Manage customer directory and purchase histories</p>
+      </div>
+    </div>
+
+    <div class="mt-4 sm:mt-0">
+      <button type="button" 
+              data-modal-url="{% url 'sales:customer_add_modal' %}"
+              data-modal-size="max-w-md"
+              class="inline-flex items-center px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md shadow-blue-600/20 transition-all">
+        <i class="fas fa-user-plus mr-2 text-xs"></i> Add Customer
+      </button>
+    </div>
+  </div>
+
+  <!-- Search Toolbar -->
+  <div class="app-card bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark:border-gray-700">
+    <div class="relative max-w-md">
+      <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+        <i class="fas fa-search text-xs"></i>
+      </div>
+      <input type="text" 
+             id="customer-search-input"
+             placeholder="Search customer by name, phone, or email..." 
+             class="w-full pl-9 pr-3.5 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+    </div>
+  </div>
+
+  <!-- Dynamic AJAX Table Container -->
+  <div id="customer-table-container" 
+       data-table-url="{% url 'sales:customer_table' %}"
+       class="app-card bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+    {% include 'customers/partials/customer_table.html' %}
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  $(document).ready(function () {
+    refreshTable('#customer-table-container');
+
+    let searchTimer;
+    $('#customer-search-input').on('keyup', function () {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => {
+        refreshTable('#customer-table-container', { q: $(this).val() });
+      }, 300);
+    });
+
+    $(document).on('click', '#customer-table-container .pagination-link', function (e) {
+      e.preventDefault();
+      const page = $(this).attr('data-page');
+      if (page) {
+        refreshTable('#customer-table-container', { page: page, q: $('#customer-search-input').val() });
+      }
+    });
+  });
+</script>
+{% endblock %}

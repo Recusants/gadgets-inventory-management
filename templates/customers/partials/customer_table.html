@@ -1,0 +1,73 @@
+<div class="overflow-x-auto max-h-[calc(100vh-285px)] overflow-y-auto custom-scrollbar">
+  <table class="w-full text-left text-xs">
+    <thead>
+      <tr class="bg-slate-100 text-slate-900 border-b-2 border-slate-300 uppercase tracking-wider font-extrabold text-[11px] sticky top-0 z-20 shadow-sm">
+        <th class="py-3.5 px-4 bg-slate-100">Customer Name</th>
+        <th class="py-3.5 px-4 bg-slate-100">Phone Number</th>
+        <th class="py-3.5 px-4 bg-slate-100">Email</th>
+        <th class="py-3.5 px-4 bg-slate-100">Purchases</th>
+        <th class="py-3.5 px-4 bg-slate-100 text-center">Actions</th>
+      </tr>
+    </thead>
+
+    <tbody class="divide-y divide-slate-200 dark:divide-slate-800 text-slate-900 dark:text-slate-100">
+      {% for cust in customers %}
+        <tr class="hover:bg-blue-50/60 dark:hover:bg-slate-800/60 transition-colors">
+          <td class="py-3 px-4 font-black text-slate-900 dark:text-white">
+            {{ cust.name }}
+          </td>
+          <td class="py-3 px-4 font-mono font-bold text-slate-900 dark:text-slate-100">
+            {{ cust.phone }}
+          </td>
+          <td class="py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">
+            {{ cust.email|default:"—" }}
+          </td>
+          <td class="py-3 px-4">
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-900 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
+              {{ cust.sales.count }} orders
+            </span>
+          </td>
+          <td class="py-3 px-4 text-center">
+            <div class="flex items-center justify-center space-x-2">
+              <button type="button" 
+                      data-modal-url="{% url 'sales:customer_detail_modal' cust.id %}"
+                      data-modal-size="max-w-lg"
+                      class="p-1.5 text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                      title="View Purchase History">
+                <i class="far fa-eye text-sm"></i>
+              </button>
+              <button type="button" 
+                      data-modal-url="{% url 'sales:customer_edit_modal' cust.id %}"
+                      data-modal-size="max-w-md"
+                      class="p-1.5 text-slate-600 hover:text-amber-600 dark:text-slate-300 dark:hover:text-amber-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                      title="Edit Customer">
+                <i class="far fa-edit text-sm"></i>
+              </button>
+              <button type="button" 
+                      data-delete-url="{% url 'sales:customer_delete' cust.id %}"
+                      data-item-title="{{ cust.name }}"
+                      data-refresh-table="#customer-table-container"
+                      class="p-1.5 text-slate-600 hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                      title="Delete Customer">
+                <i class="far fa-trash-alt text-sm"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="5" class="py-12 text-center text-gray-400 dark:text-gray-500">
+            <i class="fas fa-users text-3xl mb-2 text-gray-300 dark:text-gray-600 block"></i>
+            No customers found.
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if paginator.count > 0 %}
+<div class="px-5 py-3.5 bg-gray-50/60 dark:bg-gray-900/40 border-t border-gray-100 dark:border-gray-700/80 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+  <div>Total: <strong class="text-gray-700 dark:text-gray-300">{{ paginator.count }}</strong> customers</div>
+</div>
+{% endif %}

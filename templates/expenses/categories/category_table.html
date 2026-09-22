@@ -1,0 +1,114 @@
+<div class="flex-1 min-h-0 overflow-y-auto">
+  <table class="w-full text-left border-collapse text-xs">
+    <thead class="sticky top-0 z-20 bg-slate-100 border-b border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
+      <tr>
+        <th class="py-3 px-4">#</th>
+        <th class="py-3 px-4">Category Name</th>
+        <th class="py-3 px-4">Description</th>
+        <th class="py-3 px-4 text-right">Default Amount</th>
+        <th class="py-3 px-4 text-center">Recurring</th>
+        <th class="py-3 px-4 text-center">Expenses Count</th>
+        <th class="py-3 px-4 text-center">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+      {% for cat in categories %}
+      <tr class="hover:bg-blue-50/50 transition-colors">
+        <td class="py-3 px-4 whitespace-nowrap font-mono text-slate-400 text-[11px]">
+          {{ forloop.counter }}
+        </td>
+        <td class="py-3 px-4">
+          <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-100 text-blue-800">
+            <i class="fas fa-tag mr-1.5 text-[10px]"></i> {{ cat.name }}
+          </span>
+        </td>
+        <td class="py-3 px-4 text-slate-600">
+          {{ cat.description|default:"—" }}
+        </td>
+        <td class="py-3 px-4 whitespace-nowrap text-right font-mono font-bold text-slate-900">
+          ${{ cat.default_amount|floatformat:2 }}
+        </td>
+        <td class="py-3 px-4 whitespace-nowrap text-center">
+          {% if cat.is_recurring %}
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 uppercase">
+              <i class="fas fa-sync-alt fa-spin-pulse mr-1 text-[9px]"></i> {{ cat.recurring_interval }}
+            </span>
+          {% else %}
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-500">
+              Manual
+            </span>
+          {% endif %}
+        </td>
+        <td class="py-3 px-4 whitespace-nowrap text-center">
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-800">
+            {{ cat.expenses.count }}
+          </span>
+        </td>
+        <td class="py-3 px-4 whitespace-nowrap text-center">
+          <div class="inline-flex items-center justify-center space-x-1.5">
+            <!-- Action buttons in blue shades with white text -->
+            <button type="button"
+                    data-modal-url="{% url 'expenses:category_edit_modal' cat.pk %}"
+                    data-modal-size="max-w-md"
+                    title="Edit Category"
+                    class="w-7 h-7 rounded-lg bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center text-xs shadow-sm transition-all">
+              <i class="fas fa-pen"></i>
+            </button>
+            <button type="button"
+                    data-action-url="{% url 'expenses:category_delete' cat.pk %}"
+                    data-confirm-title="Delete Category?"
+                    data-confirm-message="Are you sure you want to delete category '{{ cat.name }}'?"
+                    data-refresh-target="#category-table-container"
+                    title="Delete Category"
+                    class="btn-delete-confirm w-7 h-7 rounded-lg bg-blue-900 hover:bg-red-600 text-white flex items-center justify-center text-xs shadow-sm transition-all">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5" class="py-12 text-center text-slate-400">
+          <div class="flex flex-col items-center justify-center">
+            <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
+              <i class="fas fa-tags text-lg"></i>
+            </div>
+            <p class="font-bold text-slate-600">No categories found</p>
+            <p class="text-xs text-slate-400">Add an expense category to organize your business expenses.</p>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Pagination / Footer info -->
+{% if paginator.num_pages > 1 %}
+<div class="py-2.5 px-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 flex-shrink-0">
+  <div>
+    Showing <span class="font-bold text-slate-700">{{ categories.start_index }}</span> to 
+    <span class="font-bold text-slate-700">{{ categories.end_index }}</span> of 
+    <span class="font-bold text-slate-700">{{ total_count }}</span> entries
+  </div>
+  <div class="inline-flex space-x-1">
+    {% if categories.has_previous %}
+      <button type="button" 
+              onclick="paginateTable('#category-table-container', {{ categories.previous_page_number }})"
+              class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all">
+        <i class="fas fa-chevron-left mr-1"></i> Prev
+      </button>
+    {% endif %}
+    <span class="px-2.5 py-1 text-xs font-bold text-slate-700">
+      Page {{ categories.number }} of {{ paginator.num_pages }}
+    </span>
+    {% if categories.has_next %}
+      <button type="button" 
+              onclick="paginateTable('#category-table-container', {{ categories.next_page_number }})"
+              class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all">
+        Next <i class="fas fa-chevron-right ml-1"></i>
+      </button>
+    {% endif %}
+  </div>
+</div>
+{% endif %}

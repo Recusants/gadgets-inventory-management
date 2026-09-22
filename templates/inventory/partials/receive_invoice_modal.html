@@ -1,0 +1,646 @@
+{% load static %}
+<div class="p-6">
+  
+  <!-- Modal Header -->
+  <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-lg shadow-md shadow-blue-600/20">
+        <i class="fas fa-file-invoice-dollar"></i>
+      </div>
+      <div>
+        <h3 class="text-base font-black text-slate-900">Receive Supplier Invoice</h3>
+        <p class="text-xs text-slate-400">3-Step intake wizard: details, multi-item batch intake, and submission</p>
+      </div>
+    </div>
+    <button type="button" onclick="closeModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+      <i class="fas fa-times text-base"></i>
+    </button>
+  </div>
+
+  <!-- Wizard Step Navigation Tabs -->
+  <div class="mt-4 border-b border-slate-200">
+    <nav class="flex space-x-4">
+      <button type="button" id="tab-nav-1" onclick="switchWizardTab(1)"
+              class="wizard-tab-btn pb-2 px-2 text-xs font-bold border-b-2 border-blue-600 text-blue-600 flex items-center space-x-1.5 transition-all">
+        <span class="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px]">1</span>
+        <span>Invoice Details</span>
+      </button>
+      <button type="button" id="tab-nav-2" onclick="switchWizardTab(2)"
+              class="wizard-tab-btn pb-2 px-2 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 flex items-center space-x-1.5 transition-all">
+        <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px]" id="tab-badge-items">2</span>
+        <span>Invoice Items</span>
+        <span id="items-count-badge" class="ml-1 px-1.5 py-0.2 bg-blue-100 text-blue-800 rounded-full text-[10px] hidden">0</span>
+      </button>
+      <button type="button" id="tab-nav-3" onclick="switchWizardTab(3)"
+              class="wizard-tab-btn pb-2 px-2 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 flex items-center space-x-1.5 transition-all">
+        <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px]">3</span>
+        <span>Verification & Submit</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Form Container -->
+  <form id="receive-invoice-wizard-form" action="{% url 'inventory:receive_invoice_save' %}" method="POST" class="mt-4">
+    {% csrf_token %}
+    <input type="hidden" name="items_json" id="wizard-items-json" value="[]">
+
+    <!-- TAB 1: INVOICE DETAILS -->
+    <div id="wizard-tab-1" class="wizard-tab-pane space-y-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        
+        <!-- Searchable Supplier Selection -->
+        <div class="sm:col-span-2">
+          <label class="block text-xs font-bold text-slate-700 mb-1">
+            Supplier / Vendor *
+          </label>
+          <div class="relative" id="supplier-combobox">
+            <input type="text" 
+                   id="supplier-search-input" 
+                   placeholder="Type to search supplier or enter new name..." 
+                   autocomplete="off"
+                   class="w-full px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none">
+            <input type="hidden" name="supplier_id" id="selected-supplier-id" value="">
+            <input type="hidden" name="supplier_name" id="selected-supplier-name" value="">
+            
+            <div id="supplier-dropdown" class="hidden absolute z-30 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-48 overflow-y-auto divide-y divide-slate-100">
+              {% for s in suppliers %}
+                <div class="p-2.5 hover:bg-blue-50 cursor-pointer supplier-option text-xs flex justify-between items-center"
+                     data-id="{{ s.id }}" data-name="{{ s.name }}" data-contact="{{ s.contact_person }}">
+                  <span class="font-bold text-slate-800">{{ s.name }}</span>
+                  <span class="text-[11px] text-slate-400">{{ s.contact_person|default:s.phone }}</span>
+                </div>
+              {% empty %}
+                <div class="p-2.5 text-xs text-slate-400 text-center">No registered suppliers found.</div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Supplier Invoice Number -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">
+            Supplier Invoice # *
+          </label>
+          <input type="text" 
+                 name="supplier_invoice_number" 
+                 id="wizard-invoice-number"
+                 required 
+                 placeholder="e.g. INV-2024-8842"
+                 class="w-full px-3.5 py-2 rounded-xl border border-slate-300 font-mono text-xs font-bold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+
+        <!-- Date Received -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">
+            Date Received *
+          </label>
+          <input type="date" 
+                 name="date_received" 
+                 id="wizard-date-received"
+                 value="{{ today }}"
+                 required
+                 class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+
+        <!-- Payment Terms / Status -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">
+            Payment Terms / Status
+          </label>
+          <select name="payment_terms" id="wizard-payment-terms"
+                  class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none">
+            <option value="Paid in Full">Paid in Full</option>
+            <option value="Credit (Net 30)">Credit (Net 30)</option>
+            <option value="Credit (Net 60)">Credit (Net 60)</option>
+            <option value="Partial Payment">Partial Payment</option>
+            <option value="Consignment">Consignment</option>
+          </select>
+        </div>
+
+        <!-- General Invoice Notes -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">
+            General Notes / Remarks
+          </label>
+          <input type="text" 
+                 name="notes" 
+                 id="wizard-notes"
+                 placeholder="e.g. Received via DHL Express, batch verified"
+                 class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+
+      </div>
+
+      <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+        <button type="button" onclick="closeModal()" class="btn-secondary">
+          Cancel
+        </button>
+        <button type="button" onclick="goToItemsTab()" class="btn-primary">
+          Next: Add Items <i class="fas fa-arrow-right ml-1"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB 2: INVOICE ITEMS -->
+    <div id="wizard-tab-2" class="wizard-tab-pane hidden space-y-4">
+      
+      <!-- Item Add Form Box -->
+      <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+        <div class="font-bold text-xs text-slate-800 flex items-center space-x-1.5">
+          <i class="fas fa-plus-circle text-blue-600"></i>
+          <span>Add Product Line Item</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end">
+          
+          <!-- Searchable Product Combobox -->
+          <div class="sm:col-span-5 relative" id="product-combobox">
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Search Product *</label>
+            <input type="text" 
+                   id="item-product-search" 
+                   placeholder="Type product name or SKU..." 
+                   autocomplete="off"
+                   class="w-full px-3 py-1.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none">
+            <input type="hidden" id="item-product-id" value="">
+            <input type="hidden" id="item-product-name" value="">
+
+            <div id="product-dropdown" class="hidden absolute z-30 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-48 overflow-y-auto divide-y divide-slate-100">
+              {% for p in products %}
+                <div class="p-2 hover:bg-blue-50 cursor-pointer product-option text-xs flex justify-between items-center"
+                     data-id="{{ p.id }}" data-name="{{ p.name }}" data-price="{{ p.current_selling_price }}" data-stock="{{ p.available_quantity }}">
+                  <div>
+                    <span class="font-bold text-slate-800">{{ p.name }}</span>
+                    <span class="text-[10px] text-slate-400 ml-1">Stock: {{ p.available_quantity }}</span>
+                  </div>
+                  <span class="font-mono text-blue-600 font-bold text-[11px]">${{ p.current_selling_price }}</span>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Quantity -->
+          <div class="sm:col-span-2">
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Quantity *</label>
+            <input type="number" id="item-quantity" min="1" value="1"
+                   class="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 bg-white text-xs font-bold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+
+          <!-- Unit Cost -->
+          <div class="sm:col-span-2">
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Cost ($) *</label>
+            <input type="number" step="0.01" min="0" id="item-cost" placeholder="0.00"
+                   class="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 bg-white text-xs font-mono font-bold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+
+          <!-- Selling Price -->
+          <div class="sm:col-span-2">
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Selling ($)</label>
+            <input type="number" step="0.01" min="0" id="item-selling" placeholder="0.00"
+                   class="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 bg-white text-xs font-mono font-bold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+
+          <!-- Add Button -->
+          <div class="sm:col-span-1">
+            <button type="button" onclick="addItemToInvoice()"
+                    class="w-full py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center justify-center">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Items Table List -->
+      <div class="border border-slate-200 rounded-2xl overflow-hidden max-h-56 overflow-y-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead class="sticky top-0 bg-slate-100 text-slate-700 uppercase text-[10px] font-black border-b border-slate-200">
+            <tr>
+              <th class="py-2.5 px-3">Product</th>
+              <th class="py-2.5 px-3 text-center">Qty</th>
+              <th class="py-2.5 px-3 text-right">Cost</th>
+              <th class="py-2.5 px-3 text-right">Subtotal</th>
+              <th class="py-2.5 px-3 text-right">Selling Price</th>
+              <th class="py-2.5 px-3 text-center">Remove</th>
+            </tr>
+          </thead>
+          <tbody id="invoice-items-table-body" class="divide-y divide-slate-100 font-medium text-slate-700">
+            <tr id="empty-items-row">
+              <td colspan="6" class="py-6 text-center text-slate-400">
+                No items added yet. Search a product above and click '+' to add to this invoice.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Items Total Summary Bar -->
+      <div class="flex items-center justify-between px-3 py-2 bg-blue-50 rounded-xl border border-blue-100 text-xs">
+        <div>
+          Total Products: <span id="tab2-total-items-count" class="font-bold text-blue-900">0</span> lines
+          (<span id="tab2-total-units" class="font-bold text-blue-900">0</span> units)
+        </div>
+        <div>
+          Total Cost: <span id="tab2-grand-total" class="font-mono font-black text-blue-900 text-sm">$0.00</span>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+        <button type="button" onclick="switchWizardTab(1)" class="btn-secondary">
+          <i class="fas fa-arrow-left mr-1"></i> Back to Details
+        </button>
+        <button type="button" onclick="goToVerifyTab()" class="btn-primary">
+          Next: Review & Verify <i class="fas fa-arrow-right ml-1"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB 3: VERIFICATION & PREVIEW SUBMIT -->
+    <div id="wizard-tab-3" class="wizard-tab-pane hidden space-y-4">
+      
+      <!-- Verification Header Cards -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+          <div class="text-[10px] uppercase font-bold text-slate-400">Supplier</div>
+          <div id="verify-supplier-name" class="font-bold text-xs text-slate-900 truncate mt-0.5">-</div>
+        </div>
+        <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+          <div class="text-[10px] uppercase font-bold text-slate-400">Invoice #</div>
+          <div id="verify-invoice-num" class="font-mono font-bold text-xs text-slate-900 truncate mt-0.5">-</div>
+        </div>
+        <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+          <div class="text-[10px] uppercase font-bold text-slate-400">Date Received</div>
+          <div id="verify-date" class="font-bold text-xs text-slate-900 mt-0.5">-</div>
+        </div>
+        <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+          <div class="text-[10px] uppercase font-bold text-slate-400">Total Purchase Cost</div>
+          <div id="verify-grand-total" class="font-mono font-black text-xs text-blue-600 mt-0.5">$0.00</div>
+        </div>
+      </div>
+
+      <!-- Preview Itemized Table -->
+      <div class="border border-slate-200 rounded-2xl overflow-hidden max-h-56 overflow-y-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead class="sticky top-0 bg-slate-100 text-slate-700 uppercase text-[10px] font-black border-b border-slate-200">
+            <tr>
+              <th class="py-2.5 px-3">Product Name</th>
+              <th class="py-2.5 px-3 text-center">Quantity</th>
+              <th class="py-2.5 px-3 text-right">Unit Cost</th>
+              <th class="py-2.5 px-3 text-right">Subtotal</th>
+              <th class="py-2.5 px-3 text-right">New Selling Price</th>
+            </tr>
+          </thead>
+          <tbody id="verify-items-table-body" class="divide-y divide-slate-100 font-medium text-slate-700">
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+        <button type="button" onclick="switchWizardTab(2)" class="btn-secondary">
+          <i class="fas fa-arrow-left mr-1"></i> Edit Items
+        </button>
+        <button type="submit" id="btn-submit-wizard" class="btn-primary">
+          <i class="fas fa-check-circle mr-2"></i> Confirm & Submit Invoice
+        </button>
+      </div>
+    </div>
+
+  </form>
+
+</div>
+
+<script>
+  // State for Invoice Items
+  window.wizardItems = [];
+
+  function switchWizardTab(tabNum) {
+    $('.wizard-tab-pane').addClass('hidden');
+    $('#wizard-tab-' + tabNum).removeClass('hidden');
+
+    $('.wizard-tab-btn').removeClass('border-blue-600 text-blue-600').addClass('border-transparent text-slate-400');
+    $('#tab-nav-' + tabNum).removeClass('border-transparent text-slate-400').addClass('border-blue-600 text-blue-600');
+  }
+
+  function goToItemsTab() {
+    const inv = $('#wizard-invoice-number').val().trim();
+    if (!inv) {
+      showNotification('Please provide a Supplier Invoice #', 'error');
+      $('#wizard-invoice-number').focus();
+      return;
+    }
+    switchWizardTab(2);
+  }
+
+  function goToVerifyTab() {
+    if (window.wizardItems.length === 0) {
+      showNotification('Please add at least one product item to the invoice.', 'error');
+      return;
+    }
+    populateVerificationTab();
+    switchWizardTab(3);
+  }
+
+  // Supplier Combobox logic with Keyboard Arrow Support
+  let supActiveIdx = -1;
+  $('#supplier-search-input').on('focus input', function () {
+    const val = $(this).val().toLowerCase();
+    $('#supplier-dropdown').removeClass('hidden');
+    supActiveIdx = -1;
+    $('.supplier-option').removeClass('bg-blue-100 ring-1 ring-blue-500 font-bold');
+    $('.supplier-option').each(function () {
+      const name = $(this).data('name').toLowerCase();
+      const contact = ($(this).data('contact') || '').toLowerCase();
+      if (name.includes(val) || contact.includes(val)) {
+        $(this).show();
+      } else {
+        $(this).hide();
+      }
+    });
+  });
+
+  $('#supplier-search-input').on('keydown', function (e) {
+    const $vis = $('.supplier-option:visible');
+    if ($('#supplier-dropdown').hasClass('hidden')) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        $(this).trigger('input');
+        return;
+      }
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      supActiveIdx++;
+      if (supActiveIdx >= $vis.length) supActiveIdx = 0;
+      $vis.removeClass('bg-blue-100 ring-1 ring-blue-500 font-bold');
+      if ($vis.eq(supActiveIdx).length) {
+        $vis.eq(supActiveIdx).addClass('bg-blue-100 ring-1 ring-blue-500 font-bold')[0].scrollIntoView({ block: 'nearest' });
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      supActiveIdx--;
+      if (supActiveIdx < 0) supActiveIdx = $vis.length - 1;
+      $vis.removeClass('bg-blue-100 ring-1 ring-blue-500 font-bold');
+      if ($vis.eq(supActiveIdx).length) {
+        $vis.eq(supActiveIdx).addClass('bg-blue-100 ring-1 ring-blue-500 font-bold')[0].scrollIntoView({ block: 'nearest' });
+      }
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (supActiveIdx >= 0 && $vis.eq(supActiveIdx).length) {
+        $vis.eq(supActiveIdx).trigger('click');
+      } else if ($vis.length > 0) {
+        $vis.first().trigger('click');
+      }
+    } else if (e.key === 'Escape') {
+      $('#supplier-dropdown').addClass('hidden');
+    }
+  });
+
+  $('.supplier-option').on('click', function () {
+    const id = $(this).data('id');
+    const name = $(this).data('name');
+    $('#selected-supplier-id').val(id);
+    $('#selected-supplier-name').val(name);
+    $('#supplier-search-input').val(name);
+    $('#supplier-dropdown').addClass('hidden');
+  });
+
+  $(document).on('click', function (e) {
+    if (!$(e.target).closest('#supplier-combobox').length) {
+      $('#supplier-dropdown').addClass('hidden');
+      if (!$('#selected-supplier-id').val()) {
+        $('#selected-supplier-name').val($('#supplier-search-input').val());
+      }
+    }
+    if (!$(e.target).closest('#product-combobox').length) {
+      $('#product-dropdown').addClass('hidden');
+    }
+  });
+
+  // Product Combobox logic with Keyboard Arrow Support
+  let prodActiveIdx = -1;
+  $('#item-product-search').on('focus input', function () {
+    const val = $(this).val().toLowerCase();
+    $('#product-dropdown').removeClass('hidden');
+    prodActiveIdx = -1;
+    $('.product-option').removeClass('bg-blue-100 ring-1 ring-blue-500 font-bold');
+    $('.product-option').each(function () {
+      const name = $(this).data('name').toLowerCase();
+      if (name.includes(val)) {
+        $(this).show();
+      } else {
+        $(this).hide();
+      }
+    });
+  });
+
+  $('#item-product-search').on('keydown', function (e) {
+    const $vis = $('.product-option:visible');
+    if ($('#product-dropdown').hasClass('hidden')) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        $(this).trigger('input');
+        return;
+      }
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      prodActiveIdx++;
+      if (prodActiveIdx >= $vis.length) prodActiveIdx = 0;
+      $vis.removeClass('bg-blue-100 ring-1 ring-blue-500 font-bold');
+      if ($vis.eq(prodActiveIdx).length) {
+        $vis.eq(prodActiveIdx).addClass('bg-blue-100 ring-1 ring-blue-500 font-bold')[0].scrollIntoView({ block: 'nearest' });
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      prodActiveIdx--;
+      if (prodActiveIdx < 0) prodActiveIdx = $vis.length - 1;
+      $vis.removeClass('bg-blue-100 ring-1 ring-blue-500 font-bold');
+      if ($vis.eq(prodActiveIdx).length) {
+        $vis.eq(prodActiveIdx).addClass('bg-blue-100 ring-1 ring-blue-500 font-bold')[0].scrollIntoView({ block: 'nearest' });
+      }
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (prodActiveIdx >= 0 && $vis.eq(prodActiveIdx).length) {
+        $vis.eq(prodActiveIdx).trigger('click');
+      } else if ($vis.length > 0) {
+        $vis.first().trigger('click');
+      }
+    } else if (e.key === 'Escape') {
+      $('#product-dropdown').addClass('hidden');
+    }
+  });
+
+  $('.product-option').on('click', function () {
+    const id = $(this).data('id');
+    const name = $(this).data('name');
+    const price = $(this).data('price');
+    $('#item-product-id').val(id);
+    $('#item-product-name').val(name);
+    $('#item-product-search').val(name);
+    $('#item-selling').val(price);
+    $('#product-dropdown').addClass('hidden');
+    $('#item-quantity').focus();
+  });
+
+  // Add Item to Invoice
+  function addItemToInvoice() {
+    const pId = $('#item-product-id').val();
+    const pName = $('#item-product-name').val();
+    const qty = parseInt($('#item-quantity').val()) || 1;
+    const cost = parseFloat($('#item-cost').val()) || 0;
+    const selling = parseFloat($('#item-selling').val()) || 0;
+
+    if (!pId || !pName) {
+      showNotification('Please select a product from the list.', 'error');
+      $('#item-product-search').focus();
+      return;
+    }
+    if (qty <= 0) {
+      showNotification('Quantity must be at least 1.', 'error');
+      return;
+    }
+    if (cost <= 0) {
+      showNotification('Please enter a valid unit purchase cost.', 'error');
+      $('#item-cost').focus();
+      return;
+    }
+
+    const subtotal = qty * cost;
+    window.wizardItems.push({
+      product_id: pId,
+      product_name: pName,
+      quantity: qty,
+      cost_price: cost.toFixed(2),
+      selling_price: selling > 0 ? selling.toFixed(2) : cost.toFixed(2),
+      subtotal: subtotal.toFixed(2)
+    });
+
+    // Reset inputs
+    $('#item-product-id').val('');
+    $('#item-product-name').val('');
+    $('#item-product-search').val('').focus();
+    $('#item-quantity').val('1');
+    $('#item-cost').val('');
+    $('#item-selling').val('');
+
+    renderItemsTable();
+  }
+
+  function removeItemFromInvoice(index) {
+    window.wizardItems.splice(index, 1);
+    renderItemsTable();
+  }
+
+  function renderItemsTable() {
+    const $tbody = $('#invoice-items-table-body');
+    $tbody.empty();
+
+    if (window.wizardItems.length === 0) {
+      $tbody.html(`
+        <tr id="empty-items-row">
+          <td colspan="6" class="py-6 text-center text-slate-400">
+            No items added yet. Search a product above and click '+' to add to this invoice.
+          </td>
+        </tr>
+      `);
+      $('#items-count-badge').addClass('hidden').text('0');
+      $('#tab2-total-items-count').text('0');
+      $('#tab2-total-units').text('0');
+      $('#tab2-grand-total').text('$0.00');
+      $('#wizard-items-json').val('[]');
+      return;
+    }
+
+    let totalUnits = 0;
+    let grandTotal = 0;
+
+    window.wizardItems.forEach(function (item, idx) {
+      totalUnits += parseInt(item.quantity);
+      grandTotal += parseFloat(item.subtotal);
+
+      $tbody.append(`
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="py-2.5 px-3 font-bold text-slate-900">${item.product_name}</td>
+          <td class="py-2.5 px-3 text-center font-bold font-mono">${item.quantity}</td>
+          <td class="py-2.5 px-3 text-right font-mono">$${parseFloat(item.cost_price).toFixed(2)}</td>
+          <td class="py-2.5 px-3 text-right font-mono font-bold text-slate-900">$${parseFloat(item.subtotal).toFixed(2)}</td>
+          <td class="py-2.5 px-3 text-right font-mono text-blue-600 font-bold">$${parseFloat(item.selling_price).toFixed(2)}</td>
+          <td class="py-2.5 px-3 text-center">
+            <button type="button" onclick="removeItemFromInvoice(${idx})" class="w-6 h-6 rounded-md bg-blue-900 hover:bg-red-600 text-white flex items-center justify-center text-[10px] mx-auto">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </td>
+        </tr>
+      `);
+    });
+
+    $('#items-count-badge').removeClass('hidden').text(window.wizardItems.length);
+    $('#tab2-total-items-count').text(window.wizardItems.length);
+    $('#tab2-total-units').text(totalUnits);
+    $('#tab2-grand-total').text('$' + grandTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+    $('#wizard-items-json').val(JSON.stringify(window.wizardItems));
+  }
+
+  function populateVerificationTab() {
+    const supName = $('#supplier-search-input').val() || 'Direct Supplier';
+    const invNum = $('#wizard-invoice-number').val() || 'INV-DRAFT';
+    const dateRec = $('#wizard-date-received').val() || 'Today';
+
+    $('#verify-supplier-name').text(supName);
+    $('#verify-invoice-num').text(invNum);
+    $('#verify-date').text(dateRec);
+
+    let grandTotal = 0;
+    const $vBody = $('#verify-items-table-body');
+    $vBody.empty();
+
+    window.wizardItems.forEach(function (item) {
+      grandTotal += parseFloat(item.subtotal);
+      $vBody.append(`
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="py-2.5 px-3 font-bold text-slate-900">${item.product_name}</td>
+          <td class="py-2.5 px-3 text-center font-bold font-mono">${item.quantity}</td>
+          <td class="py-2.5 px-3 text-right font-mono">$${parseFloat(item.cost_price).toFixed(2)}</td>
+          <td class="py-2.5 px-3 text-right font-mono font-bold text-slate-900">$${parseFloat(item.subtotal).toFixed(2)}</td>
+          <td class="py-2.5 px-3 text-right font-mono text-blue-600 font-bold">$${parseFloat(item.selling_price).toFixed(2)}</td>
+        </tr>
+      `);
+    });
+
+    $('#verify-grand-total').text('$' + grandTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+  }
+
+  // Handle Form Submission
+  $('#receive-invoice-wizard-form').on('submit', function (e) {
+    e.preventDefault();
+    if (window.wizardItems.length === 0) {
+      showNotification('Please add at least one product item to the invoice before submitting.', 'error');
+      switchWizardTab(2);
+      return;
+    }
+
+    const $form = $(this);
+    const $btn = $('#btn-submit-wizard');
+    $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Submitting...');
+
+    $.ajax({
+      url: $form.attr('action'),
+      type: 'POST',
+      data: $form.serialize(),
+      success: function (res) {
+        if (res.status === 'success') {
+          closeModal();
+          showNotification(res.message, 'success');
+          // Refresh products table or batches table if present
+          if ($('#product-table-container').length) refreshTable('#product-table-container');
+          if ($('#stock-table-container').length) refreshTable('#stock-table-container');
+          if ($('#batch-table-container').length) refreshTable('#batch-table-container');
+          if ($('#invoice-table-container').length) refreshTable('#invoice-table-container');
+        } else {
+          $btn.prop('disabled', false).html('<i class="fas fa-check-circle mr-2"></i> Confirm & Submit Invoice');
+          showNotification(res.message || 'Error occurred', 'error');
+        }
+      },
+      error: function (xhr) {
+        $btn.prop('disabled', false).html('<i class="fas fa-check-circle mr-2"></i> Confirm & Submit Invoice');
+        showNotification(xhr.responseJSON?.message || 'Server error occurred', 'error');
+      }
+    });
+  });
+</script>

@@ -1,0 +1,1081 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Point of Sale Checkout{% endblock %}
+
+{% block extra_css %}
+<style>
+  #app-main { overflow-y: hidden !important; }
+  #app-content-panel { padding: 0.6rem 1rem !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="h-[calc(100vh-64px-1.5rem)] flex flex-col overflow-hidden">
+
+  <!-- Top Title Bar (Fixed Compact Height) -->
+  <div class="flex items-center justify-between pb-2 border-b border-slate-200 flex-shrink-0">
+    <div class="flex items-center space-x-3">
+      <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center text-base shadow-sm">
+        <i class="fas fa-cash-register"></i>
+      </div>
+      <div>
+        <h1 class="text-lg font-black tracking-tight text-slate-900">POS Checkout</h1>
+        <p class="text-[11px] text-slate-500">Fast Item Combobox, Arrow Navigation &amp; Automatic FIFO Batches</p>
+      </div>
+    </div>
+    <div>
+      <a href="{% url 'sales:sale_list' %}" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all inline-flex items-center">
+        <i class="fas fa-arrow-left mr-1.5"></i> Sales History
+      </a>
+    </div>
+  </div>
+
+  <!-- Main POS Grid: Both Columns Fit in Viewport Height -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1 min-h-0 items-stretch mt-3 overflow-hidden">
+
+    <!-- ========================================================================= -->
+    <!-- LEFT SIDE: Item Entry & Add to Cart Controls (6 cols)                      -->
+    <!-- ========================================================================= -->
+    <div class="lg:col-span-6 flex flex-col h-full overflow-y-auto custom-scrollbar pr-1">
+      
+      <div class="app-card bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+          <label class="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center">
+            <i class="fas fa-box text-blue-600 mr-2"></i> Item Entry &amp; Details
+          </label>
+          <span class="text-[11px] text-slate-400 font-medium">Use &uarr; &darr; arrows to navigate &amp; Enter to select</span>
+        </div>
+
+        <!-- 1. Unified Search & Select for Product with Arrow Key Support -->
+        <div class="relative" id="pos-product-combobox-wrapper">
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-bold text-slate-700">
+              Select Item <span class="text-red-500">*</span>
+            </label>
+            <span id="pos-product-stock-badge" class="hidden text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800"></span>
+          </div>
+
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+              <i class="fas fa-search text-xs"></i>
+            </div>
+            <input type="text" 
+                   id="pos-product-combobox" 
+                   autocomplete="off"
+                   placeholder="Type product name or category (use arrows to select)..." 
+                   class="w-full pl-9 pr-10 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-bold text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-sm">
+            <input type="hidden" id="pos-selected-product-id">
+            <button type="button" 
+                    id="btn-clear-product" 
+                    title="Clear selection"
+                    class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition-colors">
+              <i class="fas fa-times-circle text-sm"></i>
+            </button>
+          </div>
+
+          <!-- Floating Live Dropdown for Products -->
+          <div id="pos-product-dropdown" 
+               class="hidden absolute left-0 right-0 top-full mt-1.5 z-40 bg-white rounded-xl border border-slate-200 shadow-xl max-h-60 overflow-y-auto custom-scrollbar divide-y divide-slate-100">
+          </div>
+        </div>
+
+        <!-- 2. Quantity Input, Serial Number Input & Add to Cart Button -->
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end pt-1">
+          
+          <!-- Input for Quantity (default 1) -->
+          <div class="sm:col-span-3">
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">
+              Quantity <span class="text-red-500">*</span>
+            </label>
+            <input type="number" 
+                   id="pos-item-qty" 
+                   min="1" 
+                   value="1" 
+                   class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs font-black text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+          </div>
+
+          <!-- Serial Number Input (Per product, only acceptable when qty is 1) -->
+          <div class="sm:col-span-5">
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">
+              Serial Number <span class="text-gray-400 font-normal">(Optional, Qty=1)</span>
+            </label>
+            <input type="text" 
+                   id="pos-item-serial" 
+                   placeholder="e.g. SN-981240"
+                   class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs font-mono text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+          </div>
+
+          <!-- Add to Cart Button -->
+          <div class="sm:col-span-4">
+            <button type="button" 
+                    id="btn-add-to-cart" 
+                    class="w-full py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-black shadow-md shadow-blue-600/20 transition-all flex items-center justify-center space-x-1.5">
+              <i class="fas fa-cart-plus text-xs"></i>
+              <span>Add to Cart</span>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Serial Number Hint / Restriction Note -->
+        <p id="pos-sn-hint" class="text-[10px] text-slate-400 italic">
+          * Serial number is strictly per unit. To serialize multiple units, add them one by one.
+        </p>
+
+        <!-- 3. Selling Price (Left) & Payment Method (Right) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-100">
+          
+          <!-- Selling Price (Left) -->
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">
+              Unit Selling Price (USD)
+            </label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 font-bold">$</span>
+              <input type="number" 
+                     step="0.01" 
+                     min="0" 
+                     id="pos-unit-price-input" 
+                     placeholder="0.00"
+                     class="w-full pl-7 pr-3 py-2 rounded-xl border border-slate-300 bg-white text-xs font-black text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+            </div>
+          </div>
+
+          <!-- Payment Method (Right) -->
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">
+              Payment Method <span class="text-red-500">*</span>
+            </label>
+            <select id="pos-payment-method" 
+                    class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs font-bold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+              {% for val, label in payment_methods %}
+                <option value="{{ val }}" {% if val == 'Cash' %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- RIGHT SIDE: Receipt Summary, Customer Selection & Fixed Checkout Button    -->
+    <!-- ========================================================================= -->
+    <div class="lg:col-span-6 flex flex-col h-full overflow-hidden">
+      
+      <!-- Receipt Card: Completely Fits in Available Height with Scrollable Items -->
+      <div class="app-card bg-white rounded-2xl border border-slate-200 shadow-md flex flex-col h-full overflow-hidden">
+        
+        <!-- Header (Fixed Top) -->
+        <div class="py-2.5 px-4 bg-slate-900 text-white text-center border-b border-slate-800 flex-shrink-0">
+          <div class="text-[9px] font-bold uppercase tracking-widest text-blue-400">OFFICIAL RECEIPT SUMMARY</div>
+          <h2 class="text-sm font-black tracking-tight mt-0.5">{{ settings.company_name }}</h2>
+        </div>
+
+        <!-- Receipt Items List (SOLE SCROLLABLE BODY) -->
+        <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-3 space-y-1.5">
+          <div class="flex items-center justify-between text-[11px] font-bold text-slate-700 uppercase tracking-wider pb-1 border-b border-slate-100">
+            <span>Items (<span id="cart-item-count" class="text-blue-600 font-black">0</span>)</span>
+            <button type="button" 
+                    id="btn-clear-cart" 
+                    class="hidden text-[10px] font-bold text-rose-600 hover:text-rose-800 transition-colors">
+              <i class="fas fa-trash-alt mr-1"></i> Clear All
+            </button>
+          </div>
+
+          <div id="summary-item-list" class="space-y-1.5 pt-1">
+            <p class="text-slate-400 italic text-center py-8">
+              <i class="fas fa-receipt text-2xl mb-1 text-slate-300 block"></i>
+              No items in receipt yet.<br/>
+              <span class="text-[11px]">Select items on the left and click Add to Cart.</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Financial Calculation (Fixed Above Customer Selection) -->
+        <div class="px-4 py-2 bg-slate-50 border-t border-slate-200 space-y-1 text-xs flex-shrink-0">
+          <div class="flex justify-between text-slate-600">
+            <span>Subtotal:</span>
+            <span id="summary-subtotal" class="font-bold font-mono text-slate-900">$0.00</span>
+          </div>
+          <div class="flex justify-between text-slate-600">
+            <span>Tax / VAT:</span>
+            <span class="font-bold font-mono text-slate-500">$0.00</span>
+          </div>
+          <hr class="border-slate-200 my-0.5">
+          <div class="flex items-baseline justify-between">
+            <span class="text-xs font-black text-slate-900">TOTAL DUE:</span>
+            <span id="summary-grand-total" class="text-xl font-black text-blue-600 font-mono">$0.00</span>
+          </div>
+        </div>
+
+        <!-- Customer Selection (Optional, defaults to Walk-in Customer) -->
+        <div class="px-4 py-2.5 bg-slate-50 border-t border-slate-200 space-y-1.5 flex-shrink-0">
+          <div class="flex items-center justify-between">
+            <label class="text-[11px] font-black text-slate-900 uppercase tracking-wider flex items-center">
+              <i class="fas fa-user text-blue-600 mr-1.5"></i> Customer <span class="text-slate-400 font-normal text-[10px] ml-1">(Optional &bull; Walk-in)</span>
+            </label>
+            <button type="button" 
+                    id="btn-open-quick-customer"
+                    class="text-[11px] font-bold text-blue-600 hover:text-blue-800 transition-colors flex items-center">
+              <i class="fas fa-user-plus mr-1"></i> + Quick Add
+            </button>
+          </div>
+
+          <!-- Single Line Customer Combobox -->
+          <div class="relative" id="pos-customer-combobox-wrapper">
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <i class="fas fa-search text-xs"></i>
+              </div>
+              <input type="text" 
+                     id="pos-customer-combobox" 
+                     autocomplete="off"
+                     value="Walk-in Customer"
+                     placeholder="Type name or phone (defaults to Walk-in Customer)..." 
+                     class="w-full pl-8 pr-8 py-1.5 rounded-xl border border-slate-300 bg-white text-xs font-bold text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-sm">
+              <input type="hidden" id="pos-selected-customer-id" value="{{ default_customer.id|default:'' }}">
+              <button type="button" 
+                      id="btn-clear-customer" 
+                      title="Clear customer"
+                      class="hidden absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors">
+                <i class="fas fa-times-circle text-xs"></i>
+              </button>
+            </div>
+
+            <!-- Floating Live Dropdown for Customers -->
+            <div id="pos-customer-dropdown" 
+                 class="hidden absolute left-0 right-0 bottom-full mb-1 z-40 bg-white rounded-xl border border-slate-200 shadow-xl max-h-48 overflow-y-auto custom-scrollbar divide-y divide-slate-100">
+            </div>
+          </div>
+        </div>
+
+        <!-- Checkout Button (Permanently Pinned at the Very Bottom in Blue) -->
+        <div class="p-2.5 bg-slate-100 border-t border-slate-200 flex-shrink-0">
+          <button type="button" 
+                  id="btn-complete-sale" 
+                  class="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-sm font-black shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center space-x-2 cursor-pointer">
+            <i class="fas fa-shopping-cart text-base"></i>
+            <span>Check Out &amp; Print Receipt</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Quick Add Customer Modal Popup -->
+<div id="pos-quick-customer-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
+    
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center text-sm shadow-sm">
+          <i class="fas fa-user-plus"></i>
+        </div>
+        <h3 class="text-base font-black text-slate-900">Quick Add Customer</h3>
+      </div>
+      <button type="button" 
+              id="btn-close-quick-customer"
+              class="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center transition-all">
+        <i class="fas fa-times text-sm"></i>
+      </button>
+    </div>
+
+    <!-- Modal Form -->
+    <form id="pos-quick-customer-form" 
+          action="{% url 'sales:customer_create' %}" 
+          method="POST" 
+          class="p-6 space-y-4">
+      {% csrf_token %}
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1.5">
+          Full Name <span class="text-red-500">*</span>
+        </label>
+        <input type="text" 
+               name="name" 
+               id="quick-cust-name" 
+               required 
+               placeholder="e.g. Tendai Moyo"
+               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1.5">
+          Phone Number <span class="text-red-500">*</span>
+        </label>
+        <input type="text" 
+               name="phone" 
+               id="quick-cust-phone" 
+               required 
+               placeholder="e.g. +263 77 123 4567"
+               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1.5">
+          Email Address <span class="text-gray-400 font-normal">(Optional)</span>
+        </label>
+        <input type="email" 
+               name="email" 
+               id="quick-cust-email" 
+               placeholder="e.g. customer@example.com"
+               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+      </div>
+
+      <div class="pt-2 flex items-center justify-end space-x-3">
+        <button type="button" 
+                id="btn-cancel-quick-customer"
+                class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all">
+          Cancel
+        </button>
+        <button type="submit" 
+                id="btn-save-quick-customer"
+                class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black shadow-md shadow-blue-600/30 transition-all flex items-center">
+          <i class="fas fa-check mr-1.5"></i> Save &amp; Select
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  $(document).ready(function () {
+    // -------------------------------------------------------------------------
+    // Initial State & Data Catalog
+    // -------------------------------------------------------------------------
+    let cart = []; // [{ cartId, productId, name, qty, unitPrice, serialNumber, availableStock }]
+    let nextCartId = 1;
+
+    let catalogProducts = [
+      {% for prod in products %}
+      {
+        id: {{ prod.id }},
+        name: "{{ prod.name|escapejs }}",
+        price: {{ prod.current_selling_price }},
+        stock: {{ prod.available_quantity }},
+        category: "{{ prod.category.name|default:'General'|escapejs }}"
+      }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ];
+
+    let catalogCustomers = [
+      {% for cust in customers %}
+      {
+        id: {{ cust.id }},
+        name: "{{ cust.name|escapejs }}",
+        phone: "{{ cust.phone|escapejs }}",
+        email: "{{ cust.email|default:''|escapejs }}"
+      }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ];
+
+    let selectedProduct = null;
+    let selectedCustomer = null;
+
+    // Helper: Escape HTML string
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, function (m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+
+    // Helper: Highlight matching text
+    function highlightMatch(text, query) {
+      if (!query) return escapeHtml(text);
+      const safeText = escapeHtml(text);
+      const safeQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(${safeQuery})`, 'gi');
+      return safeText.replace(regex, '<span class="bg-amber-200 text-slate-900 px-0.5 rounded">$1</span>');
+    }
+
+    // -------------------------------------------------------------------------
+    // UNIFIED SEARCH & SELECT: PRODUCT (WITH ARROW KEY NAVIGATION)
+    // -------------------------------------------------------------------------
+    const $prodInput = $('#pos-product-combobox');
+    const $prodHidden = $('#pos-selected-product-id');
+    const $prodDropdown = $('#pos-product-dropdown');
+    const $prodClearBtn = $('#btn-clear-product');
+    const $prodBadge = $('#pos-product-stock-badge');
+    let prodAjaxTimer = null;
+    let prodActiveIndex = -1;
+
+    function renderProductDropdown(items, query) {
+      $prodDropdown.empty();
+      prodActiveIndex = -1;
+
+      if (!items || items.length === 0) {
+        $prodDropdown.html(`
+          <div class="p-3 text-center text-xs text-slate-400 italic">
+            No matching in-stock products found
+          </div>
+        `).removeClass('hidden');
+        return;
+      }
+
+      items.forEach((p, idx) => {
+        const itemHtml = `
+          <div class="pos-product-item p-2.5 hover:bg-blue-50 cursor-pointer transition-colors flex items-center justify-between"
+               data-index="${idx}"
+               data-id="${p.id}"
+               data-name="${escapeHtml(p.name)}"
+               data-price="${p.price}"
+               data-stock="${p.stock}"
+               data-category="${escapeHtml(p.category)}">
+            <div class="min-w-0 pr-2">
+              <div class="font-bold text-slate-900 text-xs truncate">${highlightMatch(p.name, query)}</div>
+              <div class="text-[10px] text-slate-500">${escapeHtml(p.category)}</div>
+            </div>
+            <div class="text-right flex-shrink-0">
+              <div class="font-black text-blue-600 font-mono text-xs">$${parseFloat(p.price).toFixed(2)}</div>
+              <span class="inline-block text-[10px] font-bold px-1.5 py-0.2 rounded ${p.stock > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+                Stock: ${p.stock}
+              </span>
+            </div>
+          </div>
+        `;
+        $prodDropdown.append(itemHtml);
+      });
+      $prodDropdown.removeClass('hidden');
+    }
+
+    function filterProductsLive(query) {
+      const q = query.toLowerCase().trim();
+      let matches = catalogProducts.filter(p => {
+        return p.name.toLowerCase().includes(q) || (p.category && p.category.toLowerCase().includes(q));
+      });
+
+      renderProductDropdown(matches.slice(0, 10), query);
+
+      if (q.length >= 2) {
+        clearTimeout(prodAjaxTimer);
+        prodAjaxTimer = setTimeout(function () {
+          $.ajax({
+            url: '{% url "inventory:product_search_ajax" %}',
+            type: 'GET',
+            data: { q: q },
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            success: function (res) {
+              if (res.results && res.results.length > 0) {
+                res.results.forEach(apiProd => {
+                  if (!catalogProducts.some(cp => cp.id === apiProd.id)) {
+                    catalogProducts.push({
+                      id: apiProd.id,
+                      name: apiProd.name,
+                      price: apiProd.selling_price,
+                      stock: apiProd.available_quantity,
+                      category: apiProd.category || 'General'
+                    });
+                  }
+                });
+                let updatedMatches = catalogProducts.filter(p => {
+                  return p.name.toLowerCase().includes(q) || (p.category && p.category.toLowerCase().includes(q));
+                });
+                renderProductDropdown(updatedMatches.slice(0, 10), query);
+              }
+            }
+          });
+        }, 200);
+      }
+    }
+
+    // Keyboard Arrow Navigation for Product Combobox
+    $prodInput.on('keydown', function (e) {
+      const $items = $prodDropdown.find('.pos-product-item');
+      if (!$items.length || $prodDropdown.hasClass('hidden')) {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          filterProductsLive($(this).val());
+          return;
+        }
+        return;
+      }
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        prodActiveIndex++;
+        if (prodActiveIndex >= $items.length) prodActiveIndex = 0;
+        highlightActiveProdItem($items);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        prodActiveIndex--;
+        if (prodActiveIndex < 0) prodActiveIndex = $items.length - 1;
+        highlightActiveProdItem($items);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (prodActiveIndex >= 0 && prodActiveIndex < $items.length) {
+          $items.eq(prodActiveIndex).trigger('click');
+        } else if ($items.length > 0) {
+          $items.first().trigger('click');
+        }
+      } else if (e.key === 'Escape') {
+        $prodDropdown.addClass('hidden');
+      }
+    });
+
+    function highlightActiveProdItem($items) {
+      $items.removeClass('bg-blue-100 ring-1 ring-blue-500 font-black');
+      if (prodActiveIndex >= 0 && prodActiveIndex < $items.length) {
+        const $target = $items.eq(prodActiveIndex);
+        $target.addClass('bg-blue-100 ring-1 ring-blue-500 font-black');
+        $target[0].scrollIntoView({ block: 'nearest' });
+      }
+    }
+
+    $prodInput.on('focus input', function () {
+      const q = $(this).val();
+      filterProductsLive(q);
+    });
+
+    $(document).on('click', '.pos-product-item', function () {
+      const id = parseInt($(this).attr('data-id'));
+      const name = $(this).attr('data-name');
+      const price = parseFloat($(this).attr('data-price')) || 0;
+      const stock = parseInt($(this).attr('data-stock')) || 0;
+      const category = $(this).attr('data-category');
+
+      selectedProduct = { id, name, price, stock, category };
+      $prodHidden.val(id);
+      $prodInput.val(name);
+      $('#pos-unit-price-input').val(price.toFixed(2));
+      $prodClearBtn.removeClass('hidden');
+
+      $prodBadge.text(`Available: ${stock}`).removeClass('hidden');
+      if (stock > 0) {
+        $prodBadge.removeClass('bg-rose-100 text-rose-800').addClass('bg-emerald-100 text-emerald-800');
+      } else {
+        $prodBadge.removeClass('bg-emerald-100 text-emerald-800').addClass('bg-rose-100 text-rose-800');
+      }
+
+      $prodDropdown.addClass('hidden');
+      $('#pos-item-qty').focus().select();
+    });
+
+    $prodClearBtn.on('click', function () {
+      selectedProduct = null;
+      $prodHidden.val('');
+      $prodInput.val('').focus();
+      $('#pos-unit-price-input').val('');
+      $prodClearBtn.addClass('hidden');
+      $prodBadge.addClass('hidden');
+      filterProductsLive('');
+    });
+
+    // Close dropdowns on outside click
+    $(document).on('click', function (e) {
+      if (!$(e.target).closest('#pos-product-combobox-wrapper').length) {
+        $prodDropdown.addClass('hidden');
+      }
+      if (!$(e.target).closest('#pos-customer-combobox-wrapper').length) {
+        $custDropdown.addClass('hidden');
+      }
+    });
+
+    // -------------------------------------------------------------------------
+    // Serial Number & Quantity Restrictions
+    // Rule: Serial number is strictly per unit (only allowed when Qty = 1)
+    // -------------------------------------------------------------------------
+    $('#pos-item-qty').on('input change', function () {
+      const q = parseInt($(this).val()) || 1;
+      if (q > 1) {
+        $('#pos-item-serial').val('').prop('disabled', true).addClass('bg-slate-100 cursor-not-allowed');
+        $('#pos-sn-hint').html('<span class="text-amber-600 font-bold"><i class="fas fa-info-circle mr-1"></i> Serial number disabled because quantity &gt; 1. To serialize items, add them one by one.</span>');
+      } else {
+        $('#pos-item-serial').prop('disabled', false).removeClass('bg-slate-100 cursor-not-allowed');
+        $('#pos-sn-hint').text('* Serial number is strictly per unit. To serialize multiple units, add them one by one.');
+      }
+    });
+
+    $('#pos-item-serial').on('input', function () {
+      if ($(this).val().trim().length > 0) {
+        $('#pos-item-qty').val(1).prop('readonly', true).addClass('bg-slate-100');
+      } else {
+        $('#pos-item-qty').prop('readonly', false).removeClass('bg-slate-100');
+      }
+    });
+
+    // -------------------------------------------------------------------------
+    // Add to Cart Action
+    // -------------------------------------------------------------------------
+    $('#btn-add-to-cart').on('click', function () {
+      if (!selectedProduct || !$prodHidden.val()) {
+        notifySwal('Item Required', 'Please search and select a product first.', 'warning');
+        $prodInput.focus();
+        return;
+      }
+
+      const productId = selectedProduct.id;
+      const productName = selectedProduct.name;
+      const availableStock = selectedProduct.stock;
+      const qty = parseInt($('#pos-item-qty').val()) || 1;
+      const serialNumber = $('#pos-item-serial').val().trim();
+      const unitPrice = parseFloat($('#pos-unit-price-input').val());
+
+      if (isNaN(unitPrice) || unitPrice < 0) {
+        notifySwal('Price Error', 'Please enter a valid unit selling price.', 'error');
+        $('#pos-unit-price-input').focus();
+        return;
+      }
+
+      // Check cumulative quantity already in cart
+      const currentCartQty = cart
+        .filter(item => item.productId === productId)
+        .reduce((sum, item) => sum + item.qty, 0);
+
+      if (currentCartQty + qty > availableStock) {
+        notifySwal('Stock Limit Exceeded', `Only ${availableStock} units available in stock. Cart already contains ${currentCartQty}.`, 'error');
+        return;
+      }
+
+      // User Rule: If item has serial number, MUST be on its own line (qty = 1)
+      if (serialNumber) {
+        cart.push({
+          cartId: nextCartId++,
+          productId: productId,
+          name: productName,
+          qty: 1,
+          unitPrice: unitPrice,
+          serialNumber: serialNumber,
+          availableStock: availableStock
+        });
+      } else {
+        // Non-serialized item: group into existing line if price matches
+        const existingLine = cart.find(item => item.productId === productId && !item.serialNumber && item.unitPrice === unitPrice);
+        if (existingLine) {
+          existingLine.qty += qty;
+        } else {
+          cart.push({
+            cartId: nextCartId++,
+            productId: productId,
+            name: productName,
+            qty: qty,
+            unitPrice: unitPrice,
+            serialNumber: '',
+            availableStock: availableStock
+          });
+        }
+      }
+
+      // Reset item inputs
+      $('#pos-item-serial').val('').prop('disabled', false).removeClass('bg-slate-100 cursor-not-allowed');
+      $('#pos-item-qty').val(1).prop('readonly', false).removeClass('bg-slate-100');
+      $('#pos-sn-hint').text('* Serial number is strictly per unit. To serialize multiple units, add them one by one.');
+
+      // Clear product search input, hidden state and focus back for next search
+      selectedProduct = null;
+      $prodHidden.val('');
+      $prodInput.val('');
+      $('#pos-unit-price-input').val('');
+      $prodClearBtn.addClass('hidden');
+      $prodBadge.addClass('hidden');
+
+      renderCart();
+      $prodInput.focus();
+    });
+
+    // -------------------------------------------------------------------------
+    // Render Right-Side Receipt Summary
+    // -------------------------------------------------------------------------
+    function renderCart() {
+      const $summaryList = $('#summary-item-list');
+      $summaryList.empty();
+
+      if (cart.length === 0) {
+        $summaryList.html(`
+          <p class="text-slate-400 italic text-center py-8">
+            <i class="fas fa-receipt text-2xl mb-1 text-slate-300 block"></i>
+            No items in receipt yet.<br/>
+            <span class="text-[11px]">Select items on the left and click Add to Cart.</span>
+          </p>
+        `);
+        $('#cart-item-count').text(0);
+        $('#btn-clear-cart').addClass('hidden');
+        $('#summary-subtotal').text('$0.00');
+        $('#summary-grand-total').text('$0.00');
+        validateReadyForCheckout();
+        return;
+      }
+
+      $('#btn-clear-cart').removeClass('hidden');
+      let grandTotal = 0;
+      let totalUnits = 0;
+
+      cart.forEach(item => {
+        const lineTotal = item.qty * item.unitPrice;
+        grandTotal += lineTotal;
+        totalUnits += item.qty;
+
+        $summaryList.append(`
+          <div class="flex items-center justify-between text-xs py-1.5 px-2.5 rounded-xl bg-slate-50 hover:bg-slate-100/80 transition-all border border-slate-100">
+            <div class="flex-1 pr-2 min-w-0">
+              <div class="font-bold text-slate-900 truncate text-[11px]">${escapeHtml(item.name)}</div>
+              <div class="flex items-center space-x-2 text-[10px] text-slate-500">
+                <span class="font-bold text-blue-700">Qty: ${item.qty} &times; $${item.unitPrice.toFixed(2)}</span>
+                ${item.serialNumber ? `<span class="font-mono text-emerald-700 bg-emerald-50 px-1 rounded text-[9px] font-bold">SN: ${escapeHtml(item.serialNumber)}</span>` : ''}
+              </div>
+            </div>
+            <div class="flex items-center space-x-2 flex-shrink-0">
+              <span class="font-black font-mono text-slate-900 text-xs">$${lineTotal.toFixed(2)}</span>
+              <button type="button" 
+                      data-remove-cart-id="${item.cartId}" 
+                      title="Remove item"
+                      class="w-5 h-5 rounded-md text-rose-500 hover:text-white hover:bg-rose-600 transition-all flex items-center justify-center text-[10px]">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        `);
+      });
+
+      $('#cart-item-count').text(totalUnits);
+      $('#summary-subtotal').text('$' + grandTotal.toFixed(2));
+      $('#summary-grand-total').text('$' + grandTotal.toFixed(2));
+
+      validateReadyForCheckout();
+    }
+
+    // Remove single line from receipt
+    $(document).on('click', '[data-remove-cart-id]', function () {
+      const cId = parseInt($(this).attr('data-remove-cart-id'));
+      cart = cart.filter(item => item.cartId !== cId);
+      renderCart();
+    });
+
+    // Clear entire cart
+    $('#btn-clear-cart').on('click', function () {
+      cart = [];
+      renderCart();
+    });
+
+    // -------------------------------------------------------------------------
+    // UNIFIED SEARCH & SELECT: CUSTOMER (RIGHT SIDE - SINGLE LINE & ARROWS)
+    // -------------------------------------------------------------------------
+    const $custInput = $('#pos-customer-combobox');
+    const $custHidden = $('#pos-selected-customer-id');
+    const $custDropdown = $('#pos-customer-dropdown');
+    const $custClearBtn = $('#btn-clear-customer');
+    let custAjaxTimer = null;
+    let custActiveIndex = -1;
+
+    function renderCustomerDropdown(items, query) {
+      $custDropdown.empty();
+      custActiveIndex = -1;
+
+      if (!items || items.length === 0) {
+        $custDropdown.html(`
+          <div class="p-2.5 text-center text-xs text-slate-400 italic">
+            No customers match "${escapeHtml(query)}"<br/>
+            <button type="button" id="btn-dropdown-quick-add" class="mt-1 text-blue-600 font-bold hover:underline">+ Quick Add</button>
+          </div>
+        `).removeClass('hidden');
+        return;
+      }
+
+      items.forEach((c, idx) => {
+        const itemHtml = `
+          <div class="pos-customer-item px-3 py-2 hover:bg-blue-50 cursor-pointer transition-colors flex items-center justify-between text-xs"
+               data-index="${idx}"
+               data-id="${c.id}"
+               data-name="${escapeHtml(c.name)}"
+               data-phone="${escapeHtml(c.phone)}"
+               data-email="${escapeHtml(c.email)}">
+            <div class="truncate">
+              <span class="font-black text-slate-900">${highlightMatch(c.name, query)}</span>
+              <span class="text-slate-400 mx-1.5">&bull;</span>
+              <span class="font-mono text-slate-600 text-[11px]">${highlightMatch(c.phone, query)}</span>
+            </div>
+            <span class="text-blue-600 text-xs flex-shrink-0 ml-2"><i class="fas fa-arrow-right text-[10px]"></i></span>
+          </div>
+        `;
+        $custDropdown.append(itemHtml);
+      });
+      $custDropdown.removeClass('hidden');
+    }
+
+    function filterCustomersLive(query) {
+      const q = query.toLowerCase().trim();
+      let matches = catalogCustomers.filter(c => {
+        return c.name.toLowerCase().includes(q) || (c.phone && c.phone.toLowerCase().includes(q));
+      });
+
+      renderCustomerDropdown(matches.slice(0, 10), query);
+
+      if (q.length >= 2) {
+        clearTimeout(custAjaxTimer);
+        custAjaxTimer = setTimeout(function () {
+          $.ajax({
+            url: '{% url "sales:customer_search_ajax" %}',
+            type: 'GET',
+            data: { q: q },
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            success: function (res) {
+              if (res.results && res.results.length > 0) {
+                res.results.forEach(apiCust => {
+                  if (!catalogCustomers.some(cc => cc.id === apiCust.id)) {
+                    catalogCustomers.push({
+                      id: apiCust.id,
+                      name: apiCust.name,
+                      phone: apiCust.phone,
+                      email: apiCust.email || ''
+                    });
+                  }
+                });
+                let updatedMatches = catalogCustomers.filter(c => {
+                  return c.name.toLowerCase().includes(q) || (c.phone && c.phone.toLowerCase().includes(q));
+                });
+                renderCustomerDropdown(updatedMatches.slice(0, 10), query);
+              }
+            }
+          });
+        }, 200);
+      }
+    }
+
+    // Keyboard Arrow Navigation for Customer Combobox
+    $custInput.on('keydown', function (e) {
+      const $items = $custDropdown.find('.pos-customer-item');
+      if (!$items.length || $custDropdown.hasClass('hidden')) {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          filterCustomersLive($(this).val());
+          return;
+        }
+        return;
+      }
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        custActiveIndex++;
+        if (custActiveIndex >= $items.length) custActiveIndex = 0;
+        highlightActiveCustItem($items);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        custActiveIndex--;
+        if (custActiveIndex < 0) custActiveIndex = $items.length - 1;
+        highlightActiveCustItem($items);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (custActiveIndex >= 0 && custActiveIndex < $items.length) {
+          $items.eq(custActiveIndex).trigger('click');
+        } else if ($items.length > 0) {
+          $items.first().trigger('click');
+        }
+      } else if (e.key === 'Escape') {
+        $custDropdown.addClass('hidden');
+      }
+    });
+
+    function highlightActiveCustItem($items) {
+      $items.removeClass('bg-blue-100 ring-1 ring-blue-500 font-black');
+      if (custActiveIndex >= 0 && custActiveIndex < $items.length) {
+        const $target = $items.eq(custActiveIndex);
+        $target.addClass('bg-blue-100 ring-1 ring-blue-500 font-black');
+        $target[0].scrollIntoView({ block: 'nearest' });
+      }
+    }
+
+    $custInput.on('focus input', function () {
+      const q = $(this).val();
+      filterCustomersLive(q);
+    });
+
+    $(document).on('click', '.pos-customer-item', function () {
+      const id = parseInt($(this).attr('data-id'));
+      const name = $(this).attr('data-name');
+      const phone = $(this).attr('data-phone');
+      const email = $(this).attr('data-email');
+
+      selectCustomerEntity({ id, name, phone, email });
+    });
+
+    function selectCustomerEntity(c) {
+      selectedCustomer = c;
+      $custHidden.val(c.id);
+      $custInput.val(`${c.name} (${c.phone})`);
+      $custClearBtn.removeClass('hidden');
+      $custDropdown.addClass('hidden');
+
+      validateReadyForCheckout();
+    }
+
+    $custClearBtn.on('click', function () {
+      selectedCustomer = null;
+      $custHidden.val('');
+      $custInput.val('').focus();
+      $custClearBtn.addClass('hidden');
+      filterCustomersLive('');
+      validateReadyForCheckout();
+    });
+
+    $(document).on('click', '#btn-dropdown-quick-add', function () {
+      $custDropdown.addClass('hidden');
+      openQuickCustModal();
+    });
+
+    // -------------------------------------------------------------------------
+    // Payment Method & Checkout Readiness Validation
+    // -------------------------------------------------------------------------
+    function validateReadyForCheckout() {
+      // Keep checkout button always visually enabled and fully responsive to clicks
+    }
+
+    // -------------------------------------------------------------------------
+    // Quick Add Customer Modal
+    // -------------------------------------------------------------------------
+    function openQuickCustModal() {
+      $('#pos-quick-customer-form')[0].reset();
+      $('#pos-quick-customer-modal').removeClass('hidden');
+      $('#quick-cust-name').focus();
+    }
+    function closeQuickCustModal() {
+      $('#pos-quick-customer-modal').addClass('hidden');
+    }
+
+    $('#btn-open-quick-customer').on('click', function (e) {
+      e.preventDefault();
+      openQuickCustModal();
+    });
+    $('#btn-close-quick-customer, #btn-cancel-quick-customer').on('click', closeQuickCustModal);
+    $('#pos-quick-customer-modal').on('click', function (e) {
+      if ($(e.target).is('#pos-quick-customer-modal')) closeQuickCustModal();
+    });
+
+    $('#pos-quick-customer-form').on('submit', function (e) {
+      e.preventDefault();
+      const $form = $(this);
+      const submitBtn = $('#btn-save-quick-customer');
+      submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1.5"></i> Saving...');
+
+      $.ajax({
+        url: $form.attr('action'),
+        type: 'POST',
+        data: $form.serialize(),
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        success: function (res) {
+          submitBtn.prop('disabled', false).html('<i class="fas fa-check mr-1.5"></i> Save &amp; Select');
+          if (res.icon === 'success' || res.status === 'success') {
+            const custId = res.data.customer_id;
+            const custName = res.data.name;
+            const custPhone = res.data.phone;
+
+            const newCust = { id: custId, name: custName, phone: custPhone, email: '' };
+            catalogCustomers.unshift(newCust);
+            selectCustomerEntity(newCust);
+
+            closeQuickCustModal();
+            notifySwal('Customer Created', `"${custName}" was added and selected.`, 'success', 2000);
+          } else {
+            notifySwal('Error', res.message || 'Failed to create customer.', 'error');
+          }
+        },
+        error: function () {
+          submitBtn.prop('disabled', false).html('<i class="fas fa-check mr-1.5"></i> Save &amp; Select');
+          notifySwal('Error', 'Failed to create customer.', 'error');
+        }
+      });
+    });
+
+    // -------------------------------------------------------------------------
+    // Complete Sale & Checkout Action (FIFO Batch Deduction via AJAX)
+    // -------------------------------------------------------------------------
+    $('#btn-complete-sale').on('click', function () {
+      if (cart.length === 0) {
+        notifySwal('Empty Receipt', 'Please select an item and click "Add to Cart" first.', 'warning');
+        $prodInput.focus();
+        return;
+      }
+      let customerId = $custHidden.val();
+      if (!customerId) {
+        customerId = '{{ default_customer.id|default:"" }}';
+      }
+
+      const paymentMethod = $('#pos-payment-method').val();
+      const payload = {
+        customer: customerId,
+        payment_method: paymentMethod,
+        cart_items: JSON.stringify(cart.map(i => ({
+          product_id: i.productId,
+          quantity: i.qty,
+          unit_price: i.unitPrice,
+          serial_number: i.serialNumber
+        }))),
+        csrfmiddlewaretoken: getCsrfToken()
+      };
+
+      const $btn = $('#btn-complete-sale');
+      $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Processing FIFO Sale...');
+
+      $.ajax({
+        url: '{% url "sales:sale_create" %}',
+        type: 'POST',
+        data: payload,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        success: function (res) {
+          $btn.prop('disabled', false).html('<i class="fas fa-shopping-cart text-base mr-2"></i><span>Check Out &amp; Print Receipt</span>');
+          if (res.icon === 'success' || res.status === 'success') {
+            const receiptUrl = res.data ? res.data.receipt_url : null;
+            const inv = res.data ? res.data.invoice_number : '';
+
+            Swal.fire({
+              title: 'Sale Completed!',
+              html: `<p class="text-sm text-slate-600">Transaction recorded successfully with FIFO batch deduction.<br>Invoice: <b class="text-blue-600 font-mono">${inv}</b></p>`,
+              icon: 'success',
+              showCancelButton: true,
+              confirmButtonColor: '#059669',
+              cancelButtonColor: '#2563eb',
+              confirmButtonText: '<i class="fas fa-file-pdf mr-1.5"></i> Print / View PDF Receipt',
+              cancelButtonText: 'Next Sale &rarr;',
+              background: '#ffffff',
+              color: '#0f172a',
+              customClass: { popup: 'rounded-2xl shadow-2xl border border-slate-200' }
+            }).then((result) => {
+              if (result.isConfirmed && receiptUrl) {
+                window.open(receiptUrl, '_blank');
+              }
+              window.location.reload();
+            });
+          } else {
+            notifySwal(res.title || 'Error', res.message || 'Sale could not be completed.', 'error');
+          }
+        },
+        error: function (xhr) {
+          $btn.prop('disabled', false).html('<i class="fas fa-shopping-cart text-base mr-2"></i><span>Check Out &amp; Print Receipt</span>');
+          let errTitle = 'Transaction Error';
+          let errMsg = 'Failed to process sale. Please verify stock.';
+          try {
+            const errRes = JSON.parse(xhr.responseText);
+            if (errRes.title) errTitle = errRes.title;
+            if (errRes.message) errMsg = errRes.message;
+            if (errRes.errors && typeof errRes.errors === 'object') {
+              const errList = Object.values(errRes.errors).join('<br>');
+              errMsg = `<div class="text-left text-xs">${errList}</div>`;
+            }
+          } catch (e) {}
+          Swal.fire({
+            title: errTitle,
+            html: errMsg,
+            icon: 'error',
+            confirmButtonColor: '#2563eb',
+            background: '#ffffff',
+            color: '#0f172a'
+          });
+        }
+      });
+    });
+
+  });
+</script>
+{% endblock %}

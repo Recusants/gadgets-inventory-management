@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Suppliers{% endblock %}
+
+{% block content %}
+<div class="flex-1 flex flex-col min-h-0 overflow-hidden space-y-3">
+
+  <!-- Header Card -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-1 flex-shrink-0">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-xl shadow-md shadow-blue-600/20">
+        <i class="fas fa-truck-loading"></i>
+      </div>
+      <div>
+        <h1 class="text-xl font-black tracking-tight text-slate-900">Suppliers Directory</h1>
+        <p class="text-xs text-slate-500">Manage hardware vendors, distributors, and supply contacts</p>
+      </div>
+    </div>
+
+    <!-- Action Buttons (Shades of blue & white text) -->
+    <div class="mt-3 sm:mt-0 flex items-center space-x-2.5 flex-shrink-0">
+      <a href="{% url 'inventory:invoice_list' %}" 
+         class="inline-flex items-center px-4 py-2.5 bg-blue-800 hover:bg-blue-900 text-white text-xs font-bold rounded-xl shadow-md transition-all">
+        <i class="fas fa-file-invoice mr-2 text-xs"></i> View Invoices
+      </a>
+      <button type="button" 
+              data-modal-url="{% url 'inventory:receive_invoice_modal' %}"
+              data-modal-size="max-w-3xl"
+              class="inline-flex items-center px-4 py-2.5 bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold rounded-xl shadow-md transition-all">
+        <i class="fas fa-box-open mr-2 text-xs"></i> Receive Invoice
+      </button>
+      <button type="button" 
+              data-modal-url="{% url 'inventory:supplier_add_modal' %}"
+              data-modal-size="max-w-lg"
+              class="inline-flex items-center px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md shadow-blue-600/20 transition-all">
+        <i class="fas fa-plus mr-2 text-xs"></i> Add Supplier
+      </button>
+    </div>
+  </div>
+
+  <!-- Filter & Search Toolbar Card -->
+  <div class="app-card bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex-shrink-0">
+    <form id="supplier-filter-form" class="flex items-center space-x-3">
+      <div class="relative flex-1 max-w-md">
+        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+          <i class="fas fa-search text-xs"></i>
+        </div>
+        <input type="text" 
+               name="q" 
+               id="supplier-search-input"
+               placeholder="Search suppliers by name, contact person, phone, or email..." 
+               class="w-full pl-9 pr-3.5 py-1.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+      </div>
+    </form>
+  </div>
+
+  <!-- Dynamic AJAX Supplier Table Container -->
+  <div id="supplier-table-container" 
+       data-table-url="{% url 'inventory:supplier_table' %}"
+       data-filter-form="#supplier-filter-form"
+       class="app-card bg-white rounded-2xl border border-slate-200 shadow-sm flex-1 min-h-0 flex flex-col overflow-hidden">
+    
+    {% include 'inventory/suppliers/supplier_table.html' %}
+
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  $(document).ready(function () {
+    let timer = null;
+    $('#supplier-search-input').on('keyup input', function () {
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        refreshTable('#supplier-table-container');
+      }, 250);
+    });
+  });
+</script>
+{% endblock %}

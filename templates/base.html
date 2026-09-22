@@ -1,0 +1,65 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>{% block title %}{{ company_settings.company_name }}{% endblock %} — {{ company_settings.tagline }}</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/jpeg" href="{% static 'img/logo.jpg' %}">
+
+  <!-- Core App & Vendor CSS (100% Offline Local Assets with cache-buster) -->
+  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=20260919.6">
+
+  <script>
+    if (localStorage.getItem('21void_sidebar_collapsed') === 'true') {
+      document.documentElement.classList.add('sidebar-is-collapsed');
+    }
+  </script>
+
+  <!-- Alpine.js (Lightweight UI State) -->
+  <script defer src="{% static 'vendor/alpine.min.js' %}"></script>
+
+  <!-- Core Offline JavaScript Dependencies -->
+  <script src="{% static 'vendor/jquery.min.js' %}"></script>
+  <script src="{% static 'vendor/sweetalert2.all.min.js' %}"></script>
+  <script src="{% static 'vendor/chart.umd.min.js' %}"></script>
+  <script src="{% static 'js/app.js' %}?v=20260922.3"></script>
+
+
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-[#f4f7fb] text-slate-900 antialiased overflow-hidden font-sans">
+  
+  <div id="app-root" class="flex flex-col h-screen w-screen overflow-hidden">
+    
+    <!-- Topbar across the entire top edge (full width 100vw) -->
+    {% include 'partials/topbar.html' %}
+
+    <!-- Viewport area below topbar: Sidebar on left + Main Content on right -->
+    <div class="flex flex-1 min-h-0 overflow-hidden">
+      
+      <!-- Collapsible Sidebar docked on the far left beneath topbar -->
+      {% include 'partials/sidebar.html' %}
+
+      <!-- Scroll-Locked Main Content Area -->
+      <main id="app-main" class="flex-1 min-h-0 flex flex-col overflow-hidden bg-[#f4f7fb]">
+        <section id="app-content-panel" class="flex-1 min-h-0 flex flex-col p-3 sm:p-4 overflow-hidden">
+          <div class="h-full w-full flex-1 min-h-0 flex flex-col overflow-hidden">
+            {% block content %}{% endblock %}
+          </div>
+        </section>
+      </main>
+
+    </div>
+
+  </div>
+
+  <!-- Reusable Modal Shell (Add / Edit / Detail) -->
+  {% include 'partials/modal_shell.html' %}
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

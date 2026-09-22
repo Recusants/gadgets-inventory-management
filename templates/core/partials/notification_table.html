@@ -1,0 +1,155 @@
+<div class="flex-1 min-h-0 overflow-y-auto">
+  <table class="w-full text-left border-collapse text-xs">
+    <thead class="sticky top-0 z-20 bg-slate-100 border-b border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
+      <tr>
+        <th class="py-3 px-4">Type</th>
+        <th class="py-3 px-4">Subject / Title</th>
+        <th class="py-3 px-4">Stock Remaining / Level</th>
+        <th class="py-3 px-4">Message</th>
+        <th class="py-3 px-4">Date & Time</th>
+        <th class="py-3 px-4 text-center">Status</th>
+        <th class="py-3 px-4 text-center">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+      {% for n in notifications %}
+      <tr class="hover:bg-blue-50/50 transition-colors {% if not n.is_read %}bg-blue-50/20 font-semibold{% endif %}">
+        <td class="py-3 px-4 whitespace-nowrap">
+          {% if n.notification_type == 'LOW_STOCK' %}
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
+              <i class="fas fa-boxes-stacked mr-1 text-[9px] text-blue-600"></i> Stock Alert
+            </span>
+          {% elif n.notification_type == 'EXPENSE' %}
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">
+              <i class="fas fa-wallet mr-1 text-[9px]"></i> Expense
+            </span>
+          {% else %}
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">
+              <i class="fas fa-info-circle mr-1 text-[9px]"></i> System
+            </span>
+          {% endif %}
+        </td>
+        <td class="py-3 px-4">
+          <div class="font-bold text-slate-900">{{ n.title }}</div>
+        </td>
+        <td class="py-3 px-4 whitespace-nowrap">
+          {% if n.stock_level_data %}
+            <div class="space-y-1">
+              <div class="flex items-center space-x-2">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black {{ n.stock_level_data.badge_soft }}">
+                  <span class="w-1.5 h-1.5 rounded-full mr-1.5 {{ n.stock_level_data.bar_bg }} animate-pulse"></span>
+                  {{ n.stock_level_data.label }}
+                </span>
+                <span class="text-[10px] font-mono font-bold text-slate-600">
+                  <b>{{ n.stock_level_data.qty }}</b> / {{ n.stock_level_data.reorder }} units
+                </span>
+              </div>
+              <!-- Progress band respective to reorder level -->
+              <div class="w-32 bg-slate-100 h-1.5 rounded-full overflow-hidden flex border border-slate-200">
+                <div class="{{ n.stock_level_data.bar_bg }} h-full rounded-full transition-all" style="width: {{ n.stock_level_data.pct }}%"></div>
+              </div>
+            </div>
+          {% else %}
+            <span class="text-slate-400 text-[11px]">—</span>
+          {% endif %}
+        </td>
+        <td class="py-3 px-4 text-slate-600 max-w-sm">
+          {{ n.message }}
+        </td>
+        <td class="py-3 px-4 whitespace-nowrap font-mono text-slate-500 text-[11px]">
+          {{ n.created_at|date:"M d, Y H:i" }}
+        </td>
+        <td class="py-3 px-4 whitespace-nowrap text-center">
+          {% if n.is_read %}
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-500">
+              Read
+            </span>
+          {% else %}
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-600 text-white">
+              Unread
+            </span>
+          {% endif %}
+        </td>
+        <td class="py-3 px-4 whitespace-nowrap text-center">
+          <div class="inline-flex items-center justify-center space-x-1.5">
+            {% if n.product %}
+              <button type="button"
+                      data-modal-url="{% url 'inventory:product_detail_modal' n.product.id %}"
+                      data-modal-size="max-w-3xl"
+                      title="Inspect Product & Batches"
+                      class="w-7 h-7 rounded-lg bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center text-xs shadow-sm transition-all">
+                <i class="fas fa-boxes-stacked"></i>
+              </button>
+            {% elif n.link_url %}
+              <a href="{{ n.link_url }}" 
+                 title="View Related Item"
+                 class="w-7 h-7 rounded-lg bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center text-xs shadow-sm transition-all">
+                <i class="fas fa-external-link-alt"></i>
+              </a>
+            {% endif %}
+            {% if not n.is_read %}
+              <button type="button"
+                      onclick="markNotifRead('{% url 'core:notification_mark_read' n.pk %}', {{ n.pk }})"
+                      title="Mark as Read"
+                      class="w-7 h-7 rounded-lg bg-blue-700 hover:bg-blue-800 text-white flex items-center justify-center text-xs shadow-sm transition-all">
+                <i class="fas fa-check"></i>
+              </button>
+            {% endif %}
+            <button type="button"
+                    data-action-url="{% url 'core:notification_delete' n.pk %}"
+                    data-confirm-title="Delete Notification?"
+                    data-confirm-message="Are you sure you want to remove this notification?"
+                    data-refresh-target="#notification-table-container"
+                    title="Delete Notification"
+                    class="btn-delete-confirm w-7 h-7 rounded-lg bg-blue-900 hover:bg-red-600 text-white flex items-center justify-center text-xs shadow-sm transition-all">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6" class="py-12 text-center text-slate-400">
+          <div class="flex flex-col items-center justify-center">
+            <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
+              <i class="fas fa-bell-slash text-lg"></i>
+            </div>
+            <p class="font-bold text-slate-600">No notifications found</p>
+            <p class="text-xs text-slate-400">You are all caught up! No active stock alerts or system notices.</p>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Pagination / Footer info -->
+{% if paginator.num_pages > 1 %}
+<div class="py-2.5 px-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 flex-shrink-0">
+  <div>
+    Showing <span class="font-bold text-slate-700">{{ notifications.start_index }}</span> to 
+    <span class="font-bold text-slate-700">{{ notifications.end_index }}</span> of 
+    <span class="font-bold text-slate-700">{{ total_count }}</span> entries
+  </div>
+  <div class="inline-flex space-x-1">
+    {% if notifications.has_previous %}
+      <button type="button" 
+              onclick="paginateTable('#notification-table-container', {{ notifications.previous_page_number }})"
+              class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all">
+        <i class="fas fa-chevron-left mr-1"></i> Prev
+      </button>
+    {% endif %}
+    <span class="px-2.5 py-1 text-xs font-bold text-slate-700">
+      Page {{ notifications.number }} of {{ paginator.num_pages }}
+    </span>
+    {% if notifications.has_next %}
+      <button type="button" 
+              onclick="paginateTable('#notification-table-container', {{ notifications.next_page_number }})"
+              class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all">
+        Next <i class="fas fa-chevron-right ml-1"></i>
+      </button>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
