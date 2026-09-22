@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.3",
-  "build": "v2.4.3-16359b9",
-  "commit_count": 3,
-  "commit_hash": "16359b9",
+  "version": "v2.4.4",
+  "build": "v2.4.4-b9749b2",
+  "commit_count": 4,
+  "commit_hash": "b9749b2",
   "branch": "main",
   "commit_subject": "Update: ~0,4dt:~4,2dt:~6,2dt:~8,2dt:~10,2",
-  "updated_at": "2026-09-22 17:13",
-  "last_pushed_at": "2026-09-22 18:13:26"
+  "updated_at": "2026-09-22 18:13",
+  "last_pushed_at": "2026-09-22 18:16:28"
 }
