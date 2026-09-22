@@ -38,6 +38,9 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-ChangeThisSecureProdPassword2026!}
       - POSTGRES_HOST=db
       - POSTGRES_PORT=5432
+      - SENTRY_DSN=${SENTRY_DSN:-}
+      - SENTRY_ENVIRONMENT=${SENTRY_ENVIRONMENT:-production}
+      - SENTRY_TRACES_SAMPLE_RATE=${SENTRY_TRACES_SAMPLE_RATE:-0.1}
     depends_on:
       db:
         condition: service_healthy

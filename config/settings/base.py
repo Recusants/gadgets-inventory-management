@@ -4,9 +4,13 @@ Base Django settings for 21 Void Technologies - Record Keeping System.
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+# Load environment variables from .env file
+load_dotenv(BASE_DIR / '.env')
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-21void-technologies-secret-key-production-change-this')
 
@@ -110,3 +114,34 @@ LOGOUT_REDIRECT_URL = '/accounts/login/'
 SESSION_COOKIE_AGE = 28800  # 8 hours default
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# ==============================================================================
+# SENTRY ERROR TRACKING & PERFORMANCE MONITORING
+# ==============================================================================
+SENTRY_DSN = os.environ.get('SENTRY_DSN') or os.environ.get('SENTRY_KEY')
+
+if SENTRY_DSN:
+    import logging
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+    from sentry_sdk.integrations.logging import LoggingIntegration
+
+    sentry_logging = LoggingIntegration(
+        level=logging.INFO,        # Capture info and above as breadcrumbs
+        event_level=logging.ERROR  # Send errors as Sentry events
+    )
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[
+            DjangoIntegration(),
+            sentry_logging,
+        ],
+        traces_sample_rate=float(os.environ.get('SENTRY_TRACES_SAMPLE_RATE', '0.1')),
+        send_default_pii=False,
+        environment=os.environ.get(
+            'SENTRY_ENVIRONMENT',
+            'development' if os.environ.get('DJANGO_SETTINGS_MODULE', '').endswith('local') else 'production'
+        ),
+    )
+
