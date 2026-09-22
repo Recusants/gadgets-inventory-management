@@ -407,16 +407,32 @@ def receipt_pdf_view(request, pk):
             logo_path = os.path.join(settings.BASE_DIR, 'static', 'img', 'logo.jpg')
 
     if logo_path and os.path.exists(logo_path):
-        logo_img = RLImage(logo_path, width=48, height=48, mask='auto')
+        target_w = 75
+        target_h = 45
+        try:
+            from PIL import Image as PILImage
+            with PILImage.open(logo_path) as pimg:
+                pw, ph = pimg.size
+                aspect = pw / ph
+                target_h = 45
+                target_w = min(110, target_h * aspect)
+                target_h = target_w / aspect
+        except Exception:
+            target_w = 50
+            target_h = 45
 
+        logo_img = RLImage(logo_path, width=target_w, height=target_h, mask='auto')
+
+        col_logo = int(target_w + 10)
+        col_company = 330 - col_logo
         header_data = [
             [
                 logo_img,
                 Paragraph(f"<b>{settings_obj.company_name.upper()}</b><br/><font size='8' color='#64748b'>{settings_obj.tagline}<br/>{settings_obj.address}<br/>Phone: {settings_obj.phone} | Email: {settings_obj.email}</font>", subtitle_style),
-                Paragraph(f"<font color='#2563eb' size='13'><b>OFFICIAL SALES RECEIPT</b></font><br/><b>Invoice #:</b> {sale.invoice_number}<br/><b>Date:</b> {sale.date_sold.strftime('%d %b %Y')}<br/><b>Payment:</b> {sale.payment_method}", ParagraphStyle('RightMeta', parent=subtitle_style, alignment=2))
+                Paragraph(f"<font color='#2563eb' size='13'><b>OFFICIAL SALES INVOICE</b></font><br/><b>Invoice #:</b> {sale.invoice_number}<br/><b>Date:</b> {sale.date_sold.strftime('%d %b %Y')}<br/><b>Payment:</b> {sale.payment_method}", ParagraphStyle('RightMeta', parent=subtitle_style, alignment=2))
             ]
         ]
-        header_table = Table(header_data, colWidths=[55, 275, 202])
+        header_table = Table(header_data, colWidths=[col_logo, col_company, 202])
         header_table.setStyle(TableStyle([
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
@@ -425,8 +441,9 @@ def receipt_pdf_view(request, pk):
         header_data = [
             [
                 Paragraph(f"<b>{settings_obj.company_name.upper()}</b>", title_style),
-                Paragraph("<b>OFFICIAL SALES RECEIPT</b>", ParagraphStyle('RightTitle', parent=title_style, alignment=2, textColor=colors.HexColor('#2563eb'), fontSize=16))
+                Paragraph("<b>OFFICIAL SALES INVOICE</b>", ParagraphStyle('RightTitle', parent=title_style, alignment=2, textColor=colors.HexColor('#2563eb'), fontSize=16))
             ],
+
             [
                 Paragraph(f"{settings_obj.tagline}<br/>{settings_obj.address}<br/>Phone: {settings_obj.phone} | Email: {settings_obj.email}", subtitle_style),
                 Paragraph(f"<b>Invoice #:</b> {sale.invoice_number}<br/><b>Date:</b> {sale.date_sold.strftime('%d %b %Y')}<br/><b>Payment:</b> {sale.payment_method}", ParagraphStyle('RightMeta', parent=subtitle_style, alignment=2))

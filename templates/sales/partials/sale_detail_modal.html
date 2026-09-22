@@ -3,13 +3,19 @@
 <div class="p-6 sm:p-7">
   
   <div class="flex items-center justify-between pb-4 border-b border-gray-200">
-    <div class="flex items-center space-x-3">
-      <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center text-lg shadow-sm">
-        <i class="fas fa-receipt"></i>
-      </div>
+    <div class="flex items-center space-x-3.5">
+      {% if company_settings.logo %}
+        <img src="{{ company_settings.logo.url }}" 
+             alt="{{ company_settings.company_name }}" 
+             class="h-11 w-auto max-w-[120px] object-contain rounded-lg border border-slate-200 p-0.5 bg-white shadow-sm">
+      {% else %}
+        <div class="w-11 h-11 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center text-lg shadow-sm">
+          <i class="fas fa-receipt"></i>
+        </div>
+      {% endif %}
       <div>
-        <h3 class="text-lg font-black tracking-tight text-slate-900">Transaction Details</h3>
-        <p class="text-xs text-slate-500 font-mono">{{ sale.invoice_number }} &bull; {{ sale.date_sold|date:"d M Y" }}</p>
+        <h3 class="text-lg font-black tracking-tight text-slate-900">Sales Invoice: {{ sale.invoice_number }}</h3>
+        <p class="text-xs text-slate-500 font-mono">{{ company_settings.company_name }} &bull; {{ sale.date_sold|date:"d M Y" }}</p>
       </div>
     </div>
     

@@ -3,12 +3,18 @@
 <div class="p-6 sm:p-7">
   
   <div class="flex items-center justify-between pb-4 border-b border-slate-200">
-    <div class="flex items-center space-x-3">
-      <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center text-lg shadow-sm">
-        <i class="fas fa-file-invoice"></i>
-      </div>
+    <div class="flex items-center space-x-3.5">
+      {% if company_settings.logo %}
+        <img src="{{ company_settings.logo.url }}" 
+             alt="{{ company_settings.company_name }}" 
+             class="h-11 w-auto max-w-[120px] object-contain rounded-lg border border-slate-200 p-0.5 bg-white shadow-sm">
+      {% else %}
+        <div class="w-11 h-11 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center text-lg shadow-sm">
+          <i class="fas fa-file-invoice"></i>
+        </div>
+      {% endif %}
       <div>
-        <h3 class="text-lg font-black tracking-tight text-slate-900">Invoice: {{ invoice_number }}</h3>
+        <h3 class="text-lg font-black tracking-tight text-slate-900">Supplier Invoice: {{ invoice_number }}</h3>
         <p class="text-xs text-slate-500">Supplier: <span class="font-bold text-slate-700">{{ supplier_name }}</span> | Date: <span class="font-semibold">{{ date_received|date:"d M Y" }}</span></p>
       </div>
     </div>

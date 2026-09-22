@@ -7,11 +7,18 @@
   <meta name="csrf-token" content="{{ csrf_token }}">
   <title>{% block title %}{{ company_settings.company_name }}{% endblock %} — {{ company_settings.tagline }}</title>
   
-  <!-- Favicon -->
-  <link rel="icon" type="image/jpeg" href="{% static 'img/logo.jpg' %}">
+  <!-- Dynamic Favicon: Uploaded company logo or fallback static asset -->
+  {% if company_settings.logo %}
+    <link rel="icon" href="{{ company_settings.logo.url }}">
+    <link rel="apple-touch-icon" href="{{ company_settings.logo.url }}">
+  {% else %}
+    <link rel="icon" type="image/jpeg" href="{% static 'img/logo.jpg' %}">
+  {% endif %}
+
 
   <!-- Core App & Vendor CSS (100% Offline Local Assets with cache-buster) -->
-  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=20260922.7">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=20260922.8">
+
 
   <script>
     if (localStorage.getItem('21void_sidebar_collapsed') === 'true') {
@@ -26,7 +33,7 @@
   <script src="{% static 'vendor/jquery.min.js' %}"></script>
   <script src="{% static 'vendor/sweetalert2.all.min.js' %}"></script>
   <script src="{% static 'vendor/chart.umd.min.js' %}"></script>
-  <script src="{% static 'js/app.js' %}?v=20260922.7"></script>
+  <script src="{% static 'js/app.js' %}?v=20260922.9"></script>
 
 
 

@@ -312,7 +312,7 @@ function initAjaxForms() {
           3500
         );
       }
-    });
+    }));
   });
 }
 

@@ -423,7 +423,33 @@ textarea::placeholder {
 .swal2-container,
 div.swal2-container,
 .swal-high-z {
-  z-index: 100000 !important;
+  z-index: 10000000 !important;
 }
+
+/* Mandatory Store Setup Modal - Absolute System Dominance & Pitch Dark Backdrop */
+#mandatory-setup-modal,
+div#mandatory-setup-modal {
+  position: fixed !important;
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999999 !important; /* Above topbar (z-30), sidebar, and all page elements */
+  background-color: rgba(0, 0, 0, 0.94) !important; /* Dominant dark system takeover */
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow-y: auto !important;
+  padding: 1rem !important;
+}
+
+#mandatory-setup-modal.hidden,
+div#mandatory-setup-modal.hidden {
+  display: none !important;
+}
+
 
 

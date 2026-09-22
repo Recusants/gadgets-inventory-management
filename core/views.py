@@ -166,24 +166,19 @@ def setup_initialize(request):
 
     errors = {}
     if not company_name:
-        errors['company_name'] = "Store/Company name is required."
+        errors['company_name'] = "Operating Store / Company name is required."
     if not phone:
-        errors['phone'] = "Contact phone number is required."
-
-    if not Category.objects.exists() and not category_name:
-        errors['category_name'] = "At least one product category is mandatory."
-
-    if not Supplier.objects.exists() and not supplier_name:
-        errors['supplier_name'] = "At least one supplier is mandatory."
+        errors['phone'] = "Official contact phone number is required."
 
     if errors:
         if is_ajax:
             return error_response(
-                title="Initialization Incomplete",
-                message="Please fill in all required foundational fields highlighted below.",
+                title="Store Setup Incomplete",
+                message="Please provide your store name and contact phone number to continue.",
                 errors=errors
             )
         return redirect('dashboard:index')
+
 
     with transaction.atomic():
         # 1. Update CompanySetting

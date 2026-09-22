@@ -11,17 +11,18 @@
     </button>
 
     <!-- Brand Logo: Uploaded company logo or fallback static asset -->
-    <div class="flex items-center">
+    <a href="{% url 'dashboard:index' %}" class="flex items-center space-x-2 hover:opacity-95 transition-opacity" title="{{ company_settings.company_name|default:'Clarity Retail' }}">
       {% if company_settings.logo %}
         <img src="{{ company_settings.logo.url }}" 
              alt="{{ company_settings.company_name }}" 
-             class="h-9 w-auto max-w-[120px] object-contain rounded-lg">
+             class="h-9 w-auto max-w-[140px] object-contain rounded-lg">
       {% else %}
         <img src="{% static 'img/logo.png' %}" 
              alt="Company Logo" 
              class="h-9 w-auto object-contain">
       {% endif %}
-    </div>
+    </a>
+
 
     <div class="hidden md:flex items-center space-x-2 text-[11px] font-bold text-emerald-400 bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-800 ml-3">
       <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>

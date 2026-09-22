@@ -5,8 +5,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="csrf-token" content="{{ csrf_token }}">
-  <title>Sign In — 21 Void Technologies</title>
-  <link rel="icon" type="image/jpeg" href="{% static 'img/logo.jpg' %}">
+  <title>Sign In — Clarity Retail | {{ company_settings.company_name|default:"Gadget Store" }}</title>
+  {% if company_settings.logo %}
+    <link rel="icon" href="{{ company_settings.logo.url }}">
+    <link rel="apple-touch-icon" href="{{ company_settings.logo.url }}">
+  {% else %}
+    <link rel="icon" type="image/jpeg" href="{% static 'img/logo.jpg' %}">
+  {% endif %}
+
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
   <style>
     body {
@@ -114,7 +120,7 @@
   <div id="app-modal-shell" class="hidden"></div>
   <script src="{% static 'vendor/jquery.min.js' %}"></script>
   <script src="{% static 'vendor/sweetalert2.all.min.js' %}"></script>
-  <script src="{% static 'js/app.js' %}?v=20260922.7"></script>
+  <script src="{% static 'js/app.js' %}?v=20260922.9"></script>
 
 
 
