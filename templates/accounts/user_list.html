@@ -1,23 +1,36 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}User Management{% endblock %}
+{% block title %}User Management — {{ company_settings.company_name }}{% endblock %}
 
 {% block content %}
-<div class="space-y-5">
+<div class="flex-1 flex flex-col min-h-0 overflow-hidden space-y-3">
   
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-1">
+  <!-- Header Card & Telemetry Badges -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-1 flex-shrink-0">
     <div class="flex items-center space-x-3">
-      <div class="w-10 h-10 rounded-2xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xl shadow-sm">
-        <i class="fas fa-user-shield"></i>
+      <div class="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-xl shadow-md shadow-blue-600/20">
+        <i class="fas fa-users-cog"></i>
       </div>
       <div>
-        <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">User Accounts</h1>
-        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Manage staff, managers, and system administrators</p>
+        <h1 class="text-xl font-black tracking-tight text-slate-900">User Management</h1>
+        <p class="text-xs text-slate-500">Manage administrator privileges, staff access roles, and system credentials</p>
       </div>
     </div>
 
-    <div class="mt-4 sm:mt-0">
+    <!-- Summary Metrics & Add User Button (Shades of blue with white text) -->
+    <div class="mt-3 sm:mt-0 flex flex-wrap items-center gap-2 flex-shrink-0">
+      <div class="hidden md:flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-blue-50 border border-blue-100 text-xs font-bold text-blue-900">
+        <span class="text-slate-500 text-[11px]">Total:</span>
+        <span class="font-mono font-black text-blue-700">{{ stats.total }}</span>
+        <span class="text-slate-300">|</span>
+        <span class="text-purple-700 text-[11px]">{{ stats.admins }} Admins</span>
+        <span class="text-slate-300">|</span>
+        <span class="text-blue-700 text-[11px]">{{ stats.managers }} Managers</span>
+        <span class="text-slate-300">|</span>
+        <span class="text-slate-600 text-[11px]">{{ stats.staff }} Staff</span>
+      </div>
+
       <button type="button" 
               data-modal-url="{% url 'accounts:user_add_modal' %}"
               data-modal-size="max-w-lg"
@@ -27,38 +40,51 @@
     </div>
   </div>
 
-  <!-- Search & Role Filter Toolbar -->
-  <div class="app-card bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark:border-gray-700">
-    <form id="user-filter-form" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-      <div class="sm:col-span-2 relative">
-        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+  <!-- Search & Role / Status Filter Toolbar Card -->
+  <div class="app-card bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex-shrink-0">
+    <form id="user-filter-form" class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-center">
+      <!-- Search -->
+      <div class="sm:col-span-6 relative">
+        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
           <i class="fas fa-search text-xs"></i>
         </div>
         <input type="text" 
                name="q" 
                id="user-search-input"
-               placeholder="Search by username, name, or email..." 
-               class="w-full pl-9 pr-3.5 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+               placeholder="Search by username, full name, phone, or email..." 
+               class="w-full pl-9 pr-3.5 py-1.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
       </div>
 
-      <div>
+      <!-- Role Filter -->
+      <div class="sm:col-span-3">
         <select name="role" 
                 id="user-role-select"
-                class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-700 dark:text-gray-300 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-          <option value="">All Roles</option>
+                class="w-full px-3 py-1.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+          <option value="">All Roles (Admin / Manager / Staff)</option>
           {% for val, label in roles %}
             <option value="{{ val }}">{{ label }}</option>
           {% endfor %}
         </select>
       </div>
+
+      <!-- Status Filter -->
+      <div class="sm:col-span-3">
+        <select name="status" 
+                id="user-status-select"
+                class="w-full px-3 py-1.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+          <option value="">All Statuses (Active / Inactive)</option>
+          <option value="active">Active Only</option>
+          <option value="inactive">Inactive Only</option>
+        </select>
+      </div>
     </form>
   </div>
 
-  <!-- Dynamic AJAX Table Container -->
+  <!-- Dynamic AJAX Table Container (Fits screen height, rows scroll) -->
   <div id="user-table-container" 
        data-table-url="{% url 'accounts:user_table' %}"
        data-filter-form="#user-filter-form"
-       class="app-card bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+       class="app-card bg-white rounded-2xl border border-slate-200 shadow-sm flex-1 min-h-0 flex flex-col overflow-hidden">
     {% include 'accounts/partials/user_table.html' %}
   </div>
 
@@ -68,26 +94,48 @@
 {% block extra_js %}
 <script>
   $(document).ready(function () {
-    refreshTable('#user-table-container');
+    let searchTimer = null;
 
-    $('#user-role-select').on('change', function () {
+    $('#user-search-input').on('keyup input', function () {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(function () {
+        refreshTable('#user-table-container');
+      }, 250);
+    });
+
+    $('#user-role-select, #user-status-select').on('change', function () {
       refreshTable('#user-table-container');
     });
 
-    let searchTimer;
-    $('#user-search-input').on('keyup', function () {
-      clearTimeout(searchTimer);
-      searchTimer = setTimeout(() => {
-        refreshTable('#user-table-container');
-      }, 300);
-    });
-
-    $(document).on('click', '#user-table-container .pagination-link', function (e) {
+    // Toggle user status via AJAX
+    $(document).on('click', '.btn-toggle-user-status', function (e) {
       e.preventDefault();
-      const page = $(this).attr('data-page');
-      if (page) {
-        refreshTable('#user-table-container', { page: page });
-      }
+      const $btn = $(this);
+      const toggleUrl = $btn.attr('data-toggle-url');
+      const userName = $btn.attr('data-user-name') || 'this user';
+      const isCurrentlyActive = $btn.attr('data-is-active') === 'true';
+      const actionText = isCurrentlyActive ? 'deactivate' : 'activate';
+
+      confirmSwal(
+        `${isCurrentlyActive ? 'Deactivate' : 'Activate'} User Account?`,
+        `Are you sure you want to ${actionText} login access for "${userName}"?`,
+        `Yes, ${actionText}`
+      ).then(function (result) {
+        if (result && result.isConfirmed) {
+          $.ajax({
+            url: toggleUrl,
+            type: 'POST',
+            success: function (res) {
+              notifySwal(res.title || 'Status Changed', res.message, 'success', 2000);
+              refreshTable('#user-table-container');
+            },
+            error: function (xhr) {
+              const res = xhr.responseJSON || {};
+              notifySwal(res.title || 'Action Failed', res.message || 'Could not update user status.', 'error', 3500);
+            }
+          });
+        }
+      });
     });
   });
 </script>

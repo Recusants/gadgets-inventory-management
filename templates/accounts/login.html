@@ -20,28 +20,42 @@
     
     <!-- Logo & Title Header -->
     <div class="text-center space-y-2">
-      <div class="inline-flex p-3 rounded-2xl bg-black border border-slate-800 shadow-inner">
-        <img src="{% static 'img/logo.jpg' %}" alt="21 Void Logo" class="w-14 h-14 object-contain">
+      <div class="inline-flex p-3 rounded-2xl bg-black border border-slate-700 shadow-inner">
+        {% if company_settings.logo %}
+          <img src="{{ company_settings.logo.url }}" alt="{{ company_settings.company_name }}" class="w-14 h-14 object-contain">
+        {% else %}
+          <img src="{% static 'img/logo.jpg' %}" alt="Logo" class="w-14 h-14 object-contain">
+        {% endif %}
       </div>
       <h1 class="text-2xl font-black text-white tracking-tight flex items-center justify-center space-x-1">
-        <span class="text-blue-500">21</span><span>VOID</span>
+        <span class="text-blue-500">{{ company_settings.company_name|default:"21 VOID" }}</span>
       </h1>
-      <p class="text-xs text-slate-400 font-medium">Record Keeping & Sales Management System</p>
+      <p class="text-xs text-slate-300 font-medium">{{ company_settings.tagline|default:"Record Keeping & Sales Management System" }}</p>
     </div>
 
+    {% if general_error %}
+      <div class="p-3 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs font-bold text-center">
+        <i class="fas fa-exclamation-circle mr-1 text-rose-400"></i> {{ general_error }}
+      </div>
+    {% endif %}
+
     <!-- Login Form (Raw HTML, jQuery $.ajax submitted, Zero Django Forms) -->
-    <form action="{% url 'accounts:login' %}" 
+    <form id="login-form" 
+          action="{% url 'accounts:login' %}" 
           method="POST" 
           data-ajax="true"
+          data-redirect="{% url 'dashboard:index' %}"
           class="space-y-4">
       {% csrf_token %}
 
+
+
       <div>
-        <label class="block text-xs font-semibold text-slate-300 mb-1.5">
-          Username <span class="text-red-500">*</span>
+        <label class="block text-xs font-bold text-white mb-1.5 tracking-wide">
+          Username <span class="text-red-400">*</span>
         </label>
         <div class="relative">
-          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
             <i class="fas fa-user text-xs"></i>
           </div>
           <input type="text" 
@@ -49,29 +63,37 @@
                  required 
                  autofocus
                  placeholder="e.g. admin"
-                 class="w-full pl-9 pr-3.5 py-3 rounded-xl border border-slate-700 bg-slate-950 text-xs text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                 class="w-full pl-9 pr-3.5 py-3 rounded-xl border border-slate-600 bg-slate-950 text-xs text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all font-medium">
         </div>
       </div>
 
       <div>
-        <label class="block text-xs font-semibold text-slate-300 mb-1.5">
-          Password <span class="text-red-500">*</span>
+        <label class="block text-xs font-bold text-white mb-1.5 tracking-wide">
+          Password <span class="text-red-400">*</span>
         </label>
         <div class="relative">
-          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
             <i class="fas fa-lock text-xs"></i>
           </div>
           <input type="password" 
                  name="password" 
+                 id="login-password" 
                  required 
                  placeholder="••••••••"
-                 class="w-full pl-9 pr-3.5 py-3 rounded-xl border border-slate-700 bg-slate-950 text-xs text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                 class="w-full pl-9 pr-10 py-3 rounded-xl border border-slate-600 bg-slate-950 text-xs text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all font-medium">
+          <button type="button" 
+                  id="btn-toggle-password" 
+                  tabindex="-1"
+                  class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-300 hover:text-white focus:outline-none transition-colors"
+                  title="Show / Hide password">
+            <i class="fas fa-eye text-xs" id="icon-toggle-password"></i>
+          </button>
         </div>
       </div>
 
       <div class="pt-2">
         <button type="submit" 
-                class="w-full py-3.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold tracking-wide uppercase shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center space-x-2">
+                class="w-full py-3.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold tracking-wide uppercase shadow-lg shadow-blue-600/40 transition-all flex items-center justify-center space-x-2">
           <span>Sign In to System</span>
           <i class="fas fa-arrow-right text-xs"></i>
         </button>
@@ -81,8 +103,8 @@
 
     <!-- Footer Tagline -->
     <div class="pt-4 border-t border-slate-800/80 text-center">
-      <p class="text-[11px] text-slate-500 italic">
-        Fusing Technology With Market Intelligence
+      <p class="text-[11px] text-slate-400 font-medium">
+        {{ company_settings.tagline|default:"Fusing Technology With Market Intelligence" }}
       </p>
     </div>
 
@@ -92,6 +114,67 @@
   <div id="app-modal-shell" class="hidden"></div>
   <script src="{% static 'vendor/jquery.min.js' %}"></script>
   <script src="{% static 'vendor/sweetalert2.all.min.js' %}"></script>
-  <script src="{% static 'js/app.js' %}"></script>
+  <script src="{% static 'js/app.js' %}?v=20260922.7"></script>
+
+
+
+  <script>
+    $(document).ready(function () {
+      // Eye password unhide toggle
+      $('#btn-toggle-password').on('click', function (e) {
+        e.preventDefault();
+        const $pw = $('#login-password');
+        const $icon = $('#icon-toggle-password');
+        if ($pw.attr('type') === 'password') {
+          $pw.attr('type', 'text');
+          $icon.removeClass('fa-eye').addClass('fa-eye-slash text-blue-400');
+        } else {
+          $pw.attr('type', 'password');
+          $icon.removeClass('fa-eye-slash text-blue-400').addClass('fa-eye');
+        }
+      });
+
+      // Explicit login form submission
+      $('#login-form').on('submit', function (e) {
+        e.preventDefault();
+        const $form = $(this);
+        const $btn = $form.find('button[type="submit"]');
+        $btn.prop('disabled', true).addClass('opacity-70');
+
+        $.ajax({
+          url: $form.attr('action') || window.location.href,
+          type: 'POST',
+          data: $form.serialize(),
+          headers: {
+            'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val() || $('meta[name="csrf-token"]').attr('content'),
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          success: function (res) {
+            const redirectTarget = (res.data && res.data.redirect_url) ? res.data.redirect_url : '/';
+            if (window.notifySwal) {
+              notifySwal(res.title || 'Welcome Back!', res.message || 'Signing in...', res.icon || 'success', 1200);
+            }
+            setTimeout(function () {
+              window.location.href = redirectTarget;
+            }, 500);
+          },
+          error: function (xhr) {
+            $btn.prop('disabled', false).removeClass('opacity-70');
+            const res = xhr.responseJSON || {};
+            let msg = res.message || 'Incorrect username or password. Please try again.';
+            if (res.errors && res.errors.password) {
+              msg = res.errors.password;
+            }
+            if (window.notifySwal) {
+              notifySwal(res.title || 'Login Failed', msg, 'error', 3000);
+            } else {
+              alert(msg);
+            }
+          }
+        });
+      });
+    });
+  </script>
 </body>
+
 </html>

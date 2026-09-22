@@ -10,11 +10,17 @@
       <i id="sidebar-toggle-icon" class="fas fa-bars text-base"></i>
     </button>
 
-    <!-- Logo only as requested: transparent background, no '21 VOID' text in navbar -->
+    <!-- Brand Logo: Uploaded company logo or fallback static asset -->
     <div class="flex items-center">
-      <img src="{% static 'img/logo.png' %}" 
-           alt="Company Logo" 
-           class="h-9 w-auto object-contain">
+      {% if company_settings.logo %}
+        <img src="{{ company_settings.logo.url }}" 
+             alt="{{ company_settings.company_name }}" 
+             class="h-9 w-auto max-w-[120px] object-contain rounded-lg">
+      {% else %}
+        <img src="{% static 'img/logo.png' %}" 
+             alt="Company Logo" 
+             class="h-9 w-auto object-contain">
+      {% endif %}
     </div>
 
     <div class="hidden md:flex items-center space-x-2 text-[11px] font-bold text-emerald-400 bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-800 ml-3">
@@ -171,7 +177,7 @@
         <i class="fas fa-chevron-down text-[10px] text-slate-400 ml-1"></i>
       </button>
 
-      <!-- Dropdown Menu (High-Contrast Navy Blue Text) -->
+      <!-- Dropdown Menu (High-Contrast Blue Typography) -->
       <div x-show="open" 
            @click.away="open = false" 
            x-transition:enter="transition ease-out duration-100"
@@ -180,33 +186,42 @@
            x-transition:leave="transition ease-in duration-75"
            x-transition:leave-start="transform opacity-100 scale-100"
            x-transition:leave-end="transform opacity-0 scale-95"
-           class="absolute right-0 mt-2 w-48 rounded-2xl bg-white text-[#0b192c] shadow-2xl border border-blue-200 py-1.5 z-50 divide-y divide-blue-100">
+           class="absolute right-0 mt-2 w-52 rounded-2xl bg-white text-blue-900 shadow-2xl border border-blue-200 py-1.5 z-50 divide-y divide-blue-100">
         
-        <div class="px-4 py-2">
-          <p class="text-xs font-black text-[#0b192c] truncate">
-            {% if request.user.is_authenticated %}{{ request.user.username }}{% else %}staff{% endif %}
+        <div class="px-4 py-2.5 bg-blue-50/40">
+          <p class="text-xs font-black text-blue-900 truncate">
+            {% if request.user.is_authenticated %}{{ request.user.get_full_name|default:request.user.username }}{% else %}Staff User{% endif %}
           </p>
-          <p class="text-[10px] text-blue-900 font-semibold truncate">
-            {% if request.user.is_authenticated %}{{ request.user.email }}{% else %}active{% endif %}
+          <p class="text-[10px] text-blue-600 font-bold truncate mt-0.5">
+            {% if request.user.is_authenticated %}{{ request.user.email|default:request.user.username }}{% else %}active{% endif %}
           </p>
         </div>
 
         <div class="py-1">
-          <a href="{% url 'core:settings' %}" class="flex items-center px-4 py-2 text-xs font-bold text-[#0b192c] hover:bg-blue-50 hover:text-blue-700 transition-colors">
-            <i class="fas fa-cog w-4 mr-2 text-blue-600"></i> Settings
+          {% if request.user.is_admin_role or request.user.is_superuser %}
+            <a href="{% url 'accounts:user_list' %}" class="flex items-center px-4 py-2 text-xs font-bold text-blue-800 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+              <i class="fas fa-users-cog w-4 mr-2 text-blue-600"></i> User Management
+            </a>
+          {% endif %}
+          <a href="{% url 'core:settings' %}" class="flex items-center px-4 py-2 text-xs font-bold text-blue-800 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+            <i class="fas fa-store w-4 mr-2 text-blue-600"></i> Store Settings
           </a>
+          <a href="{% url 'core:system' %}" class="flex items-center px-4 py-2 text-xs font-bold text-blue-800 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+            <i class="fas fa-server w-4 mr-2 text-blue-600"></i> System Info
+          </a>
+
         </div>
 
         <div class="py-1">
           {% if request.user.is_authenticated %}
             <form action="{% url 'accounts:logout' %}" method="POST" class="w-full">
               {% csrf_token %}
-              <button type="submit" class="w-full text-left flex items-center px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors">
-                <i class="fas fa-sign-out-alt w-4 mr-2 text-rose-500"></i> Logout
+              <button type="submit" class="w-full text-left flex items-center px-4 py-2 text-xs font-bold text-blue-800 hover:bg-blue-50 hover:text-rose-600 transition-colors">
+                <i class="fas fa-sign-out-alt w-4 mr-2 text-blue-600"></i> Logout
               </button>
             </form>
           {% else %}
-            <a href="{% url 'accounts:login' %}" class="flex items-center px-4 py-2 text-xs font-bold text-blue-700 hover:bg-blue-50 transition-colors">
+            <a href="{% url 'accounts:login' %}" class="flex items-center px-4 py-2 text-xs font-bold text-blue-800 hover:bg-blue-50 hover:text-blue-600 transition-colors">
               <i class="fas fa-sign-in-alt w-4 mr-2 text-blue-600"></i> Login
             </a>
           {% endif %}

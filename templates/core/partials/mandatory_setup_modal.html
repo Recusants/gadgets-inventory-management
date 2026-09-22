@@ -1,0 +1,281 @@
+{% load static %}
+<!-- Mandatory System Initialization Modal (Aggressive / Backdrop-Locked) -->
+<div id="mandatory-setup-modal" class="fixed inset-0 z-[100000] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 overflow-y-auto">
+  <div class="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl border border-slate-300 overflow-hidden my-6">
+    
+    <!-- Modal Header Banner -->
+    <div class="bg-gradient-to-r from-blue-900 via-slate-900 to-indigo-950 p-6 text-white border-b border-slate-800">
+      <div class="flex items-center space-x-3">
+        <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-400/40 text-amber-400 flex items-center justify-center text-xl flex-shrink-0">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div>
+          <div class="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-400/30 mb-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+            <span>Mandatory System Initialization</span>
+          </div>
+          <h2 class="text-xl font-black text-white tracking-tight">Initial Store Setup Required</h2>
+          <p class="text-xs text-slate-300 mt-0.5">The application cannot operate without foundational business records. Please provide your company details below to calibrate the database.</p>
+        </div>
+      </div>
+
+      <!-- Real-Time Mandatory Checklist Status Pills -->
+      <div class="mt-4 pt-4 border-t border-slate-800/80 grid grid-cols-2 sm:grid-cols-5 gap-2">
+        {% for item in mandatory_checklist %}
+          <div class="p-2 rounded-xl border text-center {% if item.is_configured %}bg-emerald-950/40 border-emerald-700/60 text-emerald-300{% else %}bg-rose-950/40 border-rose-700/60 text-rose-300 animate-pulse{% endif %}">
+            <div class="text-[10px] font-black flex items-center justify-center space-x-1">
+              {% if item.is_configured %}
+                <i class="fas fa-check-circle text-emerald-400"></i>
+              {% else %}
+                <i class="fas fa-times-circle text-rose-400"></i>
+              {% endif %}
+              <span class="truncate">{{ item.title }}</span>
+            </div>
+            <div class="text-[9px] font-bold mt-0.5 {% if item.is_configured %}text-emerald-400{% else %}text-rose-400 font-extrabold{% endif %}">
+              {% if item.is_configured %}Configured{% else %}Required{% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Form Body -->
+    <form id="mandatory-setup-form" 
+          action="{% url 'core:setup_initialize' %}" 
+          method="POST" 
+          enctype="multipart/form-data" 
+          data-ajax="true"
+          class="p-6 sm:p-8 space-y-6 max-h-[75vh] overflow-y-auto custom-scrollbar">
+      {% csrf_token %}
+
+      <!-- SECTION 1: COMPANY PROFILE & LOGO -->
+      <div class="space-y-4">
+        <div class="flex items-center space-x-2 border-b border-slate-200 pb-2">
+          <div class="w-6 h-6 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs">
+            <i class="fas fa-store"></i>
+          </div>
+          <h3 class="text-sm font-black text-slate-900 uppercase tracking-wide">1. Company Profile &amp; Receipt Branding</h3>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Company Name -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">
+              Store / Company Name <span class="text-red-500">*</span>
+            </label>
+            <input type="text" 
+                   name="company_name" 
+                   required 
+                   value="{% if company_settings.is_customized %}{{ company_settings.company_name }}{% endif %}"
+                   placeholder="e.g. 21 Void Gadgets &amp; Tech"
+                   class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+          </div>
+
+          <!-- Phone -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">
+              Contact Phone <span class="text-red-500">*</span>
+            </label>
+            <input type="text" 
+                   name="phone" 
+                   required 
+                   value="{% if company_settings.is_customized %}{{ company_settings.phone }}{% endif %}"
+                   placeholder="e.g. +263 77 000 0000"
+                   class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+          </div>
+
+          <!-- Currency Symbol & Code -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">
+              Currency Symbol &amp; Code <span class="text-red-500">*</span>
+            </label>
+            <div class="grid grid-cols-2 gap-2">
+              <input type="text" 
+                     name="currency_symbol" 
+                     required 
+                     value="{{ company_settings.currency_symbol|default:'$' }}"
+                     placeholder="$"
+                     class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-bold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-center">
+              <input type="text" 
+                     name="currency_code" 
+                     required 
+                     value="{{ company_settings.currency_code|default:'USD' }}"
+                     placeholder="USD"
+                     class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-bold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-center uppercase">
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">
+              Store Email <span class="text-slate-400 font-normal">(Optional)</span>
+            </label>
+            <input type="email" 
+                   name="email" 
+                   value="{% if company_settings.is_customized %}{{ company_settings.email }}{% endif %}"
+                   placeholder="sales@yourstore.com"
+                   class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+          </div>
+
+          <!-- Address -->
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold text-slate-700 mb-1">
+              Physical Store Address <span class="text-slate-400 font-normal">(Printed on receipts)</span>
+            </label>
+            <input type="text" 
+                   name="address" 
+                   value="{% if company_settings.is_customized %}{{ company_settings.address }}{% endif %}"
+                   placeholder="e.g. Shop 14, First Floor, Tech Mall, Harare"
+                   class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-medium text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+          </div>
+
+          <!-- Logo Upload Box with Instant Preview -->
+          <div class="sm:col-span-2 p-3.5 rounded-2xl bg-blue-50/70 border border-blue-200">
+            <label class="block text-xs font-bold text-blue-950 mb-1">
+              Upload Company Logo <span class="text-blue-700 font-normal">(Rendered on receipts &amp; topbar)</span>
+            </label>
+            <div class="flex items-center space-x-3.5">
+              <div class="w-14 h-14 rounded-xl border border-blue-300 bg-white flex items-center justify-center p-1.5 shadow-sm overflow-hidden flex-shrink-0">
+                {% if company_settings.logo %}
+                  <img id="setup-logo-preview" src="{{ company_settings.logo.url }}" alt="Logo" class="max-w-full max-h-full object-contain">
+                {% else %}
+                  <img id="setup-logo-preview" src="{% static 'img/logo.png' %}" alt="Preview" class="max-w-full max-h-full object-contain">
+                {% endif %}
+              </div>
+              <div class="flex-1">
+                <input type="file" 
+                       name="logo" 
+                       id="setup-logo-input" 
+                       accept="image/png, image/jpeg, image/jpg, image/webp"
+                       onchange="if(this.files && this.files[0]){ var r = new FileReader(); r.onload = function(e){ document.getElementById('setup-logo-preview').src = e.target.result; }; r.readAsDataURL(this.files[0]); }"
+                       class="block w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
+                <p class="text-[10px] text-blue-800 mt-1 font-medium">Upload your transparent PNG or JPEG logo.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: INITIAL PRODUCT CATEGORY -->
+      <div class="space-y-3 pt-2">
+        <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+          <div class="flex items-center space-x-2">
+            <div class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs">
+              <i class="fas fa-tags"></i>
+            </div>
+            <h3 class="text-sm font-black text-slate-900 uppercase tracking-wide">2. First Product Category</h3>
+          </div>
+          {% if has_categories %}
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+              <i class="fas fa-check mr-1"></i> Already Configured
+            </span>
+          {% endif %}
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">
+            Category Name {% if not has_categories %}<span class="text-red-500">*</span>{% endif %}
+          </label>
+          <input type="text" 
+                 id="setup-category-input"
+                 name="category_name" 
+                 {% if not has_categories %}required{% endif %}
+                 placeholder="e.g. Smartphones &amp; Mobile Devices"
+                 class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+          
+          <!-- Category Quick Selection Pills -->
+          <div class="mt-2 flex flex-wrap items-center gap-1.5">
+            <span class="text-[11px] font-bold text-slate-500 mr-1">Quick Suggestions:</span>
+            <button type="button" onclick="$('#setup-category-input').val('Smartphones & Mobile')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-blue-100 hover:text-blue-800 text-[11px] font-bold text-slate-700 transition-colors border border-slate-200">+ Smartphones</button>
+            <button type="button" onclick="$('#setup-category-input').val('Laptops & Computers')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-blue-100 hover:text-blue-800 text-[11px] font-bold text-slate-700 transition-colors border border-slate-200">+ Computers</button>
+            <button type="button" onclick="$('#setup-category-input').val('Audio & Wearables')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-blue-100 hover:text-blue-800 text-[11px] font-bold text-slate-700 transition-colors border border-slate-200">+ Audio &amp; Wearables</button>
+            <button type="button" onclick="$('#setup-category-input').val('Accessories & Cables')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-blue-100 hover:text-blue-800 text-[11px] font-bold text-slate-700 transition-colors border border-slate-200">+ Accessories</button>
+            <button type="button" onclick="$('#setup-category-input').val('Networking & WiFi')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-blue-100 hover:text-blue-800 text-[11px] font-bold text-slate-700 transition-colors border border-slate-200">+ Networking</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3: INITIAL SUPPLIER / VENDOR -->
+      <div class="space-y-3 pt-2">
+        <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+          <div class="flex items-center space-x-2">
+            <div class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs">
+              <i class="fas fa-truck-loading"></i>
+            </div>
+            <h3 class="text-sm font-black text-slate-900 uppercase tracking-wide">3. First Supplier / Vendor</h3>
+          </div>
+          {% if has_suppliers %}
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+              <i class="fas fa-check mr-1"></i> Already Configured
+            </span>
+          {% endif %}
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">
+              Supplier Name {% if not has_suppliers %}<span class="text-red-500">*</span>{% endif %}
+            </label>
+            <input type="text" 
+                   name="supplier_name" 
+                   {% if not has_suppliers %}required{% endif %}
+                   placeholder="e.g. Direct Import Wholesale, Apex Distributors"
+                   class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">
+              Supplier Contact Phone <span class="text-slate-400 font-normal">(Optional)</span>
+            </label>
+            <input type="text" 
+                   name="supplier_phone" 
+                   placeholder="+263 77..."
+                   class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 4: INITIAL EXPENSE CATEGORY -->
+      <div class="space-y-3 pt-2">
+        <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+          <div class="flex items-center space-x-2">
+            <div class="w-6 h-6 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-xs">
+              <i class="fas fa-file-invoice-dollar"></i>
+            </div>
+            <h3 class="text-sm font-black text-slate-900 uppercase tracking-wide">4. Default Expense Category</h3>
+          </div>
+          {% if has_expense_categories %}
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+              <i class="fas fa-check mr-1"></i> Already Configured
+            </span>
+          {% endif %}
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">
+            Expense Category Name
+          </label>
+          <input type="text" 
+                 name="expense_category_name" 
+                 value="General &amp; Operational Expenses"
+                 placeholder="e.g. General Operations, Rent, Utilities"
+                 class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+        </div>
+      </div>
+
+      <!-- Submit Footer -->
+      <div class="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <p class="text-xs text-slate-500 flex items-center">
+          <i class="fas fa-lock text-slate-400 mr-1.5"></i>
+          This calibration wizard will only appear once mandatory data is configured.
+        </p>
+        <button type="submit" 
+                class="w-full sm:w-auto px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black tracking-wide uppercase shadow-xl shadow-blue-600/30 transition-all flex items-center justify-center space-x-2">
+          <i class="fas fa-check-circle text-sm"></i>
+          <span>Save &amp; Initialize System</span>
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+</div>

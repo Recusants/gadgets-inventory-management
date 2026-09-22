@@ -41,11 +41,19 @@
                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
       </div>
 
-      <!-- Category Searchable Combobox with Arrow Navigation -->
-      <div class="relative custom-searchable-combobox" id="add-product-cat-combobox">
-        <label class="block text-xs font-bold text-slate-700 mb-1.5">
-          Category <span class="text-red-500">*</span>
-        </label>
+      <!-- Category Searchable Combobox with Arrow Navigation & Quick Category -->
+      <div class="relative custom-searchable-combobox sm:col-span-2" id="add-product-cat-combobox">
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="block text-xs font-bold text-slate-700">
+            Category <span class="text-red-500">*</span>
+          </label>
+          <button type="button" 
+                  id="btn-toggle-quick-cat" 
+                  class="text-[11px] font-bold text-blue-600 hover:text-blue-800 flex items-center space-x-1 focus:outline-none transition-colors">
+            <i class="fas fa-plus-circle text-xs"></i>
+            <span>+ Quick Category</span>
+          </button>
+        </div>
         <input type="text" 
                class="combobox-input w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                placeholder="Type to search or use arrows to select..." 
@@ -59,9 +67,40 @@
                  data-name="{{ cat.name }}">
               <span class="font-bold text-slate-800">{{ cat.name }}</span>
             </div>
+          {% empty %}
+            <div id="no-cats-msg" class="p-3 text-xs text-slate-400 text-center">
+              No categories yet. Click <span class="text-blue-600 font-bold cursor-pointer" onclick="$('#btn-toggle-quick-cat').click()">+ Quick Category</span> above!
+            </div>
           {% endfor %}
         </div>
+
+        <!-- Inline Quick Category Creator -->
+        <div id="quick-cat-box" class="hidden mt-2 p-2.5 bg-blue-50 border border-blue-200 rounded-xl space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-blue-900 flex items-center space-x-1">
+              <i class="fas fa-tag text-blue-600"></i>
+              <span>Create &amp; Select New Category</span>
+            </span>
+            <button type="button" id="btn-close-quick-cat" class="text-slate-400 hover:text-slate-600 text-xs">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="flex items-center space-x-1.5">
+            <input type="text" 
+                   id="quick-cat-name-input" 
+                   placeholder="Category name (e.g. Smart Watches)..."
+                   class="flex-1 px-3 py-1.5 rounded-lg border border-blue-300 bg-white text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none">
+            <button type="button" 
+                    id="btn-submit-quick-cat" 
+                    class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold whitespace-nowrap shadow-sm transition-all flex items-center space-x-1">
+              <i class="fas fa-check text-xs"></i>
+              <span>Add</span>
+            </button>
+          </div>
+          <div id="quick-cat-feedback" class="text-[11px] hidden font-semibold"></div>
+        </div>
       </div>
+
 
       <!-- SKU / Code -->
       <div>
@@ -125,4 +164,81 @@
   if (window.initSearchableCombobox) {
     window.initSearchableCombobox('#add-product-cat-combobox');
   }
+
+  // Quick Category Handlers
+  $('#btn-toggle-quick-cat, #btn-close-quick-cat').on('click', function(e) {
+    e.preventDefault();
+    $('#quick-cat-box').toggleClass('hidden');
+    if (!$('#quick-cat-box').hasClass('hidden')) {
+      $('#quick-cat-name-input').focus();
+    }
+  });
+
+  $('#quick-cat-name-input').on('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      $('#btn-submit-quick-cat').click();
+    }
+  });
+
+  $('#btn-submit-quick-cat').on('click', function(e) {
+    e.preventDefault();
+    const catName = $('#quick-cat-name-input').val().trim();
+    const $fb = $('#quick-cat-feedback');
+    if (!catName) {
+      $fb.removeClass('hidden text-emerald-600').addClass('text-rose-600').text('Please enter a category name.');
+      return;
+    }
+
+    const $btn = $(this);
+    $btn.prop('disabled', true).addClass('opacity-70');
+    $fb.removeClass('hidden text-rose-600').addClass('text-blue-600').text('Creating category...');
+
+    $.ajax({
+      url: "{% url 'inventory:category_create' %}",
+      type: "POST",
+      data: {
+        name: catName,
+        csrfmiddlewaretoken: getCsrfToken()
+      },
+      headers: {
+        'X-CSRFToken': getCsrfToken(),
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      success: function(res) {
+        $btn.prop('disabled', false).removeClass('opacity-70');
+        const catId = res.data && res.data.category_id ? res.data.category_id : res.data.id;
+        const catText = res.data && res.data.name ? res.data.name : catName;
+
+        // Add option to combobox dropdown
+        const newOption = `<div class="p-2.5 hover:bg-blue-50 cursor-pointer combobox-option text-xs flex justify-between items-center transition-colors bg-blue-50 font-bold" data-id="${catId}" data-name="${catText}"><span class="font-bold text-slate-800">${catText}</span></div>`;
+        $('#add-product-cat-combobox .combobox-dropdown').prepend(newOption);
+        $('#no-cats-msg').remove();
+
+        // Auto-select in combobox
+        $('#add-product-cat-combobox .combobox-input').val(catText);
+        $('#add-product-cat-combobox .combobox-hidden').val(catId);
+
+        // Hide quick box and notify
+        $('#quick-cat-box').addClass('hidden');
+        $('#quick-cat-name-input').val('');
+        $fb.addClass('hidden');
+
+        if (window.notifySwal) {
+          notifySwal('Category Added', `Category "${catText}" created and selected.`, 'success', 1800);
+        }
+      },
+      error: function(xhr) {
+        $btn.prop('disabled', false).removeClass('opacity-70');
+        let errMsg = 'Failed to create category.';
+        if (xhr.responseJSON && xhr.responseJSON.message) {
+          errMsg = xhr.responseJSON.message;
+        } else if (xhr.responseJSON && xhr.responseJSON.errors) {
+          errMsg = Object.values(xhr.responseJSON.errors).flat().join(' ');
+        }
+        $fb.removeClass('hidden text-blue-600 text-emerald-600').addClass('text-rose-600').text(errMsg);
+      }
+    });
+  });
 </script>
+

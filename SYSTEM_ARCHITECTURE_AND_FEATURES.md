@@ -124,6 +124,24 @@ The following utilities are exported directly to `window` for reliable AJAX inte
   - **Merge Mode**: Ingests fixture records directly into the existing database.
   - Complete `transaction.atomic()` safety with automatic rollback upon format or database integrity failures.
 
+### F. Privileged User Management & Superuser Lifecycle
+- **Access Guard**: Strictly restricted to users where `is_admin_role()` is true (`role == 'ADMIN'` or `is_superuser=True`).
+- **Automatic Superuser Role Assignment**:
+  - In `accounts/models.py:User.save()`, any user with `is_superuser=True` is automatically assigned `role = UserRole.ADMIN`.
+- **Production Superuser Creation (Docker)**:
+  ```powershell
+  docker exec -it gadget_store_prod_web python manage.py createsuperuser
+  ```
+  *(Or double-click `create_superuser.bat` in the production directory).*
+- **Safety Safeguards**:
+  - Logged-in administrators are strictly prevented from deactivating, deleting, or stripping admin privileges from their own active account.
+- **UI Architecture**:
+  - User table fits viewport height with sticky headers (`sticky top-0 z-20`) and scrolling body.
+  - Action buttons strictly use shades of blue with white text (`bg-blue-600`, `bg-blue-800`, `bg-blue-900`).
+
+### G. Modal Feedback Layering (z-index Hierarchy)
+- **Problem & Rule**: The system modal container `#app-modal-shell` operates at `z-index: 9999`. To ensure feedback alerts, confirmation dialogs, and error messages are never hidden underneath modal forms, SweetAlert2 containers are strictly elevated to `z-index: 100000 !important` (`.swal2-container`, `.swal-high-z` in `static/css/app.css` and `static/js/app.js`).
+
 ---
 
 ## 5. Developer Verification & Regression Checklist
@@ -136,3 +154,6 @@ Before committing any future changes, always verify:
 5. All modals close properly when clicking Cancel or the cross button (`window.closeModal()`).
 6. Custom searchable comboboxes filter items and respond to keyboard arrow keys (`ArrowDown`, `ArrowUp`, `Enter`).
 7. Database backup export generates valid JSON fixtures that restore cleanly in both Merge and Overwrite modes.
+8. SweetAlert popups display above modal backdrops (`z-index: 100000`).
+9. User management routes reject non-admin accounts and block self-lockout actions.
+

@@ -361,6 +361,124 @@
     let cart = []; // [{ cartId, productId, name, qty, unitPrice, serialNumber, availableStock }]
     let nextCartId = 1;
 
+    // -------------------------------------------------------------------------
+    // Session Storage Cart Persistence Engine (Scoped to User ID, Zero Data Mixing)
+    // -------------------------------------------------------------------------
+    const CURRENT_USER_ID = '{{ request.user.id|default:"anon" }}';
+    const POS_STORAGE_KEY = '21void_pos_state_u' + CURRENT_USER_ID;
+    let isLoadingState = false;
+
+    function savePosState() {
+      if (isLoadingState) return;
+      try {
+        const state = {
+          version: 1,
+          userId: CURRENT_USER_ID,
+          cart: cart,
+          nextCartId: nextCartId,
+          selectedCustomer: selectedCustomer,
+          paymentMethod: $('#pos-payment-method').val(),
+          timestamp: Date.now()
+        };
+        sessionStorage.setItem(POS_STORAGE_KEY, JSON.stringify(state));
+      } catch (err) {
+        console.warn('Failed to save POS state to sessionStorage', err);
+      }
+    }
+
+    function clearPosState() {
+      try {
+        sessionStorage.removeItem(POS_STORAGE_KEY);
+      } catch (err) {
+        console.warn('Failed to clear POS state from sessionStorage', err);
+      }
+    }
+
+    function loadPosState() {
+      try {
+        const raw = sessionStorage.getItem(POS_STORAGE_KEY);
+        if (!raw) return;
+
+        const state = JSON.parse(raw);
+        // Guard 1: Verify user ID to ensure zero cross-account data mixing
+        if (!state || String(state.userId) !== String(CURRENT_USER_ID)) {
+          clearPosState();
+          return;
+        }
+
+        isLoadingState = true;
+
+        // Guard 2: Validate and restore cart items safely
+        if (Array.isArray(state.cart) && state.cart.length > 0) {
+          let restoredCart = [];
+          let maxId = 0;
+          let stockWarnings = [];
+
+          state.cart.forEach(item => {
+            if (item && item.productId && item.qty > 0) {
+              const catProd = catalogProducts.find(p => p.id === item.productId);
+              let itemStock = item.availableStock;
+              if (catProd) {
+                itemStock = catProd.stock;
+              }
+
+              if (itemStock <= 0) {
+                stockWarnings.push(`"${item.name}" was removed because it is now out of stock.`);
+                return;
+              }
+
+              let finalQty = item.qty;
+              if (finalQty > itemStock) {
+                finalQty = itemStock;
+                stockWarnings.push(`Quantity for "${item.name}" was reduced to available stock (${itemStock}).`);
+              }
+
+              const cId = parseInt(item.cartId) || (maxId + 1);
+              if (cId > maxId) maxId = cId;
+
+              restoredCart.push({
+                cartId: cId,
+                productId: item.productId,
+                name: item.name,
+                qty: finalQty,
+                unitPrice: parseFloat(item.unitPrice) || 0,
+                serialNumber: item.serialNumber || '',
+                availableStock: itemStock
+              });
+            }
+          });
+
+          if (restoredCart.length > 0) {
+            cart = restoredCart;
+            nextCartId = maxId + 1;
+            renderCart();
+
+            if (stockWarnings.length > 0) {
+              notifySwal('Cart Restored with Adjustments', stockWarnings.join(' '), 'warning', 3500);
+            } else {
+              notifySwal('Cart Restored', `Restored ${restoredCart.length} item(s) from your active session.`, 'info', 1800);
+            }
+          }
+        }
+
+        // Guard 3: Restore selected customer
+        if (state.selectedCustomer && state.selectedCustomer.id) {
+          selectCustomerEntity(state.selectedCustomer);
+        }
+
+        // Guard 4: Restore payment method
+        if (state.paymentMethod && $('#pos-payment-method option[value="' + state.paymentMethod + '"]').length) {
+          $('#pos-payment-method').val(state.paymentMethod);
+        }
+
+        isLoadingState = false;
+      } catch (err) {
+        console.warn('Failed to restore POS state from sessionStorage', err);
+        clearPosState();
+        isLoadingState = false;
+      }
+    }
+
     let catalogProducts = [
       {% for prod in products %}
       {
@@ -386,6 +504,7 @@
 
     let selectedProduct = null;
     let selectedCustomer = null;
+
 
     // Helper: Escape HTML string
     function escapeHtml(str) {
@@ -746,6 +865,7 @@
       $('#summary-grand-total').text('$' + grandTotal.toFixed(2));
 
       validateReadyForCheckout();
+      savePosState();
     }
 
     // Remove single line from receipt
@@ -758,8 +878,10 @@
     // Clear entire cart
     $('#btn-clear-cart').on('click', function () {
       cart = [];
+      clearPosState();
       renderCart();
     });
+
 
     // -------------------------------------------------------------------------
     // UNIFIED SEARCH & SELECT: CUSTOMER (RIGHT SIDE - SINGLE LINE & ARROWS)
@@ -909,6 +1031,7 @@
       $custDropdown.addClass('hidden');
 
       validateReadyForCheckout();
+      savePosState();
     }
 
     $custClearBtn.on('click', function () {
@@ -918,7 +1041,13 @@
       $custClearBtn.addClass('hidden');
       filterCustomersLive('');
       validateReadyForCheckout();
+      savePosState();
     });
+
+    $('#pos-payment-method').on('change', function () {
+      savePosState();
+    });
+
 
     $(document).on('click', '#btn-dropdown-quick-add', function () {
       $custDropdown.addClass('hidden');
@@ -1026,6 +1155,7 @@
         success: function (res) {
           $btn.prop('disabled', false).html('<i class="fas fa-shopping-cart text-base mr-2"></i><span>Check Out &amp; Print Receipt</span>');
           if (res.icon === 'success' || res.status === 'success') {
+            clearPosState(); // Immediately purge session storage on successful transaction
             const receiptUrl = res.data ? res.data.receipt_url : null;
             const inv = res.data ? res.data.invoice_number : '';
 
@@ -1076,6 +1206,10 @@
       });
     });
 
+    // Restore persisted cart state safely on page load
+    loadPosState();
+
   });
 </script>
 {% endblock %}
+

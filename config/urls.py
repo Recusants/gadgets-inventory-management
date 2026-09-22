@@ -19,6 +19,7 @@ urlpatterns = [
     path('core/', include('core.urls')),
     path('notifications/', core_views.notification_list_view, name='notifications_direct'),
     path('settings/', core_views.settings_view, name='settings_direct'),
+    path('system/', core_views.system_view, name='system_direct'),
     path('expenses/', include('expenses.urls')),
 ]
 

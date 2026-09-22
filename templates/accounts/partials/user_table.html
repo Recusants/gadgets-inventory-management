@@ -1,91 +1,188 @@
-<div class="overflow-x-auto max-h-[calc(100vh-285px)] overflow-y-auto custom-scrollbar">
-  <table class="w-full text-left text-xs">
-    <thead>
-      <tr class="bg-slate-100 text-slate-900 border-b-2 border-slate-300 uppercase tracking-wider font-extrabold text-[11px] sticky top-0 z-20 shadow-sm">
-        <th class="py-3.5 px-4 bg-slate-100">User</th>
-        <th class="py-3.5 px-4 bg-slate-100">Username</th>
-        <th class="py-3.5 px-4 bg-slate-100">Role</th>
-        <th class="py-3.5 px-4 bg-slate-100">Contact</th>
-        <th class="py-3.5 px-4 bg-slate-100">Status</th>
-        <th class="py-3.5 px-4 bg-slate-100 text-center">Actions</th>
+<div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+  <table class="w-full text-left border-collapse text-xs">
+    <thead class="sticky top-0 z-20 bg-slate-100 border-b border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
+      <tr>
+        <th class="py-3 px-4">User</th>
+        <th class="py-3 px-4">Role</th>
+        <th class="py-3 px-4">Contact Details</th>
+        <th class="py-3 px-4 text-center">Status</th>
+        <th class="py-3 px-4">Activity / Joined</th>
+        <th class="py-3 px-4 text-center">Actions</th>
       </tr>
     </thead>
-
-    <tbody class="divide-y divide-slate-200 dark:divide-slate-800 text-slate-900 dark:text-slate-100">
+    <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
       {% for u in users %}
-        <tr class="hover:bg-blue-50/60 dark:hover:bg-slate-800/60 transition-colors">
-          <td class="py-3 px-4 font-black text-slate-900 dark:text-white flex items-center space-x-2">
-            <div class="w-7 h-7 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center">
+      <tr class="hover:bg-blue-50/50 transition-colors {% if not u.is_active %}opacity-60 bg-slate-50/50{% endif %}">
+        
+        <!-- User Info -->
+        <td class="py-3 px-4 whitespace-nowrap">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-8 h-8 rounded-full {% if u.role == 'ADMIN' %}bg-purple-600{% elif u.role == 'MANAGER' %}bg-blue-600{% else %}bg-slate-700{% endif %} text-white font-black text-xs flex items-center justify-center shadow-sm flex-shrink-0">
               {{ u.first_name|default:u.username|slice:":1"|upper }}
             </div>
-            <div class="font-bold">{{ u.get_full_name|default:u.username }}</div>
-          </td>
-          <td class="py-3 px-4 font-mono font-bold text-slate-900 dark:text-slate-100">
-            @{{ u.username }}
-          </td>
-          <td class="py-3 px-4">
-            {% if u.role == 'ADMIN' %}
-              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-100 text-purple-900 dark:bg-purple-950/80 dark:text-purple-300 border border-purple-300 dark:border-purple-700">
-                Admin
-              </span>
-            {% elif u.role == 'MANAGER' %}
-              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-900 dark:bg-blue-950/80 dark:text-blue-300 border border-blue-300 dark:border-blue-700">
-                Manager
-              </span>
-            {% else %}
-              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-200 text-slate-800 dark:bg-slate-800 dark:text-slate-200">
-                Staff
-              </span>
-            {% endif %}
-          </td>
-          <td class="py-3 px-4 text-slate-800 dark:text-slate-200 font-medium">
-            <div>{{ u.phone|default:"—" }}</div>
-            <div class="text-[11px] text-slate-600 dark:text-slate-400 font-semibold">{{ u.email|default:"" }}</div>
-          </td>
-          <td class="py-3 px-4">
-            {% if u.is_active %}
-              <span class="text-emerald-700 dark:text-emerald-400 font-bold text-[11px] flex items-center">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5"></span> Active
-              </span>
-            {% else %}
-              <span class="text-rose-600 dark:text-rose-400 font-bold text-[11px] flex items-center">
-                <span class="w-2 h-2 rounded-full bg-rose-500 mr-1.5"></span> Inactive
-              </span>
-            {% endif %}
-          </td>
-          <td class="py-3 px-4 text-center">
-            <div class="flex items-center justify-center space-x-2">
-              <button type="button" 
-                      data-modal-url="{% url 'accounts:user_edit_modal' u.id %}"
-                      data-modal-size="max-w-lg"
-                      class="p-1.5 text-slate-600 hover:text-amber-600 dark:text-slate-300 dark:hover:text-amber-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
-                      title="Edit User">
-                <i class="far fa-edit text-sm"></i>
-              </button>
-              {% if u.id != request.user.id %}
-                <button type="button" 
-                        data-delete-url="{% url 'accounts:user_delete' u.id %}"
-                        data-item-title="{{ u.username }}"
-                        data-refresh-table="#user-table-container"
-                        class="p-1.5 text-slate-600 hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
-                        title="Delete User">
-                  <i class="far fa-trash-alt text-sm"></i>
-                </button>
-              {% endif %}
+            <div>
+              <div class="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                <span>{{ u.get_full_name|default:u.username }}</span>
+                {% if u.id == request.user.id %}
+                  <span class="px-1.5 py-0.2 rounded text-[9px] font-black bg-blue-100 text-blue-800 border border-blue-200">You</span>
+                {% endif %}
+              </div>
+              <div class="font-mono text-[11px] text-slate-500 font-semibold">@{{ u.username }}</div>
             </div>
-          </td>
-        </tr>
+          </div>
+        </td>
+
+        <!-- Role Badge -->
+        <td class="py-3 px-4 whitespace-nowrap">
+          {% if u.role == 'ADMIN' or u.is_superuser %}
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-900 border border-purple-200">
+              <i class="fas fa-shield-alt mr-1 text-[9px]"></i> Admin
+            </span>
+          {% elif u.role == 'MANAGER' %}
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-900 border border-blue-200">
+              <i class="fas fa-user-tie mr-1 text-[9px]"></i> Manager
+            </span>
+          {% else %}
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-800 border border-slate-200">
+              <i class="fas fa-user mr-1 text-[9px]"></i> Staff
+            </span>
+          {% endif %}
+        </td>
+
+        <!-- Contact Info -->
+        <td class="py-3 px-4 whitespace-nowrap text-xs">
+          {% if u.phone %}
+            <div class="text-slate-800 font-mono text-[11px] flex items-center">
+              <i class="fas fa-phone mr-1.5 text-[10px] text-slate-400"></i>{{ u.phone }}
+            </div>
+          {% endif %}
+          {% if u.email %}
+            <div class="text-[11px] text-slate-500 font-medium flex items-center mt-0.5">
+              <i class="fas fa-envelope mr-1.5 text-[10px] text-slate-400"></i>{{ u.email }}
+            </div>
+          {% elif not u.phone %}
+            <span class="text-slate-400">—</span>
+          {% endif %}
+        </td>
+
+        <!-- Active Status -->
+        <td class="py-3 px-4 whitespace-nowrap text-center">
+          {% if u.is_active %}
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></span> Active
+            </span>
+          {% else %}
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-200">
+              <span class="w-1.5 h-1.5 rounded-full bg-rose-500 mr-1.5"></span> Disabled
+            </span>
+          {% endif %}
+        </td>
+
+        <!-- Activity Times -->
+        <td class="py-3 px-4 whitespace-nowrap text-xs">
+          <div class="text-slate-700 text-[11px]">
+            <span class="text-slate-400">Joined:</span> {{ u.date_joined|date:"d M Y" }}
+          </div>
+          <div class="text-slate-400 text-[10px] mt-0.5">
+            {% if u.last_login %}
+              <span class="text-slate-500">Last seen:</span> {{ u.last_login|timesince }} ago
+            {% else %}
+              <span class="italic text-slate-400">Never logged in</span>
+            {% endif %}
+          </div>
+        </td>
+
+        <!-- Actions (Shades of blue with white text) -->
+        <td class="py-3 px-4 whitespace-nowrap text-center">
+          <div class="inline-flex items-center justify-center space-x-1.5">
+            
+            <!-- Edit User Modal -->
+            <button type="button"
+                    data-modal-url="{% url 'accounts:user_edit_modal' u.pk %}"
+                    data-modal-size="max-w-lg"
+                    title="Edit User Profile & Credentials"
+                    class="w-7 h-7 rounded-lg bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center text-xs shadow-sm transition-all">
+              <i class="fas fa-pen"></i>
+            </button>
+
+            <!-- Toggle Active / Disabled (Power button) -->
+            {% if u.id != request.user.id %}
+              <button type="button"
+                      data-toggle-url="{% url 'accounts:user_toggle_status' u.pk %}"
+                      data-user-name="{{ u.username }}"
+                      data-is-active="{{ u.is_active|yesno:'true,false' }}"
+                      title="{% if u.is_active %}Disable Account{% else %}Activate Account{% endif %}"
+                      class="btn-toggle-user-status w-7 h-7 rounded-lg {% if u.is_active %}bg-blue-800 hover:bg-amber-600{% else %}bg-emerald-600 hover:bg-emerald-700{% endif %} text-white flex items-center justify-center text-xs shadow-sm transition-all">
+                <i class="fas fa-power-off"></i>
+              </button>
+
+              <!-- Delete User Button -->
+              <button type="button"
+                      data-action-url="{% url 'accounts:user_delete' u.pk %}"
+                      data-confirm-title="Delete User Account?"
+                      data-confirm-message="Are you sure you want to permanently remove user '@{{ u.username }}'?"
+                      data-refresh-target="#user-table-container"
+                      title="Delete User"
+                      class="btn-delete-confirm w-7 h-7 rounded-lg bg-blue-900 hover:bg-red-600 text-white flex items-center justify-center text-xs shadow-sm transition-all">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            {% else %}
+              <span class="w-7 h-7 rounded-lg bg-slate-100 text-slate-300 flex items-center justify-center text-xs cursor-not-allowed" title="Cannot modify self-status">
+                <i class="fas fa-lock"></i>
+              </span>
+            {% endif %}
+
+          </div>
+        </td>
+
+      </tr>
       {% empty %}
-        <tr>
-          <td colspan="6" class="py-12 text-center text-gray-400">No users found.</td>
-        </tr>
+      <tr>
+        <td colspan="6" class="py-12 text-center text-slate-400">
+          <div class="flex flex-col items-center justify-center">
+            <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
+              <i class="fas fa-users-slash text-lg"></i>
+            </div>
+            <p class="font-bold text-slate-600">No user accounts found</p>
+            <p class="text-xs text-slate-400 mt-0.5">Adjust your filters or click 'Add User Account' to register new staff.</p>
+          </div>
+        </td>
+      </tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
 
-{% if paginator.count > 0 %}
-<div class="px-5 py-3.5 bg-gray-50/60 dark:bg-gray-900/40 border-t border-gray-100 dark:border-gray-700/80 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-  <div>Total: <strong class="text-gray-700 dark:text-gray-300">{{ paginator.count }}</strong> accounts</div>
+<!-- Pagination / Footer Info -->
+{% if paginator.num_pages > 1 %}
+<div class="py-2.5 px-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 flex-shrink-0">
+  <div>
+    Showing <span class="font-bold text-slate-700">{{ users.start_index }}</span> to 
+    <span class="font-bold text-slate-700">{{ users.end_index }}</span> of 
+    <span class="font-bold text-slate-700">{{ total_count }}</span> accounts
+  </div>
+  <div class="inline-flex space-x-1">
+    {% if users.has_previous %}
+      <button type="button" 
+              onclick="paginateTable('#user-table-container', {{ users.previous_page_number }})"
+              class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all">
+        <i class="fas fa-chevron-left mr-1"></i> Prev
+      </button>
+    {% endif %}
+    <span class="px-2.5 py-1 text-xs font-bold text-slate-700">
+      Page {{ users.number }} of {{ paginator.num_pages }}
+    </span>
+    {% if users.has_next %}
+      <button type="button" 
+              onclick="paginateTable('#user-table-container', {{ users.next_page_number }})"
+              class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all">
+        Next <i class="fas fa-chevron-right ml-1"></i>
+      </button>
+    {% endif %}
+  </div>
+</div>
+{% elif total_count > 0 %}
+<div class="py-2 px-4 bg-slate-50 border-t border-slate-200 text-right text-[11px] font-bold text-slate-400 flex-shrink-0">
+  Total registered accounts: <span class="text-blue-900 font-mono">{{ total_count }}</span>
 </div>
 {% endif %}

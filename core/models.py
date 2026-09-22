@@ -10,7 +10,10 @@ class CompanySetting(models.Model):
     currency_code = models.CharField(max_length=10, default="USD")
     receipt_header_note = models.CharField(max_length=250, default="Official Purchase Receipt")
     receipt_footer_note = models.TextField(default="Thank you for doing business with 21 Void Technologies! All products guaranteed authentic.")
+    logo = models.ImageField(upload_to='company/', null=True, blank=True, help_text="Custom Company Logo for Receipts and Header")
+    is_customized = models.BooleanField(default=False, help_text="Flag indicating company profile has been configured")
     updated_at = models.DateTimeField(auto_now=True)
+
 
     class Meta:
         verbose_name = 'Company Setting'

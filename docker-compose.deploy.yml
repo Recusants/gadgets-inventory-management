@@ -1,6 +1,12 @@
 version: '3.8'
 
+# ==============================================================================
+# 21 Void Technologies - Production Deployment (Docker Hub Pull Mode)
+# Use this file on any local server or cloud VPS without needing source code!
+# ==============================================================================
+
 services:
+  # 1. PostgreSQL 16 Database
   db:
     image: postgres:16-alpine
     container_name: twentyone_void_prod_db
@@ -17,11 +23,10 @@ services:
       timeout: 5s
       retries: 5
 
+  # 2. Django Web Application (Pulled from Docker Hub)
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile.prod
-    container_name: twentyone_void_prod_web
+    image: ${DOCKER_IMAGE:-tinashemp/gadget-store-app:latest}
+    container_name: gadget_store_prod_web
     restart: always
     command: >
       sh -c "python manage.py migrate --settings=config.settings.docker_prod &&
@@ -32,7 +37,7 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings.docker_prod
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-prod-hardened-key-21void-technologies-2026-secure}
-      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1,web}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-*}
       - POSTGRES_DB=${POSTGRES_DB:-twentyone_void_prod_db}
       - POSTGRES_USER=${POSTGRES_USER:-twentyone_user}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-ChangeThisSecureProdPassword2026!}
@@ -46,6 +51,7 @@ services:
       db:
         condition: service_healthy
 
+  # 3. Nginx Reverse Proxy & High-Performance Static Server
   nginx:
     image: nginx:1.25-alpine
     container_name: twentyone_void_prod_nginx

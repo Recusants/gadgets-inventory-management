@@ -393,11 +393,22 @@ def receipt_pdf_view(request, pk):
     from django.conf import settings
     from reportlab.platypus import Image as RLImage
 
-    logo_path = os.path.join(settings.BASE_DIR, 'static', 'img', 'logo.png')
-    if not os.path.exists(logo_path):
-        logo_path = os.path.join(settings.BASE_DIR, 'static', 'img', 'logo.jpg')
-    if os.path.exists(logo_path):
+    logo_path = None
+    if settings_obj.logo:
+        try:
+            if os.path.exists(settings_obj.logo.path):
+                logo_path = settings_obj.logo.path
+        except Exception:
+            pass
+
+    if not logo_path:
+        logo_path = os.path.join(settings.BASE_DIR, 'static', 'img', 'logo.png')
+        if not os.path.exists(logo_path):
+            logo_path = os.path.join(settings.BASE_DIR, 'static', 'img', 'logo.jpg')
+
+    if logo_path and os.path.exists(logo_path):
         logo_img = RLImage(logo_path, width=48, height=48, mask='auto')
+
         header_data = [
             [
                 logo_img,

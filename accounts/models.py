@@ -26,5 +26,11 @@ class User(AbstractUser):
     def is_manager_role(self):
         return self.role in (UserRole.ADMIN, UserRole.MANAGER) or self.is_superuser
 
+    def save(self, *args, **kwargs):
+        if self.is_superuser and self.role != UserRole.ADMIN:
+            self.role = UserRole.ADMIN
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.get_full_name() or self.username} ({self.get_role_display()})"
+

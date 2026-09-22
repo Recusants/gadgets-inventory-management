@@ -58,6 +58,7 @@ function notifySwal(title, message, icon, timer = 2500) {
     background: $('html').hasClass('dark') ? '#0f172a' : '#ffffff',
     color: $('html').hasClass('dark') ? '#f8fafc' : '#0f172a',
     customClass: {
+      container: 'swal-high-z',
       popup: 'rounded-2xl shadow-2xl border border-slate-300 dark:border-slate-700'
     }
   });
@@ -85,6 +86,7 @@ function confirmSwal(title, text, confirmButtonText = 'Yes, proceed', onConfirm 
     background: $('html').hasClass('dark') ? '#0f172a' : '#ffffff',
     color: $('html').hasClass('dark') ? '#f8fafc' : '#0f172a',
     customClass: {
+      container: 'swal-high-z',
       popup: 'rounded-2xl shadow-2xl border border-slate-300 dark:border-slate-700'
     }
   });
@@ -235,19 +237,35 @@ function initAjaxForms() {
     clearFormErrors($form);
     $submitBtn.addClass('btn-loading').prop('disabled', true);
     
-    // Serialize data
-    const formData = $form.serialize();
-    const actionUrl = $form.attr('action');
+    // Form target and method
+    const actionUrl = $form.attr('action') || window.location.href;
     const method = ($form.attr('method') || 'POST').toUpperCase();
-    
-    $.ajax({
+
+    // Serialize data (support file uploads via FormData if files or multipart)
+    const hasFiles = $form.find('input[type="file"]').length > 0 || $form.attr('enctype') === 'multipart/form-data';
+    let formData;
+    let ajaxSettings = {
       url: actionUrl,
       type: method,
-      data: formData,
       headers: {
         'X-CSRFToken': getCsrfToken(),
         'X-Requested-With': 'XMLHttpRequest'
-      },
+      }
+    };
+
+    if (hasFiles) {
+      formData = new FormData($form[0]);
+      ajaxSettings.data = formData;
+      ajaxSettings.processData = false;
+      ajaxSettings.contentType = false;
+    } else {
+      formData = $form.serialize();
+      ajaxSettings.data = formData;
+    }
+
+    $.ajax($.extend(ajaxSettings, {
+
+
       success: function (res) {
         $submitBtn.removeClass('btn-loading').prop('disabled', false);
         

@@ -8,6 +8,10 @@ urlpatterns = [
     path('test-ajax/', views.test_ajax, name='test_ajax'),
     path('settings/', views.settings_view, name='settings'),
     path('settings/save/', views.settings_save, name='settings_save'),
+    path('setup/initialize/', views.setup_initialize, name='setup_initialize'),
+    path('system/', views.system_view, name='system'),
+
+
 
     # Notifications routes
     path('notifications/', views.notification_list_view, name='notification_list'),

@@ -1,5 +1,6 @@
 @echo off
 setlocal enabledelayedexpansion
+cd /d "%~dp0"
 title Push to GitHub - 21 Void Technologies
 
 echo ======================================================
@@ -44,7 +45,15 @@ if "!COMMIT_MSG!"=="" (
 )
 
 echo.
-echo [1/3] Staging changes...
+echo [Auto-Versioning] Calculating latest Clarity Retail version...
+if exist ".\venv\Scripts\python.exe" (
+    .\venv\Scripts\python.exe core\version.py
+) else (
+    python core\version.py
+)
+
+echo.
+echo [1/3] Staging changes (including version.json)...
 git add .
 
 echo [2/3] Committing changes: "!COMMIT_MSG!"...

@@ -1,5 +1,6 @@
 @echo off
 setlocal enabledelayedexpansion
+cd /d "%~dp0"
 title Push to Docker Hub - 21 Void Technologies
 
 echo ======================================================
@@ -46,6 +47,14 @@ if errorlevel 1 (
     echo [ERROR] Docker Hub login failed. Check your password or Personal Access Token.
     pause
     exit /b 1
+)
+
+echo.
+echo [Auto-Versioning] Calculating latest Clarity Retail version...
+if exist ".\venv\Scripts\python.exe" (
+    .\venv\Scripts\python.exe core\version.py
+) else (
+    python core\version.py
 )
 
 :: 4. Build Docker Production Image

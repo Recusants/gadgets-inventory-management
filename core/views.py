@@ -22,10 +22,85 @@ def test_ajax(request):
 from django.shortcuts import render, redirect
 from django.contrib import messages
 
+import sys
+import os
+import platform
+import django
+from django.conf import settings
+
 def settings_view(request):
-    """Render company contact and printed receipt settings."""
+    """Render company contact and printed receipt settings for the store using this software."""
     settings_obj = CompanySetting.get_settings()
     return render(request, 'core/settings.html', {'settings': settings_obj})
+
+def system_view(request):
+    """Render comprehensive software details and developer support provider information (avail.co.zw)."""
+    from accounts.models import User
+    from inventory.models import Product
+    from sales.models import Sale
+    from .version import get_system_version
+    
+    db_engine = settings.DATABASES['default']['ENGINE'].split('.')[-1]
+    db_name = str(settings.DATABASES['default'].get('NAME', 'Default'))
+    if 'sqlite' in db_engine.lower() and ('/' in db_name or '\\' in db_name):
+        db_name = os.path.basename(db_name)
+
+    client_settings = CompanySetting.get_settings()
+    sys_ver = get_system_version()
+
+    context = {
+        'software_info': {
+            'name': 'Clarity Retail: Gadgets store',
+            'short_name': 'Clarity Retail',
+            'edition': 'Enterprise Retail Edition',
+            'version': sys_ver.get('version', 'v2.4.2'),
+            'build': sys_ver.get('build', 'v2.4.2-git'),
+            'commit_hash': sys_ver.get('commit_hash', 'latest'),
+            'branch': sys_ver.get('branch', 'main'),
+            'last_updated': sys_ver.get('updated_at', timezone.now().strftime('%Y-%m-%d %H:%M')),
+            'status': 'Operational & Active',
+            'license_type': 'Commercial Single-Tenant License',
+            'client_store_name': client_settings.company_name or 'Gadget Retail Store',
+            'currency': f"{client_settings.currency_symbol} ({client_settings.currency_code})",
+        },
+        'developer_info': {
+            'company_name': 'Avail Software (Avail Technologies Pvt Ltd)',
+            'short_brand': 'Avail Software',
+            'tagline': 'Scalable, Secure & Innovative Software Solutions in Zimbabwe & Beyond',
+            'website': 'https://avail.co.zw',
+            'domain': 'avail.co.zw',
+            'email': 'info@avail.co.zw',
+            'support_email': 'info@avail.co.zw',
+            'primary_phone': '+263 78 485 1863',
+            'secondary_phone': '+263 78 610 6154',
+            'address': '1788 Ruvimbo Park, Marondera, Zimbabwe',
+            'regional_hub': 'Harare, Zimbabwe',
+            'services': [
+                'Custom Business Software & Web App Development',
+                'Retail Inventory, POS & Multi-Branch Systems',
+                'Pharmacy & Clinic Management Solutions',
+                'Enterprise ERP & Financial Ledger Architecture',
+                'Cybersecurity, Cloud Infrastructure & Digital Transformation',
+                'Continuous Support, SLAs & Disaster Recovery'
+            ],
+            'copyright': '© 2026 Avail Technologies (Pvt) Ltd. All rights reserved.'
+        },
+        'environment_info': {
+            'django_version': django.get_version(),
+            'python_version': sys.version.split()[0],
+            'os_platform': f"{platform.system()} {platform.release()}",
+            'db_engine': db_engine.upper(),
+            'db_name': db_name,
+            'debug_mode': settings.DEBUG,
+            'server_time': timezone.now(),
+            'total_users': User.objects.count() if hasattr(User, 'objects') else 0,
+            'total_products': Product.objects.count() if hasattr(Product, 'objects') else 0,
+            'total_sales': Sale.objects.count() if hasattr(Sale, 'objects') else 0,
+        }
+    }
+    return render(request, 'core/system.html', context)
+
+
 
 @require_POST
 def settings_save(request):
@@ -52,7 +127,11 @@ def settings_save(request):
     settings_obj.currency_code = request.POST.get('currency_code', '').strip()
     settings_obj.receipt_header_note = request.POST.get('receipt_header_note', '').strip()
     settings_obj.receipt_footer_note = request.POST.get('receipt_footer_note', '').strip()
+    if 'logo' in request.FILES:
+        settings_obj.logo = request.FILES['logo']
+    settings_obj.is_customized = True
     settings_obj.save()
+
 
     if is_ajax:
         return success_response(
@@ -63,9 +142,109 @@ def settings_save(request):
     return redirect('core:settings')
 
 
+@require_POST
+def setup_initialize(request):
+    """
+    Handle initial store setup form submission:
+    - Updates CompanySetting (company_name, phone, currency, address, email, logo)
+    - Creates initial Category if given
+    - Creates initial Supplier if given
+    - Ensures default Customer ("Walk-in Customer")
+    - Creates initial ExpenseCategory if given
+    - Sets is_customized = True
+    """
+    from django.db import transaction
+    from inventory.models import Category, Supplier
+    from sales.models import Customer
+    from expenses.models import ExpenseCategory
+
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+    company_name = request.POST.get('company_name', '').strip()
+    phone = request.POST.get('phone', '').strip()
+    category_name = request.POST.get('category_name', '').strip()
+    supplier_name = request.POST.get('supplier_name', '').strip()
+
+    errors = {}
+    if not company_name:
+        errors['company_name'] = "Store/Company name is required."
+    if not phone:
+        errors['phone'] = "Contact phone number is required."
+
+    if not Category.objects.exists() and not category_name:
+        errors['category_name'] = "At least one product category is mandatory."
+
+    if not Supplier.objects.exists() and not supplier_name:
+        errors['supplier_name'] = "At least one supplier is mandatory."
+
+    if errors:
+        if is_ajax:
+            return error_response(
+                title="Initialization Incomplete",
+                message="Please fill in all required foundational fields highlighted below.",
+                errors=errors
+            )
+        return redirect('dashboard:index')
+
+    with transaction.atomic():
+        # 1. Update CompanySetting
+        settings_obj = CompanySetting.get_settings()
+        settings_obj.company_name = company_name
+        settings_obj.phone = phone
+        if request.POST.get('tagline'):
+            settings_obj.tagline = request.POST.get('tagline', '').strip()
+        if request.POST.get('email'):
+            settings_obj.email = request.POST.get('email', '').strip()
+        if request.POST.get('address'):
+            settings_obj.address = request.POST.get('address', '').strip()
+        if request.POST.get('currency_symbol'):
+            settings_obj.currency_symbol = request.POST.get('currency_symbol', '').strip()
+        if request.POST.get('currency_code'):
+            settings_obj.currency_code = request.POST.get('currency_code', '').strip().upper()
+        if 'logo' in request.FILES:
+            settings_obj.logo = request.FILES['logo']
+        settings_obj.is_customized = True
+        settings_obj.save()
+
+        # 2. Create Initial Category
+        if category_name:
+            Category.objects.get_or_create(
+                name=category_name,
+                defaults={"description": f"Initial product category for {company_name}"}
+            )
+
+        # 3. Create Initial Supplier
+        if supplier_name:
+            Supplier.objects.get_or_create(
+                name=supplier_name,
+                defaults={
+                    "phone": request.POST.get('supplier_phone', '').strip(),
+                    "notes": "Initial registered supplier created during setup wizard."
+                }
+            )
+
+        # 4. Ensure Default Customer
+        Customer.get_default_customer()
+
+        # 5. Create Initial ExpenseCategory
+        exp_name = request.POST.get('expense_category_name', '').strip() or 'General & Operational Expenses'
+        ExpenseCategory.objects.get_or_create(
+            name=exp_name,
+            defaults={"description": "Standard business operations and overheads"}
+        )
+
+    if is_ajax:
+        return success_response(
+            title="Store Initialized",
+            message=f'Welcome to {settings_obj.company_name}! Mandatory foundational data has been configured.',
+            data={"reload": True}
+        )
+    return redirect('dashboard:index')
+
+
 # ==============================================================================
 # NOTIFICATIONS
 # ==============================================================================
+
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q

@@ -419,3 +419,11 @@ textarea::placeholder {
   background-color: #be123c !important;
 }
 
+/* Ensure SweetAlert2 feedback always renders prominently above modal shells and backdrops */
+.swal2-container,
+div.swal2-container,
+.swal-high-z {
+  z-index: 100000 !important;
+}
+
+

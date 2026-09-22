@@ -14,6 +14,9 @@ if not SECRET_KEY:
 allowed_hosts_env = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1')
 ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(',') if host.strip()]
 
+csrf_trusted_env = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://127.0.0.1:8086,http://localhost:8086')
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_trusted_env.split(',') if origin.strip()]
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
