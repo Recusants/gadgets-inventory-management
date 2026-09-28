@@ -19,9 +19,9 @@ class RoleSessionTimeoutMiddleware:
         if request.user.is_authenticated:
             # Check if expiry is already configured for this session
             current_expiry = request.session.get('_role_expiry_set')
-            user_role = getattr(request.user, 'role', None)
+            is_admin = getattr(request.user, 'is_admin_role', lambda: False)()
             
-            if user_role == UserRole.ADMIN or request.user.is_superuser:
+            if is_admin or request.user.is_superuser:
                 target_expiry = 3600  # 1 hour
                 role_key = 'admin_3600'
             else:

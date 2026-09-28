@@ -4,8 +4,8 @@ from django.views.decorators.http import require_POST, require_GET
 from django.utils import timezone
 from .models import CompanySetting
 from .validators import validate_company_settings
-from .responses import success_response, error_response
-from .decorators import ajax_required
+from .responses import success_response, error_response, permission_denied_response
+from .decorators import ajax_required, manager_or_admin_required, admin_required
 
 def test_modal(request):
     """Return partial HTML for the test modal."""
@@ -28,11 +28,13 @@ import platform
 import django
 from django.conf import settings
 
+@manager_or_admin_required
 def settings_view(request):
     """Render company contact and printed receipt settings for the store using this software."""
     settings_obj = CompanySetting.get_settings()
     return render(request, 'core/settings.html', {'settings': settings_obj})
 
+@manager_or_admin_required
 def system_view(request):
     """Render comprehensive software details and developer support provider information (avail.co.zw)."""
     from accounts.models import User
@@ -103,6 +105,7 @@ def system_view(request):
 
 
 @require_POST
+@manager_or_admin_required
 def settings_save(request):
     """Save company settings via jQuery AJAX with fallback redirect."""
     is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
@@ -300,6 +303,7 @@ def notification_delete(request, pk):
 # UNIVERSAL DATABASE BACKUP & RESTORE (SQLite, PostgreSQL, Docker)
 # ==============================================================================
 
+@admin_required
 def db_backup_download(request):
     """
     Download database backup.
@@ -365,6 +369,12 @@ def db_backup_restore(request):
     Supports Overwrite and Merge modes.
     Works universally across SQLite, PostgreSQL, and Docker containers.
     """
+    # Allow if Admin OR if company profile is not yet configured (setup initialization phase)
+    if not (request.user.is_admin_role() or request.user.is_superuser or not CompanySetting.get_settings().is_customized):
+        return permission_denied_response(
+            title="Access Denied",
+            message="Only Administrators are authorized to restore database archives."
+        )
     import os
     import json
     import tempfile
@@ -435,18 +445,17 @@ def db_backup_restore(request):
 
             with transaction.atomic():
                 if restore_mode == 'overwrite':
-                    from sales.models import SalePayment, SaleItem, Sale, Customer
+                    from sales.models import SaleBatchDeduction, SaleItem, Sale, Customer
                     from expenses.models import Expense, ExpenseCategory
-                    from inventory.models import StockMovement, StockBatch, Stock, Product, Supplier, Category
+                    from inventory.models import StockBatch, Stock, Product, Supplier, Category
                     from core.models import Notification
 
-                    SalePayment.objects.all().delete()
+                    SaleBatchDeduction.objects.all().delete()
                     SaleItem.objects.all().delete()
                     Sale.objects.all().delete()
                     Customer.objects.all().delete()
                     Expense.objects.all().delete()
                     ExpenseCategory.objects.all().delete()
-                    StockMovement.objects.all().delete()
                     StockBatch.objects.all().delete()
                     Stock.objects.all().delete()
                     Product.objects.all().delete()

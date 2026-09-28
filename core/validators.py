@@ -108,9 +108,16 @@ def validate_user(data, instance=None):
         elif len(email) > 254:
             errors['email'] = 'Email address is too long.'
 
-    # Role
-    if role and role not in UserRole.values:
-        errors['role'] = f'Role must be one of: {", ".join(UserRole.values)}'
+    # Roles validation
+    roles = data.getlist('roles') if hasattr(data, 'getlist') and data.getlist('roles') else data.get('roles', [])
+    if isinstance(roles, str):
+        roles = [r.strip() for r in roles.split(',') if r.strip()]
+    if not roles and data.get('role'):
+        roles = [data.get('role').strip()]
+
+    invalid_roles = [r for r in roles if r not in UserRole.values]
+    if invalid_roles:
+        errors['roles'] = f'Invalid role(s): {", ".join(invalid_roles)}. Must be one of: {", ".join(UserRole.values)}'
 
     return errors
 
@@ -210,6 +217,27 @@ def validate_receive_invoice(data):
         sp = _parse_decimal(selling_price_raw)
         if sp is None or sp < Decimal('0.00'):
             errors['selling_price'] = 'Selling price must be a valid positive number.'
+
+    # Serial Number & Quantity constraint (Qty strictly 1 if serial number provided)
+    sn = data.get('serial_number', '').strip()
+    if sn:
+        try:
+            qty = int(qty_raw or 1)
+            if qty > 1:
+                errors['serial_number'] = 'A serial number can only be assigned when quantity is strictly 1.'
+        except (ValueError, TypeError):
+            pass
+
+        from inventory.models import StockBatch
+        if product_id and StockBatch.objects.filter(product_id=product_id, serial_number__iexact=sn, is_active=True, quantity_remaining__gt=0).exists():
+            errors['serial_number'] = f'An active batch with serial number "{sn}" already exists for this product.'
+
+    # Expiration date validation
+    exp_raw = data.get('expiration_date')
+    if exp_raw and str(exp_raw).strip():
+        exp = _parse_custom_date(exp_raw)
+        if not exp:
+            errors['expiration_date'] = 'Invalid expiration date format (expected YYYY-MM-DD).'
 
     return errors
 

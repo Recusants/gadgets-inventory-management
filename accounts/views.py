@@ -1,6 +1,7 @@
 """
 Function-Based Views for Authentication and User Management.
 Strictly zero Django Forms, 100% FBVs, uniform JSON envelope responses.
+Role-based access enforced via custom @allowed_roles decorator.
 """
 
 from django.shortcuts import render, redirect, get_object_or_404
@@ -12,7 +13,7 @@ from django.db.models import Q
 from .models import User, UserRole
 from core.validators import validate_login, validate_user
 from core.responses import success_response, error_response, permission_denied_response
-from core.decorators import admin_required, ajax_required
+from core.decorators import allowed_roles, ajax_required
 
 
 # ==============================================================================
@@ -86,23 +87,24 @@ def logout_view(request):
 
 
 # ==============================================================================
-# USER MANAGEMENT (ADMIN ONLY)
+# USER MANAGEMENT (ADMIN ONLY - PROTECTED BY @allowed_roles)
 # ==============================================================================
 
-@admin_required
+@allowed_roles(['ADMIN'])
 def user_list_view(request):
     """Render User Management page shell (Admin only) with stats and initial table pre-rendered."""
     roles = UserRole.choices
-    all_users = User.objects.all()
+    all_users = list(User.objects.all())
     stats = {
-        'total': all_users.count(),
-        'admins': all_users.filter(role=UserRole.ADMIN).count(),
-        'managers': all_users.filter(role=UserRole.MANAGER).count(),
-        'staff': all_users.filter(role=UserRole.STAFF).count(),
-        'active': all_users.filter(is_active=True).count(),
-        'inactive': all_users.filter(is_active=False).count(),
+        'total': len(all_users),
+        'admins': sum(1 for u in all_users if UserRole.ADMIN in (u.roles or []) or u.is_superuser),
+        'managers': sum(1 for u in all_users if UserRole.MANAGER in (u.roles or [])),
+        'supervisors': sum(1 for u in all_users if UserRole.SUPERVISOR in (u.roles or [])),
+        'cashiers': sum(1 for u in all_users if UserRole.CASHIER in (u.roles or []) or UserRole.STAFF in (u.roles or [])),
+        'active': sum(1 for u in all_users if u.is_active),
+        'inactive': sum(1 for u in all_users if not u.is_active),
     }
-    queryset = all_users.order_by('-date_joined')
+    queryset = User.objects.all().order_by('-date_joined')
     paginator = Paginator(queryset, 12)
     users = paginator.page(1)
     return render(request, 'accounts/user_list.html', {
@@ -114,11 +116,11 @@ def user_list_view(request):
     })
 
 
-@admin_required
+@allowed_roles(['ADMIN'])
 def user_table_partial(request):
     """Return User table body and pagination partial with search and filters."""
     query = request.GET.get('q', '').strip()
-    role = request.GET.get('role', '').strip()
+    role_filter = request.GET.get('role', '').strip()
     status = request.GET.get('status', '').strip().lower()
     page_num = request.GET.get('page', 1)
 
@@ -131,8 +133,8 @@ def user_table_partial(request):
             Q(email__icontains=query) |
             Q(phone__icontains=query)
         )
-    if role and role in UserRole.values:
-        queryset = queryset.filter(role=role)
+    if role_filter and role_filter in UserRole.values:
+        queryset = queryset.filter(roles__icontains=f'"{role_filter}"')
     if status == 'active':
         queryset = queryset.filter(is_active=True)
     elif status == 'inactive':
@@ -151,14 +153,14 @@ def user_table_partial(request):
     })
 
 
-@admin_required
+@allowed_roles(['ADMIN'])
 def user_add_modal(request):
     """Return Add User modal partial."""
     roles = UserRole.choices
     return render(request, 'accounts/partials/user_add_modal.html', {'roles': roles})
 
 
-@admin_required
+@allowed_roles(['ADMIN'])
 def user_edit_modal(request, pk):
     """Return Edit User modal partial."""
     user = get_object_or_404(User, pk=pk)
@@ -170,7 +172,7 @@ def user_edit_modal(request, pk):
 
 
 @require_POST
-@admin_required
+@allowed_roles(['ADMIN'])
 def user_create(request):
     """Create a new user with hashed password."""
     errors = validate_user(request.POST)
@@ -181,27 +183,31 @@ def user_create(request):
             errors=errors
         )
 
-    role = request.POST.get('role', UserRole.STAFF)
+    roles = request.POST.getlist('roles')
+    if not roles and request.POST.get('role'):
+        roles = [request.POST.get('role').strip()]
+    if not roles:
+        roles = [UserRole.STAFF]
+
     user = User.objects.create_user(
         username=request.POST.get('username', '').strip(),
         password=request.POST.get('password', '').strip(),
         email=request.POST.get('email', '').strip(),
         first_name=request.POST.get('first_name', '').strip(),
         last_name=request.POST.get('last_name', '').strip(),
-        role=role,
+        roles=roles,
         phone=request.POST.get('phone', '').strip(),
-        is_staff=True if role in (UserRole.ADMIN, UserRole.MANAGER) else False
     )
 
     return success_response(
         title="User Created",
-        message=f'User account "{user.username}" ({user.get_role_display()}) created successfully.',
+        message=f'User account "{user.username}" ({user.get_roles_display()}) created successfully.',
         data={"user_id": user.pk}
     )
 
 
 @require_POST
-@admin_required
+@allowed_roles(['ADMIN'])
 def user_update(request, pk):
     """Update user profile and optionally change password."""
     user = get_object_or_404(User, pk=pk)
@@ -213,12 +219,17 @@ def user_update(request, pk):
             errors=errors
         )
 
-    # Protect self from role downgrade away from ADMIN
-    new_role = request.POST.get('role', user.role)
-    if user.pk == request.user.pk and new_role != UserRole.ADMIN:
+    roles = request.POST.getlist('roles')
+    if not roles and request.POST.get('role'):
+        roles = [request.POST.get('role').strip()]
+    if not roles:
+        roles = user.roles or [UserRole.STAFF]
+
+    # Protect self from removing ADMIN role
+    if user.pk == request.user.pk and UserRole.ADMIN not in roles:
         return error_response(
             title="Action Blocked",
-            message="You cannot downgrade your own administrator role.",
+            message="You cannot remove the administrator role from your own account.",
             status=400
         )
 
@@ -238,8 +249,7 @@ def user_update(request, pk):
     user.last_name = request.POST.get('last_name', '').strip()
     user.email = request.POST.get('email', '').strip()
     user.phone = request.POST.get('phone', '').strip()
-    user.role = new_role
-    user.is_staff = True if user.role in (UserRole.ADMIN, UserRole.MANAGER) else False
+    user.roles = roles
 
     # Optional password change
     new_password = request.POST.get('password', '').strip()
@@ -256,7 +266,7 @@ def user_update(request, pk):
 
 
 @require_POST
-@admin_required
+@allowed_roles(['ADMIN'])
 def user_toggle_status(request, pk):
     """Toggle user active / inactive status."""
     if request.user.pk == pk:
@@ -279,7 +289,7 @@ def user_toggle_status(request, pk):
 
 
 @require_POST
-@admin_required
+@allowed_roles(['ADMIN'])
 def user_delete(request, pk):
     """Delete user account (prevents deleting oneself)."""
     if request.user.pk == pk:

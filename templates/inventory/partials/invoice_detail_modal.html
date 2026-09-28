@@ -63,25 +63,33 @@
               <th class="py-2.5 px-3">Batch #</th>
               <th class="py-2.5 px-3">Product Name</th>
               <th class="py-2.5 px-3">Category</th>
-              <th class="py-2.5 px-3 font-mono">Unit Cost</th>
+              <th class="py-2.5 px-3 font-mono text-right">Unit Cost</th>
               <th class="py-2.5 px-3 text-center">Qty Recv</th>
               <th class="py-2.5 px-3 text-center">Qty Avail</th>
-              <th class="py-2.5 px-3 font-mono">Total Cost</th>
+              <th class="py-2.5 px-3 font-mono text-right">Total Cost</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
             {% for b in batches %}
-              <tr class="hover:bg-slate-50">
+              <tr class="hover:bg-slate-50 transition-colors">
                 <td class="py-2 px-3 font-mono font-bold text-blue-700">#{{ b.id }}</td>
-                <td class="py-2 px-3 font-black text-slate-900">{{ b.product.name }}</td>
-                <td class="py-2 px-3 text-slate-600">{{ b.product.category.name }}</td>
-                <td class="py-2 px-3 font-mono font-bold text-slate-900">${{ b.cost_price|intcomma }}</td>
+                <td class="py-2 px-3 font-black text-slate-900">
+                  {{ b.product.name }}
+                  {% if b.serial_number %}
+                    <span class="ml-1.5 px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-mono font-bold">SN: {{ b.serial_number }}</span>
+                  {% endif %}
+                  {% if b.expiration_date %}
+                    <span class="ml-1.5 px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-mono font-bold">Exp: {{ b.expiration_date|date:"Y-m-d" }}</span>
+                  {% endif %}
+                </td>
+                <td class="py-2 px-3 text-slate-600">{{ b.product.category.name|default:"General" }}</td>
+                <td class="py-2 px-3 font-mono font-bold text-slate-900 text-right">${{ b.cost_price|floatformat:2|intcomma }}</td>
                 <td class="py-2 px-3 text-center font-bold text-slate-900">{{ b.quantity_received }}</td>
                 <td class="py-2 px-3 text-center font-bold {% if b.quantity_remaining > 0 %}text-emerald-700{% else %}text-slate-400{% endif %}">
                   {{ b.quantity_remaining }}
                 </td>
-                <td class="py-2 px-3 font-mono font-bold text-slate-900">
-                  ${% widthratio b.cost_price 1 b.quantity_received as line_cost %}{{ b.cost_price }} &times; {{ b.quantity_received }}
+                <td class="py-2 px-3 font-mono font-black text-slate-900 text-right">
+                  ${{ b.total_cost|floatformat:2|intcomma }}
                 </td>
               </tr>
             {% endfor %}

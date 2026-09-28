@@ -25,6 +25,7 @@ from inventory.models import Product, Category, Stock, StockBatch
 from expenses.models import Expense
 from core.models import CompanySetting
 from core.validators import _parse_custom_date
+from core.decorators import supervisor_or_above_required
 
 
 def get_date_range(filter_type, from_date_raw, to_date_raw):
@@ -53,6 +54,7 @@ def get_date_range(filter_type, from_date_raw, to_date_raw):
     return start_date, end_date
 
 
+@supervisor_or_above_required
 def report_index_view(request):
     """
     Renders the Reports & Analytics hub.

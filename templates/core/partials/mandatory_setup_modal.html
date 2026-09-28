@@ -40,6 +40,20 @@
           </div>
         {% endfor %}
       </div>
+
+      <!-- Setup Mode Selector Tabs -->
+      <div class="mt-4 flex flex-wrap gap-2 pt-3 border-t border-white/20">
+        <button type="button" id="tab-btn-manual" onclick="switchSetupTab('manual')" 
+                class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-white text-black shadow transition-all flex items-center space-x-1.5">
+          <i class="fas fa-store"></i>
+          <span>1. Fresh Store Setup</span>
+        </button>
+        <button type="button" id="tab-btn-restore" onclick="switchSetupTab('restore')" 
+                class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-white/10 hover:bg-white/20 text-white transition-all flex items-center space-x-1.5">
+          <i class="fas fa-database"></i>
+          <span>2. Restore From Existing Backup Archive</span>
+        </button>
+      </div>
     </div>
 
     <!-- Form Body (Strictly Operating Store Settings) -->
@@ -186,5 +200,273 @@
 
     </form>
 
+    <!-- RESTORE FROM EXISTING BACKUP TAB -->
+    <div id="mandatory-restore-pane" class="hidden p-6 sm:p-8 space-y-6 max-h-[75vh] overflow-y-auto custom-scrollbar bg-white">
+      <div class="flex items-center space-x-2 border-b-2 border-black pb-2">
+        <div class="w-6 h-6 rounded-lg bg-black text-white flex items-center justify-center text-xs">
+          <i class="fas fa-database"></i>
+        </div>
+        <h3 class="text-sm font-black text-black uppercase tracking-wide">Import &amp; Restore Backup Archive</h3>
+      </div>
+
+      <p class="text-xs text-slate-600 leading-relaxed">
+        If you are moving from an existing deployment or restoring an earlier installation, you can restore your database snapshot directly. Supported files: Universal JSON (<code class="font-mono text-black font-bold">.json</code>) or SQLite database (<code class="font-mono text-black font-bold">.sqlite3</code>).
+      </p>
+
+      <form id="setup-restore-form" action="{% url 'core:backup_restore' %}" method="POST" enctype="multipart/form-data" class="space-y-5">
+        {% csrf_token %}
+
+        <div class="space-y-4">
+          <!-- Backup File Input -->
+          <div>
+            <label class="block text-xs font-black text-black mb-1.5">
+              Select Backup Archive File (.json or .sqlite3) <span class="text-red-600">*</span>
+            </label>
+            <input type="file" 
+                   name="backup_file" 
+                   id="setup_backup_file_input"
+                   accept=".json,.sqlite3,.db" 
+                   required
+                   class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-300 focus:border-black bg-white text-xs font-bold text-black outline-none file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-black file:bg-black file:text-white hover:file:bg-slate-800 cursor-pointer">
+
+            <!-- File selection badge -->
+            <div id="setup-file-badge" class="hidden mt-2 p-2.5 rounded-xl bg-slate-100 border border-slate-300 flex items-center justify-between text-xs transition-all">
+              <div class="flex items-center space-x-2 text-slate-900 font-bold truncate mr-2">
+                <i class="fas fa-file-code text-blue-600 flex-shrink-0"></i>
+                <span id="setup-file-badge-name" class="truncate font-mono">backup.json</span>
+                <span id="setup-file-badge-size" class="text-[10px] text-slate-700 bg-white px-2 py-0.5 rounded-md border border-slate-200 flex-shrink-0 font-mono">0 KB</span>
+              </div>
+              <span id="setup-file-badge-type" class="text-[10px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md flex-shrink-0">Universal JSON</span>
+            </div>
+          </div>
+
+          <!-- Mode -->
+          <div>
+            <label class="block text-xs font-black text-black mb-1.5">
+              Restoration Mode <span class="text-red-600">*</span>
+            </label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label class="p-3 rounded-xl border-2 border-slate-200 hover:border-black cursor-pointer flex items-start space-x-2.5 transition-all">
+                <input type="radio" name="restore_mode" value="overwrite" checked class="text-black focus:ring-black w-4 h-4 mt-0.5">
+                <div>
+                  <span class="block text-xs font-black text-black">Clean Restore &amp; Overwrite</span>
+                  <span class="block text-[11px] text-slate-500 mt-0.5">Initializes the fresh system purely from your backup snapshot.</span>
+                </div>
+              </label>
+              <label class="p-3 rounded-xl border-2 border-slate-200 hover:border-black cursor-pointer flex items-start space-x-2.5 transition-all">
+                <input type="radio" name="restore_mode" value="merge" class="text-black focus:ring-black w-4 h-4 mt-0.5">
+                <div>
+                  <span class="block text-xs font-black text-black">Merge with Existing Data</span>
+                  <span class="block text-[11px] text-slate-500 mt-0.5">Appends backup records on top of current default database records.</span>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Band (Hidden until submitting) -->
+        <div id="setup-restore-progress-container" class="hidden p-4 bg-slate-50 border-2 border-black rounded-2xl space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <i class="fas fa-circle-notch fa-spin text-black text-sm"></i>
+              <span id="setup-restore-status-text" class="text-xs font-black text-black">
+                Uploading backup archive...
+              </span>
+            </div>
+            <span id="setup-restore-pct" class="font-mono font-black text-xs text-black bg-white px-2 py-0.5 rounded-lg border border-slate-300">
+              0%
+            </span>
+          </div>
+          <div class="w-full bg-slate-200 h-3 rounded-full overflow-hidden p-0.5 border border-slate-300">
+            <div id="setup-restore-progress-bar" class="h-full bg-black rounded-full transition-all duration-300" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- Result Feedback Banner (Hidden until done) -->
+        <div id="setup-restore-result-box" class="hidden p-4 bg-emerald-50 border-2 border-emerald-500 rounded-2xl space-y-2">
+          <div class="flex items-center space-x-2 text-emerald-900 font-black text-sm">
+            <i class="fas fa-check-circle text-emerald-600"></i>
+            <span id="setup-result-title">Database Restored Successfully</span>
+          </div>
+          <p id="setup-result-msg" class="text-xs text-emerald-800 font-medium"></p>
+          <div class="pt-2 flex items-center justify-between">
+            <span class="text-xs text-emerald-900 font-bold">
+              Auto-reloading application in <b class="font-mono text-black" id="setup-reload-countdown">5</b>s...
+            </span>
+            <button type="button" onclick="window.location.reload()" class="px-4 py-1.5 rounded-lg bg-black text-white text-xs font-black uppercase tracking-wider">
+              Reload Now
+            </button>
+          </div>
+        </div>
+
+        <!-- Action Submit Footer -->
+        <div class="pt-4 border-t-2 border-black flex flex-col sm:flex-row items-center justify-between gap-3">
+          <button type="button" onclick="switchSetupTab('manual')" class="text-xs font-bold text-slate-600 hover:text-black">
+            <i class="fas fa-arrow-left mr-1"></i> Back to Store Details Form
+          </button>
+          <button type="submit" id="btn-submit-setup-restore"
+                  class="w-full sm:w-auto px-7 py-3 rounded-xl bg-black hover:bg-slate-800 text-white text-xs font-black tracking-wider uppercase shadow-xl transition-all flex items-center justify-center space-x-2">
+            <i class="fas fa-cloud-upload-alt text-sm"></i>
+            <span>Upload &amp; Restore Database</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+
   </div>
 </div>
+
+<script>
+  function switchSetupTab(mode) {
+    if (mode === 'restore') {
+      $('#mandatory-setup-form').addClass('hidden');
+      $('#mandatory-restore-pane').removeClass('hidden');
+      $('#tab-btn-restore').removeClass('bg-white/10 hover:bg-white/20 text-white').addClass('bg-white text-black shadow');
+      $('#tab-btn-manual').removeClass('bg-white text-black shadow').addClass('bg-white/10 hover:bg-white/20 text-white');
+    } else {
+      $('#mandatory-restore-pane').addClass('hidden');
+      $('#mandatory-setup-form').removeClass('hidden');
+      $('#tab-btn-manual').removeClass('bg-white/10 hover:bg-white/20 text-white').addClass('bg-white text-black shadow');
+      $('#tab-btn-restore').removeClass('bg-white text-black shadow').addClass('bg-white/10 hover:bg-white/20 text-white');
+    }
+  }
+
+  // Backup file preview badge inside mandatory modal
+  $('#setup_backup_file_input').on('change', function() {
+    const file = this.files && this.files[0];
+    if (file) {
+      $('#setup-file-badge-name').text(file.name);
+      $('#setup-file-badge-size').text((file.size / 1024).toFixed(1) + ' KB');
+      const lower = file.name.toLowerCase();
+      const isJson = lower.endsWith('.json');
+      const isSqlite = lower.endsWith('.sqlite3') || lower.endsWith('.db');
+
+      const $bType = $('#setup-file-badge-type');
+      if (isJson) {
+        $bType.text('Universal JSON').attr('class', 'text-[10px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md flex-shrink-0');
+      } else if (isSqlite) {
+        $bType.text('Raw SQLite DB').attr('class', 'text-[10px] font-black text-blue-800 bg-blue-100 px-2 py-0.5 rounded-md flex-shrink-0');
+      } else {
+        $bType.text('Unknown Format').attr('class', 'text-[10px] font-black text-red-800 bg-red-100 px-2 py-0.5 rounded-md flex-shrink-0');
+      }
+      $('#setup-file-badge').removeClass('hidden');
+    } else {
+      $('#setup-file-badge').addClass('hidden');
+    }
+  });
+
+  // Handle backup restore inside mandatory modal
+  $('#setup-restore-form').on('submit', function(e) {
+    e.preventDefault();
+    const fileInput = document.getElementById('setup_backup_file_input');
+    if (!fileInput.files || fileInput.files.length === 0) {
+      if (typeof notifySwal === 'function') {
+        notifySwal('No File Selected', 'Please select a backup archive file to restore.', 'error');
+      } else {
+        alert('Please select a backup archive file to restore.');
+      }
+      return;
+    }
+
+    const file = fileInput.files[0];
+    const mode = $('#setup-restore-form input[name="restore_mode"]:checked').val() || 'overwrite';
+    const modeLabel = mode === 'overwrite' ? 'Clean Restore & Overwrite' : 'Merge Mode';
+    const confirmMsg = `Restore data from "${file.name}" (${(file.size / 1024).toFixed(1)} KB) using ${modeLabel}?\n\nThis will configure your system from the backup archive.`;
+
+    const executeSetupRestore = function() {
+      const formData = new FormData(document.getElementById('setup-restore-form'));
+      const $btn = $('#btn-submit-setup-restore');
+      const $progressContainer = $('#setup-restore-progress-container');
+      const $progressBar = $('#setup-restore-progress-bar');
+      const $pctText = $('#setup-restore-pct');
+      const $statusText = $('#setup-restore-status-text');
+      const $resultBox = $('#setup-restore-result-box');
+
+      $btn.prop('disabled', true).addClass('opacity-60 pointer-events-none').html('<i class="fas fa-spinner fa-spin mr-2"></i> Restoring Database...');
+      $resultBox.addClass('hidden');
+      $progressContainer.removeClass('hidden');
+
+      function updateProg(pct, text) {
+        $progressBar.css('width', pct + '%');
+        $pctText.text(pct + '%');
+        $statusText.text(text);
+      }
+
+      updateProg(15, 'Uploading archive package...');
+
+      let simTimer = setInterval(function() {
+        let cur = parseInt($pctText.text()) || 15;
+        if (cur < 85) {
+          updateProg(cur + 10, cur < 45 ? 'Validating database schema...' : 'Ingesting backup records...');
+        }
+      }, 500);
+
+      $.ajax({
+        url: $('#setup-restore-form').attr('action'),
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(res) {
+          clearInterval(simTimer);
+          updateProg(100, 'Restoration complete!');
+          setTimeout(function() {
+            $progressContainer.addClass('hidden');
+            if (res.status === 'success') {
+              $('#setup-result-title').text(res.title || 'Database Restored Successfully');
+              $('#setup-result-msg').text(res.message);
+              $resultBox.removeClass('hidden');
+
+              if (typeof notifySwal === 'function') {
+                notifySwal(res.title || 'Restore Completed', res.message, 'success');
+              }
+
+              let count = 5;
+              $('#setup-reload-countdown').text(count);
+              const timer = setInterval(function() {
+                count--;
+                $('#setup-reload-countdown').text(count);
+                if (count <= 0) {
+                  clearInterval(timer);
+                  window.location.reload();
+                }
+              }, 1000);
+            } else {
+              $btn.prop('disabled', false).removeClass('opacity-60 pointer-events-none').html('<i class="fas fa-cloud-upload-alt text-sm"></i><span>Upload &amp; Restore Database</span>');
+              if (typeof notifySwal === 'function') {
+                notifySwal(res.title || 'Restore Failed', res.message, 'error');
+              } else {
+                alert(res.message);
+              }
+            }
+          }, 400);
+        },
+        error: function(xhr) {
+          clearInterval(simTimer);
+          $progressContainer.addClass('hidden');
+          $btn.prop('disabled', false).removeClass('opacity-60 pointer-events-none').html('<i class="fas fa-cloud-upload-alt text-sm"></i><span>Upload &amp; Restore Database</span>');
+          const err = xhr.responseJSON?.message || 'Server error during restore process.';
+          if (typeof notifySwal === 'function') {
+            notifySwal('Restore Error', err, 'error');
+          } else {
+            alert(err);
+          }
+        }
+      });
+    };
+
+    if (typeof confirmSwal === 'function') {
+      confirmSwal(
+        'Confirm Database Restore',
+        confirmMsg,
+        'Proceed & Restore',
+        executeSetupRestore
+      );
+    } else {
+      if (confirm(confirmMsg)) {
+        executeSetupRestore();
+      }
+    }
+  });
+</script>

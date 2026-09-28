@@ -149,7 +149,7 @@ const ModalManager = {
     
     // Reset container size class
     const dialog = this.shell.find('.modal-dialog');
-    dialog.removeClass('max-w-xs max-w-sm max-w-md max-w-lg max-w-xl max-w-2xl max-w-3xl max-w-4xl max-w-5xl').addClass(sizeClass);
+    dialog.removeClass('max-w-xs max-w-sm max-w-md max-w-lg max-w-xl max-w-2xl max-w-3xl max-w-4xl max-w-5xl max-w-6xl max-w-7xl max-w-full').addClass(sizeClass);
     
     // Show skeleton loader in modal
     this.container.html(`
@@ -486,6 +486,7 @@ window.initSearchableCombobox = function (wrapperSelector) {
 
 // Table AJAX Refresh Helper
 function refreshTable(containerSelector, customParams = {}) {
+window.refreshTable = refreshTable;
   const $container = $(containerSelector);
   if (!$container.length) return;
   

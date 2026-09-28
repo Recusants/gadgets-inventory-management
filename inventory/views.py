@@ -15,7 +15,7 @@ from django.utils import timezone
 from .models import Product, Stock, StockBatch, Category, ProductStatus, Supplier
 from core.validators import validate_product, validate_receive_invoice, validate_category, validate_supplier, _parse_decimal, _parse_custom_date
 from core.responses import success_response, error_response, permission_denied_response
-from core.decorators import admin_required, manager_or_admin_required, ajax_required
+from core.decorators import allowed_roles, admin_required, manager_or_admin_required, supervisor_or_above_required, ajax_required
 
 
 # ==============================================================================
@@ -108,6 +108,7 @@ def product_search_ajax(request):
     return JsonResponse({'status': 'success', 'results': results})
 
 
+@supervisor_or_above_required
 def product_add_modal(request):
     """Returns the Add Product modal HTML partial."""
     categories = Category.objects.all().order_by('name')
@@ -116,6 +117,7 @@ def product_add_modal(request):
     })
 
 
+@supervisor_or_above_required
 def product_edit_modal(request, pk):
     """Returns the Edit Product modal HTML partial pre-filled with data."""
     product = get_object_or_404(Product.objects.select_related('category', 'stock'), pk=pk)
@@ -135,6 +137,7 @@ def product_detail_modal(request, pk):
 
 
 @require_POST
+@supervisor_or_above_required
 def product_create(request):
     """Creates a new generic product definition with default Stock record."""
     is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
@@ -197,6 +200,7 @@ def product_create(request):
 
 
 @require_POST
+@supervisor_or_above_required
 def product_update(request, pk):
     """Updates an existing product record and selling price."""
     product = get_object_or_404(Product, pk=pk)
@@ -231,6 +235,7 @@ def product_update(request, pk):
 
 
 @require_POST
+@manager_or_admin_required
 def product_delete(request, pk):
     """Deletes a product record."""
     if request.user.is_authenticated and not (request.user.is_admin_role() or request.user.is_manager_role()):
@@ -258,6 +263,7 @@ def product_delete(request, pk):
 # RECEIVE INVOICE & STOCK BATCHES
 # ==============================================================================
 
+@allowed_roles(['ADMIN', 'MANAGER', 'SUPERVISOR', 'STAFF', 'CASHIER'])
 def receive_invoice_modal(request):
     """Returns modal HTML for receiving a supplier invoice (3-tab wizard with searchable selects)."""
     products = Product.objects.select_related('stock').all().order_by('name')
@@ -270,10 +276,12 @@ def receive_invoice_modal(request):
 
 
 @require_POST
+@allowed_roles(['ADMIN', 'MANAGER', 'SUPERVISOR', 'STAFF', 'CASHIER'])
 def receive_invoice_save(request):
     """
     Receives an incoming supplier invoice (supports multi-item 3-tab wizard or single item),
-    creates FIFO stock batches, updates selling prices, recalculates stock, and links supplier.
+    creates FIFO stock batches with optional serial_number and expiration_date,
+    updates selling prices, recalculates stock, and links supplier.
     """
     is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
     items_json = request.POST.get('items_json', '').strip()
@@ -297,6 +305,28 @@ def receive_invoice_save(request):
         date_received = _parse_custom_date(request.POST.get('date_received')) or timezone.now().date()
         notes = request.POST.get('notes', '').strip()
 
+        # Validate serial numbers & quantities up-front
+        for it in items:
+            p_id = it.get('product_id')
+            p_qty = int(it.get('quantity', 1))
+            sn = str(it.get('serial_number') or '').strip()
+            exp_date_raw = it.get('expiration_date')
+            product = Product.objects.filter(pk=p_id).first()
+            if not product:
+                continue
+
+            if sn:
+                if p_qty > 1:
+                    return error_response(
+                        title="Invalid Quantity",
+                        message=f"Product '{product.name}' has a serial number '{sn}'. Items with a serial number can only have a quantity of 1."
+                    )
+                if StockBatch.objects.filter(product=product, serial_number__iexact=sn, is_active=True, quantity_remaining__gt=0).exists():
+                    return error_response(
+                        title="Duplicate Serial Number",
+                        message=f"An active batch already exists for '{product.name}' with Serial Number '{sn}'."
+                    )
+
         created_batches = []
         total_qty = 0
         for it in items:
@@ -304,6 +334,9 @@ def receive_invoice_save(request):
             p_qty = int(it.get('quantity', 1))
             p_cost = _parse_decimal(it.get('cost_price', '0')) or Decimal('0.00')
             p_sell = _parse_decimal(it.get('selling_price', '0'))
+            sn = str(it.get('serial_number') or '').strip()
+            exp_date_raw = it.get('expiration_date')
+            exp_date = _parse_custom_date(exp_date_raw) if exp_date_raw else None
 
             product = Product.objects.filter(pk=p_id).first()
             if not product or p_qty <= 0:
@@ -321,6 +354,8 @@ def receive_invoice_save(request):
                 supplier_invoice_number=invoice_num,
                 supplier_name=supplier_name,
                 date_received=date_received,
+                expiration_date=exp_date,
+                serial_number=sn,
                 cost_price=p_cost,
                 quantity_received=p_qty,
                 quantity_remaining=p_qty,
@@ -331,6 +366,12 @@ def receive_invoice_save(request):
             stock.recalculate_quantity()
             created_batches.append(batch)
             total_qty += p_qty
+
+        try:
+            from core.utils import sync_all_stock_notifications
+            sync_all_stock_notifications()
+        except Exception:
+            pass
 
         return success_response(
             title="Invoice Received",
@@ -358,6 +399,8 @@ def receive_invoice_save(request):
     cost_price = _parse_decimal(request.POST.get('cost_price') or request.POST.get('amount_bought'))
     selling_price = _parse_decimal(request.POST.get('selling_price') or request.POST.get('amount_sold'))
     date_received = _parse_custom_date(request.POST.get('date_received')) or timezone.now().date()
+    exp_date = _parse_custom_date(request.POST.get('expiration_date'))
+    sn = request.POST.get('serial_number', '').strip()
     notes = request.POST.get('notes', '').strip()
 
     stock, _ = Stock.objects.get_or_create(product=product)
@@ -372,6 +415,8 @@ def receive_invoice_save(request):
         supplier_invoice_number=invoice_num,
         supplier_name=supplier_name,
         date_received=date_received,
+        expiration_date=exp_date,
+        serial_number=sn,
         cost_price=cost_price,
         quantity_received=qty,
         quantity_remaining=qty,
@@ -381,6 +426,12 @@ def receive_invoice_save(request):
     )
 
     stock.recalculate_quantity()
+
+    try:
+        from core.utils import sync_all_stock_notifications
+        sync_all_stock_notifications()
+    except Exception:
+        pass
 
     if is_ajax:
         return success_response(

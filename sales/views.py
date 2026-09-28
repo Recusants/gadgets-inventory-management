@@ -18,8 +18,8 @@ from .models import Customer, Sale, SaleItem, SaleBatchDeduction, PaymentMethod
 from inventory.models import Product, Stock, StockBatch, Category
 from core.models import CompanySetting
 from core.validators import validate_customer, validate_sale, _parse_decimal, _parse_custom_date
+from core.decorators import allowed_roles, ajax_required
 from core.responses import success_response, error_response, permission_denied_response
-from core.decorators import admin_required, manager_or_admin_required, ajax_required
 
 
 # ==============================================================================
@@ -180,8 +180,55 @@ def sale_create(request):
             sn = str(item.get('serial_number') or '').strip()
             line_total = unit_price * qty
 
-            # FIFO Deduction from active batches ordered by date_received ASC, id ASC
-            batches = prod.batches.filter(is_active=True, quantity_remaining__gt=0).order_by('date_received', 'id')
+            if sn:
+                # 1. Serialized Checkout: Match exact active batch with matching serial number
+                sn_batch = prod.batches.filter(
+                    is_active=True,
+                    quantity_remaining__gt=0,
+                    serial_number__iexact=sn
+                ).first()
+
+                if not sn_batch:
+                    exhausted = prod.batches.filter(serial_number__iexact=sn, quantity_remaining=0).exists()
+                    if exhausted:
+                        msg = f"Product '{prod.name}' with Serial Number '{sn}' has already been sold or exhausted."
+                    else:
+                        msg = f"No active stock found for '{prod.name}' with Serial Number '{sn}'. Please verify the serial number."
+                    transaction.set_rollback(True)
+                    if is_ajax:
+                        return error_response(title="Serial Number Not Found", message=msg)
+                    return redirect('sales:checkout')
+
+                batches = [sn_batch]
+            else:
+                # 2. Non-Serialized Checkout: Deduct ONLY from batches without serial numbers
+                batches = list(prod.batches.filter(
+                    is_active=True,
+                    quantity_remaining__gt=0,
+                    serial_number=''
+                ).order_by('date_received', 'id'))
+
+                non_sn_available = sum(b.quantity_remaining for b in batches)
+                if non_sn_available < qty:
+                    serialized_count = prod.batches.filter(
+                        is_active=True,
+                        quantity_remaining__gt=0
+                    ).exclude(serial_number='').count()
+
+                    if serialized_count > 0:
+                        msg = (
+                            f"Insufficient non-serialized stock for '{prod.name}'. "
+                            f"Only {non_sn_available} unit(s) available without serial number. "
+                            f"Remaining {serialized_count} unit(s) are serialized and require an exact serial number at checkout."
+                        )
+                    else:
+                        msg = f"Insufficient stock for '{prod.name}'. Requested: {qty}, available: {non_sn_available}."
+
+                    transaction.set_rollback(True)
+                    if is_ajax:
+                        return error_response(title="Stock Allocation Error", message=msg)
+                    return redirect('sales:checkout')
+
             rem_qty = qty
             line_cost = Decimal('0.00')
             deductions = []
@@ -231,6 +278,12 @@ def sale_create(request):
         sale.total_cost = total_cost
         sale.total_profit = total_amount - total_cost
         sale.save()
+
+        try:
+            from core.utils import sync_all_stock_notifications
+            sync_all_stock_notifications()
+        except Exception:
+            pass
 
     if is_ajax:
         return success_response(

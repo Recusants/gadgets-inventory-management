@@ -22,7 +22,7 @@
     <div class="mt-3 sm:mt-0 flex items-center space-x-2.5 flex-shrink-0">
       <button type="button" 
               data-modal-url="{% url 'inventory:receive_invoice_modal' %}"
-              data-modal-size="max-w-3xl"
+              data-modal-size="max-w-6xl"
               class="inline-flex items-center px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md shadow-blue-600/20 transition-all">
         <i class="fas fa-file-invoice-dollar mr-2 text-xs"></i> Receive Stock / Invoice
       </button>
@@ -36,8 +36,10 @@
         <thead class="sticky top-0 z-20 bg-slate-100 border-b border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
           <tr>
             <th class="py-3 px-4">Batch #</th>
+            <th class="py-3 px-4">Serial #</th>
             <th class="py-3 px-4">Date Received</th>
             <th class="py-3 px-4">Product Name</th>
+            <th class="py-3 px-4">Expiration</th>
             <th class="py-3 px-4">Supplier Invoice #</th>
             <th class="py-3 px-4">Supplier Name</th>
             <th class="py-3 px-4 text-right">Unit Cost</th>
@@ -53,11 +55,37 @@
               <td class="py-3 px-4 font-mono font-bold text-blue-700 whitespace-nowrap">
                 #{{ b.id }}
               </td>
+              <td class="py-3 px-4 font-mono whitespace-nowrap">
+                {% if b.serial_number %}
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                    {{ b.serial_number }}
+                  </span>
+                {% else %}
+                  <span class="text-slate-400 italic">—</span>
+                {% endif %}
+              </td>
               <td class="py-3 px-4 font-mono text-[11px] text-slate-500 whitespace-nowrap">
                 {{ b.date_received|date:"Y-m-d" }}
               </td>
               <td class="py-3 px-4 font-bold text-slate-900">
                 {{ b.product.name }}
+              </td>
+              <td class="py-3 px-4 whitespace-nowrap">
+                {% if b.expiration_date %}
+                  {% if b.expiry_status == 'EXPIRED' %}
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black bg-red-100 text-red-800 font-mono border border-red-200">
+                      <i class="fas fa-exclamation-triangle mr-1"></i> Expired ({{ b.expiration_date|date:"Y-m-d" }})
+                    </span>
+                  {% elif b.expiry_status == 'EXPIRING_SOON' %}
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 font-mono border border-amber-200">
+                      <i class="fas fa-clock mr-1"></i> {{ b.expiration_date|date:"Y-m-d" }} ({{ b.days_until_expiry }}d)
+                    </span>
+                  {% else %}
+                    <span class="font-mono text-[11px] text-slate-700">{{ b.expiration_date|date:"Y-m-d" }}</span>
+                  {% endif %}
+                {% else %}
+                  <span class="text-slate-400 italic">—</span>
+                {% endif %}
               </td>
               <td class="py-3 px-4 font-mono font-bold text-slate-700 whitespace-nowrap">
                 {{ b.supplier_invoice_number|default:"—" }}
@@ -108,7 +136,7 @@
             </tr>
           {% empty %}
             <tr>
-              <td colspan="10" class="py-12 text-center text-slate-400">
+              <td colspan="12" class="py-12 text-center text-slate-400">
                 <div class="flex flex-col items-center justify-center">
                   <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
                     <i class="fas fa-layer-group text-lg"></i>

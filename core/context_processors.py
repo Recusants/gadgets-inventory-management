@@ -9,17 +9,19 @@ def company_settings_processor(request):
     """
     settings_obj = CompanySetting.get_settings()
     
-    # Auto-generate or sync low-stock notifications if needed
+    # Auto-generate or sync low-stock and expiry notifications if needed
     try:
-        from .utils import sync_low_stock_notifications
-        sync_low_stock_notifications()
-        unread_notifications = Notification.objects.select_related('product', 'product__stock').filter(is_read=False).order_by('-created_at')[:6]
+        from .utils import sync_all_stock_notifications
+        sync_all_stock_notifications()
+        unread_notifications = Notification.objects.select_related('product', 'product__stock', 'batch').filter(is_read=False).order_by('-created_at')[:6]
         unread_notifications_count = Notification.objects.filter(is_read=False).count()
         low_stock_count = Notification.objects.filter(is_read=False, notification_type=Notification.NotificationType.LOW_STOCK).count()
+        expiry_count = Notification.objects.filter(is_read=False, notification_type=Notification.NotificationType.EXPIRING).count()
     except Exception:
         unread_notifications = []
         unread_notifications_count = 0
         low_stock_count = 0
+        expiry_count = 0
 
     # Evaluate Mandatory Operational Data Checklist (Strictly Operating Store Settings)
     has_company_profile = False
@@ -70,17 +72,40 @@ def company_settings_processor(request):
         pass
 
 
+    import platform
+    import sys
+    import django
+    from django.conf import settings
+    db_engine = settings.DATABASES['default']['ENGINE'].split('.')[-1].upper()
+
     sys_ver = get_system_version()
+    system_details = {
+        'system_name': sys_ver.get('system_name', 'Clarity Retail: Gadgets store'),
+        'short_name': sys_ver.get('short_name', 'Clarity Retail'),
+        'edition': 'Enterprise Retail Edition',
+        'version': sys_ver.get('version', 'v2.4.8'),
+        'build': sys_ver.get('build', 'v2.4.8-236657a'),
+        'commit_hash': sys_ver.get('commit_hash', '236657a'),
+        'branch': sys_ver.get('branch', 'main'),
+        'db_engine': db_engine,
+        'os_platform': f"{platform.system()} {platform.release()}",
+        'python_version': f"Python {sys.version.split()[0]}",
+        'django_version': f"Django {django.get_version()}",
+        'developer_name': 'Avail Technologies (Pvt) Ltd',
+        'developer_website': 'avail.co.zw',
+    }
 
     return {
         'system_name': sys_ver.get('system_name', 'Clarity Retail: Gadgets store'),
         'system_short_name': sys_ver.get('short_name', 'Clarity Retail'),
         'system_version': sys_ver,
+        'system_details': system_details,
         'company_settings': settings_obj,
         'settings': settings_obj,  # backwards compatibility
         'unread_notifications': unread_notifications,
         'unread_notifications_count': unread_notifications_count,
         'low_stock_count': low_stock_count,
+        'expiry_count': expiry_count,
         'needs_mandatory_setup': needs_mandatory_setup,
         'mandatory_checklist': mandatory_checklist,
         'has_company_profile': has_company_profile,

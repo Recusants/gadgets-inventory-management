@@ -37,7 +37,7 @@ admin_user, _ = User.objects.get_or_create(
         "first_name": "James",
         "last_name": "Zvokureva",
         "email": "admin@21void.com",
-        "role": UserRole.ADMIN,
+        "roles": [UserRole.ADMIN],
         "is_staff": True,
         "is_superuser": True
     }
@@ -45,7 +45,7 @@ admin_user, _ = User.objects.get_or_create(
 admin_user.set_password("Admin@21Void2026")
 admin_user.first_name = "James"
 admin_user.last_name = "Zvokureva"
-admin_user.role = UserRole.ADMIN
+admin_user.roles = [UserRole.ADMIN]
 admin_user.save()
 
 # 3. Categories

@@ -31,6 +31,7 @@ class CompanySetting(models.Model):
 class Notification(models.Model):
     class NotificationType(models.TextChoices):
         LOW_STOCK = 'LOW_STOCK', 'Low Stock Alert'
+        EXPIRING = 'EXPIRING', 'Expiry Alert'
         SYSTEM = 'SYSTEM', 'System Notice'
         EXPENSE = 'EXPENSE', 'Expense Notice'
 
@@ -39,6 +40,13 @@ class Notification(models.Model):
     notification_type = models.CharField(max_length=30, choices=NotificationType.choices, default=NotificationType.LOW_STOCK)
     product = models.ForeignKey(
         'inventory.Product',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='notifications'
+    )
+    batch = models.ForeignKey(
+        'inventory.StockBatch',
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
@@ -131,4 +139,70 @@ class Notification(models.Model):
             }
         except Exception:
             return None
+
+    @property
+    def expiry_data(self):
+        """
+        Calculates expiry status for EXPIRING notifications.
+        Returns visual badges, color-coding, and days remaining.
+        """
+        if self.notification_type != self.NotificationType.EXPIRING:
+            return None
+
+        from django.utils import timezone
+        today = timezone.now().date()
+        exp_date = None
+        days = None
+
+        if self.batch and self.batch.expiration_date:
+            exp_date = self.batch.expiration_date
+            days = (exp_date - today).days
+
+        if days is None:
+            return None
+
+        if days < 0:
+            return {
+                'days': days,
+                'abs_days': abs(days),
+                'exp_date': exp_date,
+                'color': 'red',
+                'badge_bg': 'bg-red-500 text-white',
+                'badge_soft': 'bg-red-100 text-red-700 border-red-200',
+                'label': f'Expired ({abs(days)}d ago)',
+                'level': 'EXPIRED'
+            }
+        elif days <= 7:
+            return {
+                'days': days,
+                'abs_days': days,
+                'exp_date': exp_date,
+                'color': 'rose',
+                'badge_bg': 'bg-rose-600 text-white',
+                'badge_soft': 'bg-rose-100 text-rose-800 border-rose-200',
+                'label': f'Expires in {days}d',
+                'level': 'CRITICAL'
+            }
+        elif days <= 30:
+            return {
+                'days': days,
+                'abs_days': days,
+                'exp_date': exp_date,
+                'color': 'orange',
+                'badge_bg': 'bg-orange-600 text-white',
+                'badge_soft': 'bg-orange-100 text-orange-800 border-orange-200',
+                'label': f'{days} days left',
+                'level': 'URGENT'
+            }
+        else:
+            return {
+                'days': days,
+                'abs_days': days,
+                'exp_date': exp_date,
+                'color': 'amber',
+                'badge_bg': 'bg-amber-600 text-white',
+                'badge_soft': 'bg-amber-100 text-amber-800 border-amber-200',
+                'label': f'{days} days left',
+                'level': 'WARNING'
+            }
 

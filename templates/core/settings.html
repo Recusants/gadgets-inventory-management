@@ -616,25 +616,13 @@ $(document).ready(function () {
       });
     };
 
-    // Both Promise and callback support
-    const swalResult = confirmSwal(
+    // Trigger confirmation dialog
+    confirmSwal(
       'Restore Database Confirmation',
       confirmMsg,
       'Proceed With Restore',
       executeRestore
     );
-
-    if (swalResult && typeof swalResult.then === 'function') {
-      swalResult.then(function (result) {
-        if (result && result.isConfirmed) {
-          // If onConfirm callback was already executed, executeRestore can guard against double run
-          // We can check if button is already disabled
-          if (!$('#btn-submit-restore').prop('disabled')) {
-            executeRestore();
-          }
-        }
-      });
-    }
   });
 });
 </script>

@@ -19,6 +19,10 @@
             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
               <i class="fas fa-boxes-stacked mr-1 text-[9px] text-blue-600"></i> Stock Alert
             </span>
+          {% elif n.notification_type == 'EXPIRING' %}
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+              <i class="fas fa-clock mr-1 text-[9px] text-amber-600"></i> Expiry Alert
+            </span>
           {% elif n.notification_type == 'EXPENSE' %}
             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">
               <i class="fas fa-wallet mr-1 text-[9px]"></i> Expense
@@ -33,7 +37,22 @@
           <div class="font-bold text-slate-900">{{ n.title }}</div>
         </td>
         <td class="py-3 px-4 whitespace-nowrap">
-          {% if n.stock_level_data %}
+          {% if n.notification_type == 'EXPIRING' and n.expiry_data %}
+            <div class="space-y-1">
+              <div class="flex items-center space-x-2">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black {{ n.expiry_data.badge_class }}">
+                  <span class="w-1.5 h-1.5 rounded-full mr-1.5 {{ n.expiry_data.dot_class }} animate-pulse"></span>
+                  {{ n.expiry_data.label }}
+                </span>
+                <span class="text-[10px] font-mono font-bold text-slate-600">
+                  Batch #{{ n.batch.id }}{% if n.batch.serial_number %} [SN: {{ n.batch.serial_number }}]{% endif %}
+                </span>
+              </div>
+              <div class="text-[10px] text-slate-500 font-mono">
+                Exp: {{ n.batch.expiration_date|date:"Y-m-d" }} ({{ n.batch.quantity_remaining }} units)
+              </div>
+            </div>
+          {% elif n.stock_level_data %}
             <div class="space-y-1">
               <div class="flex items-center space-x-2">
                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black {{ n.stock_level_data.badge_soft }}">

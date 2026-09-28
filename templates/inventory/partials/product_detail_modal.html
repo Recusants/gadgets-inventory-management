@@ -62,8 +62,10 @@
           <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200 sticky top-0">
             <tr>
               <th class="py-2 px-3">Batch #</th>
+              <th class="py-2 px-3">Serial #</th>
               <th class="py-2 px-3">Date</th>
               <th class="py-2 px-3">Supplier / Invoice</th>
+              <th class="py-2 px-3">Expiry</th>
               <th class="py-2 px-3">Cost Price</th>
               <th class="py-2 px-3">Qty Received</th>
               <th class="py-2 px-3">Qty Available</th>
@@ -73,10 +75,36 @@
             {% for b in product.batches.all %}
               <tr class="hover:bg-slate-50">
                 <td class="py-2 px-3 font-mono font-bold text-blue-700">#{{ b.id }}</td>
-                <td class="py-2 px-3 text-slate-600">{{ b.date_received|date:"d M Y" }}</td>
+                <td class="py-2 px-3 font-mono whitespace-nowrap">
+                  {% if b.serial_number %}
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                      {{ b.serial_number }}
+                    </span>
+                  {% else %}
+                    <span class="text-slate-400 italic text-[10px]">Bulk</span>
+                  {% endif %}
+                </td>
+                <td class="py-2 px-3 text-slate-600 whitespace-nowrap">{{ b.date_received|date:"d M Y" }}</td>
                 <td class="py-2 px-3">
-                  <div class="font-bold text-slate-900">{{ b.supplier|default:"Direct" }}</div>
-                  <div class="text-[10px] font-mono text-slate-500">{{ b.invoice_number }}</div>
+                  <div class="font-bold text-slate-900">{{ b.supplier_name|default:"Direct" }}</div>
+                  <div class="text-[10px] font-mono text-slate-500">{{ b.supplier_invoice_number }}</div>
+                </td>
+                <td class="py-2 px-3 whitespace-nowrap">
+                  {% if b.expiration_date %}
+                    {% if b.expiry_status == 'EXPIRED' %}
+                      <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800 border border-red-200">
+                        Expired
+                      </span>
+                    {% elif b.expiry_status == 'EXPIRING_SOON' %}
+                      <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                        {{ b.days_until_expiry }}d left
+                      </span>
+                    {% else %}
+                      <span class="text-slate-700 text-[10px] font-mono">{{ b.expiration_date|date:"d M Y" }}</span>
+                    {% endif %}
+                  {% else %}
+                    <span class="text-slate-400 italic text-[10px]">—</span>
+                  {% endif %}
                 </td>
                 <td class="py-2 px-3 font-mono font-bold text-slate-900">${{ b.cost_price|intcomma }}</td>
                 <td class="py-2 px-3 font-semibold text-slate-700">{{ b.quantity_received }}</td>
@@ -86,7 +114,7 @@
               </tr>
             {% empty %}
               <tr>
-                <td colspan="6" class="py-4 text-center text-slate-400 italic">No batches received for this product yet.</td>
+                <td colspan="8" class="py-4 text-center text-slate-400 italic">No batches received for this product yet.</td>
               </tr>
             {% endfor %}
           </tbody>

@@ -23,7 +23,7 @@
       <span class="ml-auto w-2 h-2 rounded-full bg-emerald-400 animate-pulse sidebar-label" title="POS Ready"></span>
     </a>
 
-    <!-- Products -->
+    <!-- Products (Catalog) -->
     <a href="/inventory/products/" 
        title="Products"
        class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if '/inventory/products/' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
@@ -31,6 +31,7 @@
       <span class="sidebar-label truncate text-white font-bold text-xs">Products</span>
     </a>
 
+    {% if request.user.is_supervisor_role %}
     <!-- Stock & Pricing -->
     <a href="/inventory/stock/" 
        title="Stock & Pricing"
@@ -70,6 +71,7 @@
       <i class="fas fa-tags w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
       <span class="sidebar-label truncate text-white font-bold text-xs">Categories</span>
     </a>
+    {% endif %}
 
     <!-- Sales Records -->
     <a href="/sales/" 
@@ -79,13 +81,15 @@
       <span class="sidebar-label truncate text-white font-bold text-xs">Sales</span>
     </a>
 
-    <!-- Expenses (New Module) -->
+    {% if request.user.is_supervisor_role %}
+    <!-- Expenses -->
     <a href="/expenses/" 
        title="Expenses Tracking"
        class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if request.resolver_match.app_name == 'expenses' %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
       <i class="fas fa-wallet w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
       <span class="sidebar-label truncate text-white font-bold text-xs">Expenses</span>
     </a>
+    {% endif %}
 
     <!-- Customers -->
     <a href="/sales/customers/" 
@@ -108,6 +112,7 @@
       {% endif %}
     </a>
 
+    {% if request.user.is_supervisor_role %}
     <!-- Reports -->
     <a href="/reports/" 
        title="Reports & Analytics"
@@ -115,7 +120,9 @@
       <i class="fas fa-chart-bar w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
       <span class="sidebar-label truncate text-white font-bold text-xs">Reports</span>
     </a>
+    {% endif %}
 
+    {% if request.user.is_manager_role %}
     <!-- Settings (Client Store Profile) -->
     <a href="{% url 'core:settings' %}" 
        title="Store Settings"
@@ -124,16 +131,16 @@
       <span class="sidebar-label truncate text-white font-bold text-xs">Settings</span>
     </a>
 
-    <!-- System & Developer Support (Avail Technologies) -->
+    <!-- System & Developer Support -->
     <a href="{% url 'core:system' %}" 
        title="System Information & Support"
        class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if 'system' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
       <i class="fas fa-server w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
       <span class="sidebar-label truncate text-white font-bold text-xs">System</span>
     </a>
+    {% endif %}
 
-
-    <!-- User Management (Privileged Accounts: Admin/Superuser Only) -->
+    <!-- User Management (Admin Only) -->
     {% if request.user.is_admin_role or request.user.is_superuser %}
     <a href="{% url 'accounts:user_list' %}" 
        title="User Management"

@@ -59,6 +59,42 @@
       </div>
     </div>
 
+    <!-- Serial Number & Expiration Card -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div class="p-3.5 rounded-xl border border-slate-200 bg-white">
+        <div class="text-slate-950 uppercase tracking-wider font-black text-[10px]">Serial Number</div>
+        <div class="font-mono font-bold text-xs mt-1">
+          {% if batch.serial_number %}
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-purple-800 bg-purple-100 border border-purple-200">
+              <i class="fas fa-barcode mr-1.5"></i> {{ batch.serial_number }}
+            </span>
+          {% else %}
+            <span class="text-slate-400 italic">No serial number (Bulk Batch)</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="p-3.5 rounded-xl border border-slate-200 bg-white">
+        <div class="text-slate-950 uppercase tracking-wider font-black text-[10px]">Expiration Date</div>
+        <div class="font-mono font-bold text-xs mt-1">
+          {% if batch.expiration_date %}
+            {% if batch.expiry_status == 'EXPIRED' %}
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-red-800 bg-red-100 border border-red-200">
+                <i class="fas fa-exclamation-triangle mr-1.5"></i> Expired ({{ batch.expiration_date|date:"d M Y" }})
+              </span>
+            {% elif batch.expiry_status == 'EXPIRING_SOON' %}
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-amber-800 bg-amber-100 border border-amber-200">
+                <i class="fas fa-clock mr-1.5"></i> {{ batch.expiration_date|date:"d M Y" }} ({{ batch.days_until_expiry }} days left)
+              </span>
+            {% else %}
+              <span class="text-slate-800">{{ batch.expiration_date|date:"d M Y" }}</span>
+            {% endif %}
+          {% else %}
+            <span class="text-slate-400 italic">No expiration date set</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
     <!-- Supplier & Invoice Details -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <div class="p-3.5 rounded-xl border border-slate-200 bg-white">

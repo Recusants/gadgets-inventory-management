@@ -1,0 +1,360 @@
+{% load static %}
+<!-- High-Contrast Enterprise Startup Splash Screen (8-Second DB & System Telemetry) -->
+<div id="app-splash-screen" 
+     class="fixed inset-0 z-[99999] flex flex-col items-center justify-between p-4 sm:p-8 select-none overflow-hidden transition-all duration-700 ease-out"
+     style="background: radial-gradient(circle at 50% 25%, #08162d 0%, #02040a 70%, #000000 100%);">
+
+  <!-- Background Animated Cyber Grid & Tech Glow -->
+  <div class="absolute inset-0 pointer-events-none opacity-30" 
+       style="background-image: linear-gradient(to right, rgba(6, 182, 212, 0.15) 1px, transparent 1px), linear-gradient(to bottom, rgba(6, 182, 212, 0.15) 1px, transparent 1px); background-size: 32px 32px;">
+  </div>
+  
+  <!-- Sweeping Tech Scanline Effect -->
+  <div class="splash-scanline absolute inset-x-0 h-28 pointer-events-none opacity-35 bg-gradient-to-b from-transparent via-cyan-400/40 to-transparent"></div>
+
+  <!-- Ambient Pulsing Glow Orbs -->
+  <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-600/20 rounded-full blur-[100px] pointer-events-none"></div>
+  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-blue-600/15 rounded-full blur-[80px] pointer-events-none"></div>
+
+  <!-- Top Telemetry & Controls Bar (High-Contrast System Information) -->
+  <div class="w-full max-w-5xl flex items-center justify-between z-10 text-xs font-mono">
+    <div class="flex items-center space-x-3">
+      <span class="inline-flex items-center px-3 py-1 rounded-full bg-cyan-950 border-2 border-cyan-400 text-cyan-200 font-extrabold shadow-[0_0_12px_rgba(6,182,212,0.4)]">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping mr-2 inline-block"></span>
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 absolute mr-2 inline-block"></span>
+        SYSTEM BOOT
+      </span>
+      <span class="text-cyan-300 font-bold hidden sm:inline-block">DB ENGINE: <strong class="text-white font-extrabold">{{ system_details.db_engine|default:"SQLITE3" }}</strong></span>
+      <span class="text-cyan-300 font-bold hidden md:inline-block">ENV: <strong class="text-emerald-400 font-black">{{ system_details.edition|default:"ENTERPRISE RETAIL" }}</strong></span>
+      <span class="text-cyan-300 font-bold hidden lg:inline-block">PLATFORM: <strong class="text-white font-extrabold">{{ system_details.os_platform }}</strong></span>
+    </div>
+
+    <!-- Quick Skip Button (Immediate Bypass) -->
+    <button type="button" 
+            onclick="window.dismissSplashScreen ? window.dismissSplashScreen() : null"
+            title="Press Esc or click to skip"
+            class="px-3.5 py-1.5 rounded-lg border-2 border-slate-600 bg-slate-900 hover:bg-slate-800 text-white font-bold hover:border-cyan-400 hover:text-cyan-300 transition-all flex items-center space-x-2 shadow-md">
+      <span>SKIP</span>
+      <span class="text-[10px] text-cyan-400 font-black">❯❯</span>
+    </button>
+  </div>
+
+  <!-- Center Holographic Brand & System Core -->
+  <div class="flex flex-col items-center justify-center my-auto z-10 text-center space-y-5 max-w-3xl px-4">
+    
+    <!-- Concentric Rotating Cyber Reactor Rings & Company Logo from DB -->
+    <div class="relative w-32 h-32 sm:w-40 sm:h-40 flex items-center justify-center">
+      
+      <!-- Outer Dashed Orbit Ring (Clockwise) -->
+      <div class="absolute inset-0 rounded-full border-2 border-dashed border-cyan-400 animate-cyber-spin pointer-events-none shadow-[0_0_20px_rgba(6,182,212,0.4)]"></div>
+      
+      <!-- Middle Circuit Crosshair Ring (Counter-Clockwise) -->
+      <div class="absolute inset-2 sm:inset-3 rounded-full border-2 border-cyan-400 border-t-white border-b-blue-500 animate-cyber-spin-reverse pointer-events-none shadow-[0_0_25px_rgba(6,182,212,0.6)]"></div>
+      
+      <!-- Inner Radar Scanner Sweep -->
+      <div class="absolute inset-4 sm:inset-5 rounded-full overflow-hidden pointer-events-none">
+        <div class="w-full h-full bg-gradient-to-tr from-cyan-400/30 via-cyan-500/10 to-transparent animate-radar-sweep origin-bottom-right"></div>
+      </div>
+
+      <!-- Core Glowing Badge with Company Logo from DB -->
+      <div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-[#030712] border-2 border-cyan-400 shadow-[0_0_40px_rgba(6,182,212,0.7)] flex items-center justify-center p-2.5 backdrop-blur-md transition-all">
+        {% if company_settings.logo %}
+          <img src="{{ company_settings.logo.url }}" 
+               alt="{{ company_settings.company_name }}" 
+               class="w-full h-full object-contain rounded-2xl drop-shadow-[0_0_15px_rgba(255,255,255,0.7)]">
+        {% else %}
+          <div class="text-cyan-300 text-3xl sm:text-4xl animate-pulse drop-shadow-[0_0_15px_rgba(6,182,212,0.8)]">
+            <i class="fas fa-microchip"></i>
+          </div>
+        {% endif %}
+        
+        <!-- Corner Accent Tech Ticks (Vibrant Neon Cyan) -->
+        <span class="absolute -top-1 -left-1 w-3 h-3 border-t-2 border-l-2 border-cyan-300"></span>
+        <span class="absolute -top-1 -right-1 w-3 h-3 border-t-2 border-r-2 border-cyan-300"></span>
+        <span class="absolute -bottom-1 -left-1 w-3 h-3 border-b-2 border-l-2 border-cyan-300"></span>
+        <span class="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2 border-cyan-300"></span>
+      </div>
+
+    </div>
+
+    <!-- Company Information from Database -->
+    <div class="space-y-1.5">
+      <h1 class="text-3xl sm:text-5xl font-black tracking-[0.22em] uppercase text-white drop-shadow-[0_0_25px_rgba(6,182,212,0.8)]">
+        {{ company_settings.company_name|default:"21 Void" }}
+      </h1>
+      <p class="text-xs sm:text-sm font-bold tracking-[0.2em] text-cyan-300 uppercase drop-shadow-[0_0_10px_rgba(6,182,212,0.5)]">
+        {{ company_settings.tagline|default:"Point of Sale & Inventory Matrix Engine" }}
+      </p>
+      
+      <!-- Store Location & Contact from DB -->
+      <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 pt-1 text-[11px] font-mono text-slate-300 font-semibold">
+        {% if company_settings.address %}
+          <span class="flex items-center space-x-1">
+            <i class="fas fa-map-marker-alt text-rose-400"></i>
+            <span>{{ company_settings.address }}</span>
+          </span>
+        {% endif %}
+        {% if company_settings.phone %}
+          <span class="flex items-center space-x-1">
+            <i class="fas fa-phone-alt text-emerald-400"></i>
+            <span>{{ company_settings.phone }}</span>
+          </span>
+        {% endif %}
+        {% if company_settings.currency_code %}
+          <span class="flex items-center space-x-1">
+            <i class="fas fa-coins text-amber-400"></i>
+            <span>CURRENCY: <strong class="text-white">{{ company_settings.currency_code }} ({{ company_settings.currency_symbol }})</strong></span>
+          </span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- System Details Specification Chips -->
+    <div class="flex flex-wrap items-center justify-center gap-2 pt-1 font-mono text-xs">
+      <span class="px-3 py-1.5 rounded-lg bg-black border-2 border-slate-600 text-white font-extrabold flex items-center space-x-2 shadow-md">
+        <i class="fas fa-layer-group text-blue-400 text-xs"></i>
+        <span>{{ system_details.system_name|default:"Clarity Retail" }}</span>
+      </span>
+      <span class="px-3 py-1.5 rounded-lg bg-cyan-950 border-2 border-cyan-400 text-cyan-200 font-black flex items-center space-x-2 shadow-[0_0_15px_rgba(6,182,212,0.5)]">
+        <i class="fas fa-code-branch text-cyan-300 text-xs"></i>
+        <span>{{ system_details.version|default:"v2.4.8" }}</span>
+      </span>
+      <span class="px-3 py-1.5 rounded-lg bg-black border-2 border-slate-600 text-slate-100 font-extrabold flex items-center space-x-2 shadow-md">
+        <i class="fas fa-hashtag text-cyan-400 text-xs"></i>
+        <span>BUILD <strong class="text-white">{{ system_details.commit_hash|default:"236657a" }}</strong></span>
+      </span>
+      <span class="px-3 py-1.5 rounded-lg bg-black border-2 border-slate-700 text-slate-300 font-bold hidden sm:flex items-center space-x-2 shadow-md">
+        <i class="fas fa-shield-alt text-emerald-400 text-xs"></i>
+        <span>{{ system_details.developer_name|default:"Avail Technologies" }}</span>
+      </span>
+    </div>
+
+    <!-- Live Telemetry Terminal Console (Comprehensive 8-Step System Diagnostic) -->
+    <div class="w-full max-w-xl bg-black border-2 border-cyan-500/70 rounded-2xl p-4 shadow-[0_0_35px_rgba(0,0,0,0.95)] text-left font-mono space-y-2">
+      <div class="flex items-center justify-between pb-2 border-b border-cyan-900/60 text-xs">
+        <span class="flex items-center space-x-2 text-cyan-300 font-black tracking-wider">
+          <i class="fas fa-terminal text-cyan-400"></i>
+          <span>SYSTEM_INITIALIZATION_TELEMETRY</span>
+        </span>
+        <span id="splash-status-badge" class="text-cyan-200 font-black tracking-widest text-[11px] bg-cyan-950 border border-cyan-400 px-2.5 py-0.5 rounded shadow-[0_0_10px_rgba(6,182,212,0.5)] uppercase animate-pulse">
+          INITIALIZING
+        </span>
+      </div>
+
+      <!-- Telemetry Output Lines (White text with Neon Status Tags) -->
+      <div id="splash-terminal-logs" class="text-xs leading-relaxed space-y-1.5 h-20 overflow-hidden flex flex-col justify-end">
+        <div class="text-white font-mono font-bold flex items-center justify-between">
+          <span>&gt; KERNEL: SECURE RUNTIME VERIFIED</span>
+          <span class="text-emerald-400 font-black drop-shadow-[0_0_8px_rgba(52,211,153,0.8)]">[OK]</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Progressive Loading Engine Bar (Timed for 8.0 Seconds) -->
+  <div class="w-full max-w-2xl z-10 space-y-2.5 pb-2">
+    <div class="flex items-center justify-between text-xs font-mono">
+      <div class="flex items-center space-x-2 text-cyan-300">
+        <i class="fas fa-circle-notch fa-spin text-xs text-cyan-400"></i>
+        <span id="splash-loading-task" class="font-extrabold tracking-wider text-white uppercase">MOUNTING INVENTORY MATRIX...</span>
+      </div>
+      <div class="font-black text-white font-mono text-base tracking-widest drop-shadow-[0_0_12px_rgba(6,182,212,0.8)]">
+        <span id="splash-progress-number">0</span>%
+      </div>
+    </div>
+
+    <!-- Segmented Neon Glowing Progress Track (Solid Black with Cyan Border) -->
+    <div class="relative w-full h-3.5 bg-black rounded-full border-2 border-cyan-500/70 p-0.5 overflow-hidden shadow-inner">
+      <div id="splash-progress-bar" 
+           class="h-full rounded-full bg-gradient-to-r from-blue-500 via-cyan-400 to-emerald-400 shadow-[0_0_20px_rgba(6,182,212,1)] transition-all duration-100 ease-out" 
+           style="width: 0%;">
+      </div>
+    </div>
+
+    <!-- System Spec Footnote (High Contrast) -->
+    <div class="flex items-center justify-between text-[11px] font-mono text-slate-200 font-bold pt-0.5">
+      <span>DATABASE: <span class="text-emerald-400 font-extrabold">{{ system_details.db_engine|default:"SQLITE3" }} &bull; ACTIVE</span></span>
+      <span class="tracking-widest text-slate-300 hidden sm:inline-block">STORE: <strong class="text-white">{{ company_settings.company_name|default:"21 VOID" }}</strong></span>
+      <span>READY IN: <span id="splash-timer-countdown" class="text-cyan-300 font-black text-sm">8.0s</span></span>
+    </div>
+  </div>
+
+</div>
+
+<!-- High-Tech Keyframe Styles -->
+<style>
+  @keyframes cyberSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  @keyframes cyberSpinReverse {
+    from { transform: rotate(360deg); }
+    to { transform: rotate(0deg); }
+  }
+  @keyframes radarSweep {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  @keyframes scanlineBeam {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(1000%); }
+  }
+  .animate-cyber-spin {
+    animation: cyberSpin 12s linear infinite;
+  }
+  .animate-cyber-spin-reverse {
+    animation: cyberSpinReverse 8s linear infinite;
+  }
+  .animate-radar-sweep {
+    animation: radarSweep 3s linear infinite;
+  }
+  .splash-scanline {
+    animation: scanlineBeam 4s linear infinite;
+  }
+  @keyframes fadeInLog {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fadeIn {
+    animation: fadeInLog 0.2s ease-out forwards;
+  }
+</style>
+
+<!-- Sophisticated Startup Sequence Engine (Strictly 8 Seconds) -->
+<script>
+(function() {
+  const MINIMUM_DURATION_MS = 8000; // Exactly 8 seconds
+  const startTime = Date.now();
+
+  const splash = document.getElementById('app-splash-screen');
+  if (!splash) return;
+
+  // Clear any legacy session lockout flag so it always plays smoothly before login
+  try {
+    sessionStorage.removeItem('clarity_splash_shown');
+  } catch(e) {}
+
+  const bar = document.getElementById('splash-progress-bar');
+  const num = document.getElementById('splash-progress-number');
+  const task = document.getElementById('splash-loading-task');
+  const logs = document.getElementById('splash-terminal-logs');
+  const statusBadge = document.getElementById('splash-status-badge');
+  const timerCountdown = document.getElementById('splash-timer-countdown');
+
+  // Dynamic values injected from DB & System context
+  const companyName = "{{ company_settings.company_name|escapejs|default:'21 VOID' }}".toUpperCase();
+  const storeAddress = "{{ company_settings.address|escapejs|default:'HARARE, ZIMBABWE' }}".toUpperCase();
+  const dbEngine = "{{ system_details.db_engine|escapejs|default:'SQLITE3' }}".toUpperCase();
+  const currencyCode = "{{ company_settings.currency_code|escapejs|default:'USD' }}";
+  const commitHash = "{{ system_details.commit_hash|escapejs|default:'236657a' }}";
+
+  // Telemetry Step Log Sequence timed gracefully across 8 seconds
+  const telemetrySteps = [
+    { atPercent: 8,  msg: `&gt; INITIALIZING SYSTEM CORE &amp; ENVIRONMENT...`, status: "[OK]", task: "MOUNTING SYSTEM CORE..." },
+    { atPercent: 20, msg: `&gt; CONNECTING ENCRYPTED DATABASE [${dbEngine}]...`, status: "[CONNECTED]", task: `CONNECTING ${dbEngine} MATRIX...` },
+    { atPercent: 34, msg: `&gt; LOADING STORE IDENTITY: ${companyName}...`, status: "[VERIFIED]", task: `CALIBRATING ${companyName}...` },
+    { atPercent: 48, msg: `&gt; REGISTERING LOCATION: ${storeAddress}...`, status: "[ACTIVE]", task: "VERIFYING STORE REPOSITORY..." },
+    { atPercent: 62, msg: `&gt; SYNCHRONIZING FIFO BATCHES &amp; SERIAL MATRIX...`, status: "[SECURED]", task: "SYNCING INVENTORY REPOSITORIES..." },
+    { atPercent: 74, msg: `&gt; CONFIGURING POS ENGINE [CURRENCY: ${currencyCode}]...`, status: "[CALIBRATED]", task: "CALIBRATING POS ENGINES..." },
+    { atPercent: 86, msg: `&gt; CRYPTO TELEMETRY &amp; INTEGRITY CHECK [${commitHash}]...`, status: "[PASSED]", task: "FINALIZING SECURITY TELEMETRY..." },
+    { atPercent: 97, msg: `&gt; ALL SYSTEMS GREEN. LAUNCHING WORKSPACE...`, status: "[ONLINE]", task: "SYSTEM READY. PREPARING LOGIN..." }
+  ];
+
+  let currentStepIdx = 0;
+  let animationInterval = null;
+
+  function updateLoading() {
+    const elapsed = Date.now() - startTime;
+    const progress = Math.min((elapsed / MINIMUM_DURATION_MS) * 100, 100);
+
+    const roundedProgress = Math.floor(progress);
+    if (num) num.textContent = roundedProgress;
+    if (bar) bar.style.width = progress + '%';
+
+    // Countdown timer display starting at 8.0s down to 0.0s
+    if (timerCountdown) {
+      const rem = Math.max(0, ((MINIMUM_DURATION_MS - elapsed) / 1000)).toFixed(1);
+      timerCountdown.textContent = rem + 's';
+    }
+
+    // Step logger with high-contrast text and bright status badges
+    while (currentStepIdx < telemetrySteps.length && progress >= telemetrySteps[currentStepIdx].atPercent) {
+      const step = telemetrySteps[currentStepIdx];
+      if (task) task.textContent = step.task;
+      if (logs) {
+        const line = document.createElement('div');
+        line.className = "flex items-center justify-between text-white font-mono font-bold animate-fadeIn";
+        line.innerHTML = `<span>${step.msg}</span><span class="text-emerald-400 font-black drop-shadow-[0_0_8px_rgba(52,211,153,0.8)] ml-2">${step.status}</span>`;
+        logs.appendChild(line);
+        while (logs.children.length > 3) {
+          logs.removeChild(logs.firstChild);
+        }
+      }
+      currentStepIdx++;
+    }
+
+    // Complete Sequence after 8.0 Seconds
+    if (elapsed >= MINIMUM_DURATION_MS) {
+      clearInterval(animationInterval);
+      if (num) num.textContent = '100';
+      if (bar) bar.style.width = '100%';
+      if (task) task.textContent = 'SYSTEM OPERATIONAL';
+      if (statusBadge) {
+        statusBadge.textContent = 'ONLINE';
+        statusBadge.className = 'text-emerald-400 font-black tracking-widest text-[11px] bg-emerald-950 border border-emerald-400 px-2.5 py-0.5 rounded shadow-[0_0_10px_rgba(52,211,153,0.5)] uppercase';
+      }
+      if (timerCountdown) timerCountdown.textContent = '0.0s';
+
+      setTimeout(dismissSplashScreen, 350);
+    }
+  }
+
+  // Smooth 25ms tick rate
+  animationInterval = setInterval(updateLoading, 25);
+
+  function dismissSplashScreen() {
+    if (!splash) return;
+    if (animationInterval) clearInterval(animationInterval);
+
+    // 1. Reveal login card smoothly before fading splash
+    document.documentElement.classList.remove('splash-active');
+    const loginCard = document.getElementById('login-card-container');
+    if (loginCard) {
+      loginCard.style.display = '';
+      loginCard.style.opacity = '0';
+      loginCard.style.transform = 'translateY(16px) scale(0.98)';
+      // Trigger reflow
+      void loginCard.offsetWidth;
+      loginCard.style.opacity = '1';
+      loginCard.style.transform = 'translateY(0) scale(1)';
+    }
+
+    // 2. Smooth cybernetic fade-out and scale transition
+    splash.style.opacity = '0';
+    splash.style.transform = 'scale(1.02)';
+    splash.style.pointerEvents = 'none';
+
+    setTimeout(() => {
+      splash.style.display = 'none';
+      if (splash.parentNode) {
+        splash.parentNode.removeChild(splash);
+      }
+    }, 700);
+  }
+
+  // Global exposure for instant manual bypass or replay
+  window.dismissSplashScreen = dismissSplashScreen;
+  window.showSplashScreen = function() {
+    window.location.reload();
+  };
+  window.replaySplashScreen = window.showSplashScreen;
+
+  window.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      dismissSplashScreen();
+    }
+  });
+
+})();
+</script>

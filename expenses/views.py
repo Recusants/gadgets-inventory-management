@@ -13,6 +13,7 @@ from django.utils import timezone
 from .models import Expense, ExpenseCategory
 from core.responses import success_response, error_response, permission_denied_response
 from core.validators import _parse_decimal, _parse_custom_date
+from core.decorators import supervisor_or_above_required, manager_or_admin_required
 
 
 # ==============================================================================
@@ -55,6 +56,7 @@ def sync_recurring_expenses(user=None):
             cat.save(update_fields=['last_recurring_date'])
 
 
+@supervisor_or_above_required
 def expense_list_view(request):
     """Render full shell for Expenses page."""
     sync_recurring_expenses(request.user)

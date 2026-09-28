@@ -143,6 +143,10 @@ class Stock(models.Model):
         default=5,
         help_text="Reorder quantity threshold for low stock notification alerts"
     )
+    expiry_warning_days = models.PositiveIntegerField(
+        default=30,
+        help_text="Default days before expiration to trigger stock alert"
+    )
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -209,6 +213,19 @@ class StockBatch(models.Model):
         default=timezone.now,
         db_index=True
     )
+    expiration_date = models.DateField(
+        null=True,
+        blank=True,
+        db_index=True,
+        help_text="Batch expiration date"
+    )
+    serial_number = models.CharField(
+        max_length=100,
+        blank=True,
+        default='',
+        db_index=True,
+        help_text="Serial number for serialized inventory (Qty strictly 1)"
+    )
     cost_price = models.DecimalField(
         max_digits=12,
         decimal_places=2,
@@ -241,6 +258,40 @@ class StockBatch(models.Model):
         verbose_name_plural = 'Stock Batches'
         ordering = ['date_received', 'id']
 
+    @property
+    def is_serialized(self):
+        return bool(self.serial_number and self.serial_number.strip())
+
+    @property
+    def is_expired(self):
+        if not self.expiration_date:
+            return False
+        return self.expiration_date < timezone.now().date()
+
+    @property
+    def days_until_expiry(self):
+        if not self.expiration_date:
+            return None
+        return (self.expiration_date - timezone.now().date()).days
+
+    @property
+    def expiry_status(self):
+        days = self.days_until_expiry
+        if days is None:
+            return None
+        if days < 0:
+            return 'EXPIRED'
+        if days <= 7:
+            return 'CRITICAL'
+        if days <= 30:
+            return 'WARNING'
+        return 'GOOD'
+
+    @property
+    def total_cost(self):
+        """Total purchase cost for this batch (unit cost * quantity received)."""
+        return (self.cost_price or Decimal('0.00')) * self.quantity_received
+
     def save(self, *args, **kwargs):
         if not self.stock_id and self.product_id:
             try:
@@ -251,5 +302,6 @@ class StockBatch(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Batch #{self.id}: {self.product.name} ({self.quantity_remaining}/{self.quantity_received} left @ ${self.cost_price})"
+        sn_label = f" [SN: {self.serial_number}]" if self.serial_number else ""
+        return f"Batch #{self.id}: {self.product.name}{sn_label} ({self.quantity_remaining}/{self.quantity_received} left @ ${self.cost_price})"
 
