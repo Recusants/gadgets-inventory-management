@@ -39,7 +39,7 @@ for /f "tokens=2 delims= " %%v in ('python --version 2^>^&1') do set PY_VER=%%v
 echo  [OK] Python found: !PY_VER!
 
 :: -----------------------------------------------------------------------------
-:: STAGE 2: Repository Verification / Auto-Clone (Standalone Mode)
+:: STAGE 2: Repository Verification / Auto-Sync (Remote Code Takes Precedence, Data Preserved)
 :: -----------------------------------------------------------------------------
 echo.
 echo [2/7] Checking project repository...
@@ -47,36 +47,83 @@ echo [2/7] Checking project repository...
 set DEFAULT_REPO=https://github.com/Recusants/gadgets-inventory-management.git
 set TARGET_DIR=gadget-store
 set REPO_URL=!DEFAULT_REPO!
+set BRANCH=main
 
+:: Case A: Running directly inside project directory
 if exist "manage.py" (
-    echo  [OK] Project files detected in current directory. Skipping clone.
-) else (
-    echo.
-    echo  ------------------------------------------------------------------------
-    echo  [STANDALONE INSTALLER DETECTED]
-    echo  Project files not found in current folder.
-    echo  This script will automatically clone the repository from GitHub:
-    echo    !DEFAULT_REPO!
-    echo  ------------------------------------------------------------------------
-    echo.
-    set REPO_INPUT=
-    set /p REPO_INPUT="Press ENTER to clone default repo, or enter custom Git URL: "
-    if defined REPO_INPUT (
-        set "TRIMMED_INPUT=!REPO_INPUT: =!"
-        if not "!TRIMMED_INPUT!"=="" set REPO_URL=!REPO_INPUT!
-    )
+    echo  [OK] Project detected in current directory.
+    goto :sync_existing_repo
+)
 
-    echo.
-    echo  [INFO] Cloning repository into .\!TARGET_DIR!...
-    git clone "!REPO_URL!" "!TARGET_DIR!"
-    if errorlevel 1 goto :clone_error
-
-    if not exist "!TARGET_DIR!\manage.py" goto :clone_empty_error
-
-    echo  [OK] Repository cloned successfully!
+:: Case B: Project already cloned in subfolder !TARGET_DIR! from a previous run
+if exist "!TARGET_DIR!\manage.py" (
+    echo  [OK] Project detected in .\!TARGET_DIR!.
     echo  [INFO] Entering project directory: .\!TARGET_DIR!...
     cd /d "!TARGET_DIR!"
+    goto :sync_existing_repo
 )
+
+:: Case C: Standalone installer mode - fresh clone needed
+echo.
+echo  ------------------------------------------------------------------------
+echo  [STANDALONE INSTALLER DETECTED]
+echo  Project files not found in current folder.
+echo  Cloning repository from GitHub:
+echo    !DEFAULT_REPO!
+echo  ------------------------------------------------------------------------
+echo.
+set REPO_INPUT=
+set /p REPO_INPUT="Press ENTER to clone default repo, or enter custom Git URL: "
+if defined REPO_INPUT (
+    set "TRIMMED_INPUT=!REPO_INPUT: =!"
+    if not "!TRIMMED_INPUT!"=="" set REPO_URL=!REPO_INPUT!
+)
+
+:: If target dir exists but without manage.py (interrupted or corrupted prior clone)
+if exist "!TARGET_DIR!" (
+    echo.
+    echo  [WARNING] Directory .\!TARGET_DIR! exists but contains no project files.
+    echo  [INFO] Cleaning incomplete directory before re-cloning...
+    rmdir /s /q "!TARGET_DIR!" >nul 2>&1
+)
+
+echo.
+echo  [INFO] Cloning repository into .\!TARGET_DIR!...
+git clone "!REPO_URL!" "!TARGET_DIR!"
+if errorlevel 1 goto :clone_error
+
+if not exist "!TARGET_DIR!\manage.py" goto :clone_empty_error
+
+echo  [OK] Repository cloned successfully!
+echo  [INFO] Entering project directory: .\!TARGET_DIR!...
+cd /d "!TARGET_DIR!"
+goto :repo_ready
+
+:sync_existing_repo
+:: Safety backup of existing database before code synchronization
+if exist "db.sqlite3" (
+    if not exist "backups" mkdir "backups"
+    copy /y "db.sqlite3" "backups\db_backup_sync.sqlite3" >nul 2>&1
+    echo  [OK] Safety snapshot of database saved to backups\db_backup_sync.sqlite3
+)
+
+if exist ".git" (
+    :: Detect active branch
+    for /f "tokens=*" %%B in ('git branch --show-current 2^>nul') do set BRANCH=%%B
+    if "!BRANCH!"=="" set BRANCH=main
+
+    echo  [INFO] Synchronizing code with online repository (Remote code takes precedence)...
+    echo  [INFO] Preserving your local database (db.sqlite3), media/, and .env...
+    git fetch origin !BRANCH!
+    if errorlevel 1 (
+        echo  [WARNING] Could not reach GitHub to fetch updates. Continuing with existing local files.
+    ) else (
+        git reset --hard origin/!BRANCH!
+        echo  [OK] Code successfully updated to match origin/!BRANCH! (Data preserved).
+    )
+)
+
+:repo_ready
 
 :: -----------------------------------------------------------------------------
 :: STAGE 3: Virtual Environment Auto-Provisioning

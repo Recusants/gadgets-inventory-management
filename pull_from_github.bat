@@ -22,8 +22,17 @@ for /f "tokens=*" %%B in ('git branch --show-current 2^>nul') do (
 )
 if "!BRANCH!"=="" set BRANCH=main
 
-echo [1/4] Pulling latest code from origin/!BRANCH!...
-git pull origin !BRANCH!
+:: Safety backup of local database before pull
+if exist "db.sqlite3" (
+    if not exist "backups" mkdir "backups"
+    copy /y "db.sqlite3" "backups\db_backup_pull.sqlite3" >nul 2>&1
+    echo  [OK] Safety snapshot of database saved to backups\db_backup_pull.sqlite3
+)
+
+echo [1/4] Updating code from origin/!BRANCH! (Remote takes precedence, local data preserved)...
+git fetch origin !BRANCH!
+if errorlevel 1 goto :pull_error
+git reset --hard origin/!BRANCH!
 if errorlevel 1 goto :pull_error
 
 echo.
