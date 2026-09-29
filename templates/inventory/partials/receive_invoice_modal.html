@@ -338,6 +338,7 @@
 </div>
 
 <script>
+(function () {
   // State for Invoice Items
   window.wizardItems = [];
 
@@ -381,7 +382,7 @@
   }
 
   // Supplier Combobox logic with Keyboard Arrow Support
-  let supActiveIdx = -1;
+  var supActiveIdx = -1;
   $('#supplier-search-input').off('focus input').on('focus input', function () {
     const val = String($(this).val() || '').toLowerCase();
     $('#supplier-dropdown').removeClass('hidden');
@@ -456,7 +457,7 @@
   });
 
   // Product Combobox logic with Keyboard Arrow Support
-  let prodActiveIdx = -1;
+  var prodActiveIdx = -1;
   $('#item-product-search').off('focus input').on('focus input', function () {
     const val = String($(this).val() || '').toLowerCase();
     $('#product-dropdown').removeClass('hidden');
@@ -795,4 +796,5 @@
       }
     });
   });
+})();
 </script>

@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.10",
-  "build": "v2.4.10-f4bbf44",
-  "commit_count": 10,
-  "commit_hash": "f4bbf44",
+  "version": "v2.4.11",
+  "build": "v2.4.11-2550d4c",
+  "commit_count": 11,
+  "commit_hash": "2550d4c",
   "branch": "main",
-  "commit_subject": "Update: ~0,4dt:~4,2dt:~6,2dt:~8,2dt:~10,2",
-  "updated_at": "2026-09-28 21:27",
-  "last_pushed_at": "2026-09-29 18:15:40"
+  "commit_subject": "added email field on batch",
+  "updated_at": "2026-09-29 18:15",
+  "last_pushed_at": "2026-09-29 19:22:19"
 }
