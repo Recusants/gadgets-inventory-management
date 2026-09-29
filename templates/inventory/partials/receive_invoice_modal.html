@@ -187,11 +187,20 @@
                    class="w-full px-2.5 py-2 rounded-xl border border-slate-300 bg-white text-xs font-mono font-bold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
 
-          <!-- Expiration Date (lg: 2 cols) -->
-          <div class="col-span-1 sm:col-span-1 md:col-span-2 lg:col-span-2">
-            <label class="block text-[11px] font-bold text-slate-600 mb-1">Expiry Date <span class="text-slate-400 font-normal">(Opt)</span></label>
+          <!-- Expiration Date (lg: 1 col) -->
+          <div class="col-span-1 sm:col-span-1 md:col-span-1 lg:col-span-1">
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Expiry <span class="text-slate-400 font-normal">(Opt)</span></label>
             <input type="date" id="item-expiry"
-                   class="w-full px-2 py-2 rounded-xl border border-slate-300 bg-white text-xs font-mono text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none">
+                   class="w-full px-1.5 py-2 rounded-xl border border-slate-300 bg-white text-xs font-mono text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+
+          <!-- Email / Account Ref (Just before Quantity, lg: 2 cols) -->
+          <div class="col-span-1 sm:col-span-1 md:col-span-2 lg:col-span-2">
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">
+              Email <span class="text-slate-400 font-normal">(Opt)</span>
+            </label>
+            <input type="email" id="item-email" placeholder="Requires Serial #" disabled autocomplete="off"
+                   class="w-full px-2.5 py-2 rounded-xl border border-slate-300 bg-slate-100 text-xs text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
           </div>
 
           <!-- Quantity (lg: 1 col) -->
@@ -215,12 +224,12 @@
                    class="w-full px-2 py-2 rounded-xl border border-slate-300 bg-white text-xs font-mono font-bold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none text-right">
           </div>
 
-          <!-- Add Button (lg: 2 cols) -->
-          <div class="col-span-1 sm:col-span-2 md:col-span-2 lg:col-span-2">
+          <!-- Add Button (lg: 1 col) -->
+          <div class="col-span-1 sm:col-span-1 md:col-span-1 lg:col-span-1">
             <button type="button" onclick="addItemToInvoice()" id="btn-add-item-to-list"
-                    class="w-full h-[38px] bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center justify-center space-x-1.5">
+                    class="w-full h-[38px] bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center justify-center space-x-1">
               <i class="fas fa-plus"></i>
-              <span>Add Item</span>
+              <span>Add</span>
             </button>
           </div>
         </div>
@@ -232,7 +241,7 @@
           <thead class="sticky top-0 bg-slate-100 text-slate-700 uppercase text-[10px] font-black border-b border-slate-200">
             <tr>
               <th class="py-2.5 px-3.5">Product</th>
-              <th class="py-2.5 px-3.5">Serial #</th>
+              <th class="py-2.5 px-3.5">Serial # / Email</th>
               <th class="py-2.5 px-3.5">Expiry</th>
               <th class="py-2.5 px-3 text-center">Qty</th>
               <th class="py-2.5 px-3.5 text-right">Cost</th>
@@ -301,7 +310,7 @@
           <thead class="sticky top-0 bg-slate-100 text-slate-700 uppercase text-[10px] font-black border-b border-slate-200">
             <tr>
               <th class="py-2.5 px-3.5">Product Name</th>
-              <th class="py-2.5 px-3.5">Serial #</th>
+              <th class="py-2.5 px-3.5">Serial # / Email</th>
               <th class="py-2.5 px-3.5">Expiry</th>
               <th class="py-2.5 px-3 text-center">Quantity</th>
               <th class="py-2.5 px-3.5 text-right">Unit Cost</th>
@@ -512,15 +521,17 @@
     $('#item-cost').focus();
   });
 
-  // Serial input listener to lock Quantity to 1
+  // Serial input listener to lock Quantity to 1 and enable optional Email field
   $('#item-serial').off('input change').on('input change', function() {
     const sn = String($(this).val() || '').trim();
     if (sn.length > 0) {
       $('#item-quantity').val('1').prop('readonly', true).addClass('bg-slate-100 cursor-not-allowed');
       $('#item-serial-hint').removeClass('hidden');
+      $('#item-email').prop('disabled', false).removeClass('bg-slate-100 cursor-not-allowed opacity-60').addClass('bg-white').attr('placeholder', 'e.g. device@account.com');
     } else {
       $('#item-quantity').prop('readonly', false).removeClass('bg-slate-100 cursor-not-allowed');
       $('#item-serial-hint').addClass('hidden');
+      $('#item-email').val('').prop('disabled', true).addClass('bg-slate-100 cursor-not-allowed opacity-60').removeClass('bg-white').attr('placeholder', 'Requires Serial #');
     }
   });
 
@@ -532,6 +543,7 @@
     const cost = parseFloat($('#item-cost').val()) || 0;
     const selling = parseFloat($('#item-selling').val()) || 0;
     const serial = String($('#item-serial').val() || '').trim();
+    const email = String($('#item-email').val() || '').trim();
     const expiry = String($('#item-expiry').val() || '').trim();
 
     const notify = function(msg, icon) {
@@ -543,6 +555,11 @@
     if (!pId || !pName) {
       notify('Please select a product from the list.', 'error');
       $('#item-product-search').focus();
+      return;
+    }
+    if (email && !serial) {
+      notify('Email reference can only be specified for items with a serial number.', 'error');
+      $('#item-serial').focus();
       return;
     }
     if (serial && qty !== 1) {
@@ -575,6 +592,7 @@
       product_name: pName,
       quantity: qty,
       serial_number: serial,
+      email: serial ? email : '',
       expiration_date: expiry,
       cost_price: cost.toFixed(2),
       selling_price: selling > 0 ? selling.toFixed(2) : cost.toFixed(2),
@@ -586,6 +604,7 @@
     $('#item-product-name').val('');
     $('#item-product-search').val('').focus();
     $('#item-serial').val('');
+    $('#item-email').val('').prop('disabled', true).addClass('bg-slate-100 cursor-not-allowed opacity-60').removeClass('bg-white').attr('placeholder', 'Requires Serial #');
     $('#item-expiry').val('');
     $('#item-quantity').val('1').prop('readonly', false).removeClass('bg-slate-100 cursor-not-allowed');
     $('#item-serial-hint').addClass('hidden');
@@ -631,7 +650,12 @@
         <tr class="hover:bg-slate-50 transition-colors">
           <td class="py-2.5 px-3.5 font-bold text-slate-900">${item.product_name}</td>
           <td class="py-2.5 px-3.5">
-            ${item.serial_number ? `<span class="font-mono text-[11px] bg-slate-100 text-slate-800 px-2 py-0.5 rounded-md border border-slate-200 font-bold">${item.serial_number}</span>` : `<span class="text-slate-400 italic text-[11px]">None</span>`}
+            ${item.serial_number ? `
+              <div class="flex flex-col gap-0.5">
+                <span class="font-mono text-[11px] bg-slate-100 text-slate-800 px-2 py-0.5 rounded-md border border-slate-200 font-bold inline-block w-fit">${item.serial_number}</span>
+                ${item.email ? `<span class="text-[10px] text-slate-500 font-mono flex items-center gap-1"><i class="fas fa-envelope text-[9px] text-slate-400"></i>${item.email}</span>` : ''}
+              </div>
+            ` : `<span class="text-slate-400 italic text-[11px]">None</span>`}
           </td>
           <td class="py-2.5 px-3.5">
             ${item.expiration_date ? `<span class="font-mono text-[11px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 font-bold">${item.expiration_date}</span>` : `<span class="text-slate-400 italic text-[11px]">None</span>`}
@@ -675,7 +699,12 @@
         <tr class="hover:bg-slate-50 transition-colors">
           <td class="py-2.5 px-3.5 font-bold text-slate-900">${item.product_name}</td>
           <td class="py-2.5 px-3.5">
-            ${item.serial_number ? `<span class="font-mono text-[11px] bg-slate-100 text-slate-800 px-2 py-0.5 rounded-md border border-slate-200 font-bold">${item.serial_number}</span>` : `<span class="text-slate-400 italic text-[11px]">None</span>`}
+            ${item.serial_number ? `
+              <div class="flex flex-col gap-0.5">
+                <span class="font-mono text-[11px] bg-slate-100 text-slate-800 px-2 py-0.5 rounded-md border border-slate-200 font-bold inline-block w-fit">${item.serial_number}</span>
+                ${item.email ? `<span class="text-[10px] text-slate-500 font-mono flex items-center gap-1"><i class="fas fa-envelope text-[9px] text-slate-400"></i>${item.email}</span>` : ''}
+              </div>
+            ` : `<span class="text-slate-400 italic text-[11px]">None</span>`}
           </td>
           <td class="py-2.5 px-3.5">
             ${item.expiration_date ? `<span class="font-mono text-[11px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 font-bold">${item.expiration_date}</span>` : `<span class="text-slate-400 italic text-[11px]">None</span>`}

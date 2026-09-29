@@ -310,10 +310,17 @@ def receive_invoice_save(request):
             p_id = it.get('product_id')
             p_qty = int(it.get('quantity', 1))
             sn = str(it.get('serial_number') or '').strip()
+            item_email = str(it.get('email') or '').strip()
             exp_date_raw = it.get('expiration_date')
             product = Product.objects.filter(pk=p_id).first()
             if not product:
                 continue
+
+            if item_email and not sn:
+                return error_response(
+                    title="Invalid Email Reference",
+                    message=f"Product '{product.name}' has an email reference '{item_email}', but email is only allowed for items with a serial number."
+                )
 
             if sn:
                 if p_qty > 1:
@@ -335,6 +342,7 @@ def receive_invoice_save(request):
             p_cost = _parse_decimal(it.get('cost_price', '0')) or Decimal('0.00')
             p_sell = _parse_decimal(it.get('selling_price', '0'))
             sn = str(it.get('serial_number') or '').strip()
+            item_email = str(it.get('email') or '').strip() if sn else ''
             exp_date_raw = it.get('expiration_date')
             exp_date = _parse_custom_date(exp_date_raw) if exp_date_raw else None
 
@@ -356,6 +364,7 @@ def receive_invoice_save(request):
                 date_received=date_received,
                 expiration_date=exp_date,
                 serial_number=sn,
+                email=item_email,
                 cost_price=p_cost,
                 quantity_received=p_qty,
                 quantity_remaining=p_qty,
@@ -401,6 +410,7 @@ def receive_invoice_save(request):
     date_received = _parse_custom_date(request.POST.get('date_received')) or timezone.now().date()
     exp_date = _parse_custom_date(request.POST.get('expiration_date'))
     sn = request.POST.get('serial_number', '').strip()
+    item_email = request.POST.get('email', '').strip() if sn else ''
     notes = request.POST.get('notes', '').strip()
 
     stock, _ = Stock.objects.get_or_create(product=product)
@@ -417,6 +427,7 @@ def receive_invoice_save(request):
         date_received=date_received,
         expiration_date=exp_date,
         serial_number=sn,
+        email=item_email,
         cost_price=cost_price,
         quantity_received=qty,
         quantity_remaining=qty,

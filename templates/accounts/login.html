@@ -69,7 +69,7 @@
     <form id="login-form" 
           action="{% url 'accounts:login' %}" 
           method="POST" 
-          data-ajax="true"
+          data-prevent-default-swal="true"
           data-redirect="{% url 'dashboard:index' %}"
           class="space-y-4">
       {% csrf_token %}
@@ -138,7 +138,7 @@
   <div id="app-modal-shell" class="hidden"></div>
   <script src="{% static 'vendor/jquery.min.js' %}"></script>
   <script src="{% static 'vendor/sweetalert2.all.min.js' %}"></script>
-  <script src="{% static 'js/app.js' %}?v=20260922.9"></script>
+  <script src="{% static 'js/app.js' %}?v=20260929.1"></script>
 
 
 
@@ -158,9 +158,10 @@
         }
       });
 
-      // Explicit login form submission
-      $('#login-form').on('submit', function (e) {
+      // Explicit login form submission (immediate redirect on success, zero popup)
+      $('#login-form').off('submit').on('submit', function (e) {
         e.preventDefault();
+        e.stopImmediatePropagation();
         const $form = $(this);
         const $btn = $form.find('button[type="submit"]');
         $btn.prop('disabled', true).addClass('opacity-70');
@@ -175,12 +176,7 @@
           },
           success: function (res) {
             const redirectTarget = (res.data && res.data.redirect_url) ? res.data.redirect_url : '/';
-            if (window.notifySwal) {
-              notifySwal(res.title || 'Welcome Back!', res.message || 'Signing in...', res.icon || 'success', 1200);
-            }
-            setTimeout(function () {
-              window.location.href = redirectTarget;
-            }, 500);
+            window.location.href = redirectTarget;
           },
           error: function (xhr) {
             $btn.prop('disabled', false).removeClass('opacity-70');

@@ -167,6 +167,12 @@ class SaleItem(models.Model):
         default='',
         help_text="Optional serial number for 1:1 serialized item"
     )
+    email = models.CharField(
+        max_length=255,
+        blank=True,
+        default='',
+        help_text="Optional email / account reference for serialized item"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

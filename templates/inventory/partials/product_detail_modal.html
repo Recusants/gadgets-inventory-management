@@ -77,9 +77,14 @@
                 <td class="py-2 px-3 font-mono font-bold text-blue-700">#{{ b.id }}</td>
                 <td class="py-2 px-3 font-mono whitespace-nowrap">
                   {% if b.serial_number %}
-                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200">
-                      {{ b.serial_number }}
-                    </span>
+                    <div class="flex flex-col gap-0.5">
+                      <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200 w-fit">
+                        {{ b.serial_number }}
+                      </span>
+                      {% if b.email %}
+                        <span class="text-[9px] text-slate-500 font-mono flex items-center gap-1"><i class="fas fa-envelope text-[8px] text-slate-400"></i>{{ b.email }}</span>
+                      {% endif %}
+                    </div>
                   {% else %}
                     <span class="text-slate-400 italic text-[10px]">Bulk</span>
                   {% endif %}

@@ -180,6 +180,7 @@ def sale_create(request):
             sn = str(item.get('serial_number') or '').strip()
             line_total = unit_price * qty
 
+            sn_batch = None
             if sn:
                 # 1. Serialized Checkout: Match exact active batch with matching serial number
                 sn_batch = prod.batches.filter(
@@ -247,6 +248,7 @@ def sale_create(request):
                     break
 
             line_profit = line_total - line_cost
+            item_email = sn_batch.email if (sn and sn_batch and sn_batch.email) else ''
 
             sale_item = SaleItem.objects.create(
                 sale=sale,
@@ -256,7 +258,8 @@ def sale_create(request):
                 total_price=line_total,
                 cost_price=line_cost,
                 profit=line_profit,
-                serial_number=sn
+                serial_number=sn,
+                email=item_email
             )
 
             for b, take_qty, cost_unit in deductions:
@@ -542,7 +545,12 @@ def receipt_pdf_view(request, pk):
     ]
 
     for idx, item in enumerate(sale.items.all(), 1):
-        desc = Paragraph(f"<b>{item.product.name}</b>" + (f"<br/><font color='#2563eb' size=8>SN: {item.serial_number}</font>" if item.serial_number else ""), item_title)
+        desc_parts = [f"<b>{item.product.name}</b>"]
+        if item.serial_number:
+            desc_parts.append(f"<font color='#2563eb' size=8>SN: {item.serial_number}</font>")
+        if item.email:
+            desc_parts.append(f"<font color='#475569' size=8>Email: {item.email}</font>")
+        desc = Paragraph("<br/>".join(desc_parts), item_title)
         item_rows.append([
             Paragraph(str(idx), cell_text),
             desc,

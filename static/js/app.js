@@ -269,14 +269,23 @@ function initAjaxForms() {
       success: function (res) {
         $submitBtn.removeClass('btn-loading').prop('disabled', false);
         
-        // SweetAlert2 notification according to uniform envelope
-        if (!preventDefaultSwal) {
+        const isLogin = $form.attr('id') === 'login-form' || (typeof actionUrl === 'string' && actionUrl.indexOf('/accounts/login') !== -1);
+
+        // SweetAlert2 notification according to uniform envelope (bypassed on login success)
+        if (!preventDefaultSwal && !isLogin) {
           notifySwal(res.title || 'Success', res.message || 'Operation successful', res.icon || 'success', 2200);
         }
         
         // Modal handling
         if (isModal) {
           ModalManager.close();
+        }
+
+        // Direct instant redirect for login without modal or artificial delay
+        if (isLogin) {
+          const dest = (res.data && res.data.redirect_url) ? res.data.redirect_url : (redirectUrl || '/');
+          window.location.href = dest;
+          return;
         }
         
         // Table refresh

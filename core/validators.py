@@ -220,6 +220,10 @@ def validate_receive_invoice(data):
 
     # Serial Number & Quantity constraint (Qty strictly 1 if serial number provided)
     sn = data.get('serial_number', '').strip()
+    email = data.get('email', '').strip()
+    if email and not sn:
+        errors['email'] = 'Email reference is only allowed for items with a serial number.'
+
     if sn:
         try:
             qty = int(qty_raw or 1)

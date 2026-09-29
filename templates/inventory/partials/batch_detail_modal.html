@@ -62,12 +62,19 @@
     <!-- Serial Number & Expiration Card -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <div class="p-3.5 rounded-xl border border-slate-200 bg-white">
-        <div class="text-slate-950 uppercase tracking-wider font-black text-[10px]">Serial Number</div>
+        <div class="text-slate-950 uppercase tracking-wider font-black text-[10px]">Serial Number &amp; Email Reference</div>
         <div class="font-mono font-bold text-xs mt-1">
           {% if batch.serial_number %}
-            <span class="inline-flex items-center px-2 py-0.5 rounded text-purple-800 bg-purple-100 border border-purple-200">
-              <i class="fas fa-barcode mr-1.5"></i> {{ batch.serial_number }}
-            </span>
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-purple-800 bg-purple-100 border border-purple-200">
+                <i class="fas fa-barcode mr-1.5"></i> {{ batch.serial_number }}
+              </span>
+              {% if batch.email %}
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-blue-800 bg-blue-50 border border-blue-200">
+                  <i class="fas fa-envelope mr-1.5 text-blue-500"></i> {{ batch.email }}
+                </span>
+              {% endif %}
+            </div>
           {% else %}
             <span class="text-slate-400 italic">No serial number (Bulk Batch)</span>
           {% endif %}

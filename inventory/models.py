@@ -226,6 +226,13 @@ class StockBatch(models.Model):
         db_index=True,
         help_text="Serial number for serialized inventory (Qty strictly 1)"
     )
+    email = models.CharField(
+        max_length=255,
+        blank=True,
+        default='',
+        db_index=True,
+        help_text="Optional email / account reference for serialized item"
+    )
     cost_price = models.DecimalField(
         max_digits=12,
         decimal_places=2,

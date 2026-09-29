@@ -59,7 +59,7 @@ def login_view(request):
             login(request, user)
             if is_ajax:
                 return success_response(
-                    title="Welcome Back!",
+                    title="Signed In",
                     message=f"Logged in as {user.get_full_name() or user.username}",
                     data={"redirect_url": "/"}
                 )

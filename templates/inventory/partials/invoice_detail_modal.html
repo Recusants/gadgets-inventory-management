@@ -78,6 +78,9 @@
                   {% if b.serial_number %}
                     <span class="ml-1.5 px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-mono font-bold">SN: {{ b.serial_number }}</span>
                   {% endif %}
+                  {% if b.email %}
+                    <span class="ml-1.5 px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-mono font-bold"><i class="fas fa-envelope text-[9px] mr-1 text-blue-500"></i>{{ b.email }}</span>
+                  {% endif %}
                   {% if b.expiration_date %}
                     <span class="ml-1.5 px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-mono font-bold">Exp: {{ b.expiration_date|date:"Y-m-d" }}</span>
                   {% endif %}
