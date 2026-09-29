@@ -29,7 +29,7 @@ if exist "db.sqlite3" (
     echo  [OK] Safety snapshot of database saved to backups\db_backup_pull.sqlite3
 )
 
-echo [1/4] Updating code from origin/!BRANCH! (Remote takes precedence, local data preserved)...
+echo [1/4] Updating code from origin/!BRANCH! - Remote takes precedence, local data preserved...
 git fetch origin !BRANCH!
 if errorlevel 1 goto :pull_error
 git reset --hard origin/!BRANCH!

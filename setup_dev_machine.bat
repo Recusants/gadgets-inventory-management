@@ -107,21 +107,22 @@ if exist "db.sqlite3" (
     echo  [OK] Safety snapshot of database saved to backups\db_backup_sync.sqlite3
 )
 
-if exist ".git" (
-    :: Detect active branch
-    for /f "tokens=*" %%B in ('git branch --show-current 2^>nul') do set BRANCH=%%B
-    if "!BRANCH!"=="" set BRANCH=main
+if not exist ".git" goto :repo_ready
 
-    echo  [INFO] Synchronizing code with online repository (Remote code takes precedence)...
-    echo  [INFO] Preserving your local database (db.sqlite3), media/, and .env...
-    git fetch origin !BRANCH!
-    if errorlevel 1 (
-        echo  [WARNING] Could not reach GitHub to fetch updates. Continuing with existing local files.
-    ) else (
-        git reset --hard origin/!BRANCH!
-        echo  [OK] Code successfully updated to match origin/!BRANCH! (Data preserved).
-    )
+:: Detect active branch
+for /f "tokens=*" %%B in ('git branch --show-current 2^>nul') do set BRANCH=%%B
+if "!BRANCH!"=="" set BRANCH=main
+
+echo  [INFO] Synchronizing code with online repository - Remote code takes precedence...
+echo  [INFO] Preserving your local database db.sqlite3, media folder, and .env...
+git fetch origin !BRANCH!
+if errorlevel 1 (
+    echo  [WARNING] Could not reach GitHub to fetch updates. Continuing with existing local files.
+    goto :repo_ready
 )
+
+git reset --hard origin/!BRANCH!
+echo  [OK] Code successfully updated to match origin/!BRANCH! - Data preserved.
 
 :repo_ready
 
