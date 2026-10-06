@@ -114,7 +114,7 @@
     <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
       <div>
         <div class="text-[10px] font-extrabold uppercase text-slate-400">Total Sales</div>
-        <div class="text-lg font-black font-mono text-slate-900 mt-0.5">${{ total_rev|intcomma }}</div>
+        <div class="text-lg font-black font-mono text-slate-900 mt-0.5">{{ company_settings.currency_symbol|default:'$' }}{{ total_rev|floatformat:2|intcomma }}</div>
       </div>
       <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-sm">
         <i class="fas fa-coins"></i>
@@ -123,7 +123,7 @@
     <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
       <div>
         <div class="text-[10px] font-extrabold uppercase text-slate-400">Cost of Goods</div>
-        <div class="text-lg font-black font-mono text-slate-700 mt-0.5">${{ total_cost|intcomma }}</div>
+        <div class="text-lg font-black font-mono text-slate-700 mt-0.5">{{ company_settings.currency_symbol|default:'$' }}{{ total_cost|floatformat:2|intcomma }}</div>
       </div>
       <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center text-sm">
         <i class="fas fa-receipt"></i>
@@ -132,7 +132,7 @@
     <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
       <div>
         <div class="text-[10px] font-extrabold uppercase text-slate-400">Gross Margin</div>
-        <div class="text-lg font-black font-mono text-blue-600 mt-0.5">${{ total_prof|intcomma }}</div>
+        <div class="text-lg font-black font-mono text-blue-600 mt-0.5">{{ company_settings.currency_symbol|default:'$' }}{{ total_prof|floatformat:2|intcomma }}</div>
       </div>
       <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-sm">
         <i class="fas fa-chart-line"></i>
@@ -141,7 +141,7 @@
     <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
       <div>
         <div class="text-[10px] font-extrabold uppercase text-slate-400">Expenses</div>
-        <div class="text-lg font-black font-mono text-blue-800 mt-0.5">${{ total_exp|intcomma }}</div>
+        <div class="text-lg font-black font-mono text-blue-800 mt-0.5">{{ company_settings.currency_symbol|default:'$' }}{{ total_exp|floatformat:2|intcomma }}</div>
       </div>
       <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-800 flex items-center justify-center text-sm">
         <i class="fas fa-wallet"></i>
@@ -150,7 +150,7 @@
     <div class="bg-blue-600 p-3 rounded-2xl text-white shadow-md flex items-center justify-between col-span-2 sm:col-span-1">
       <div>
         <div class="text-[10px] font-extrabold uppercase text-blue-200">Net Profit</div>
-        <div class="text-lg font-black font-mono text-white mt-0.5">${{ net_operating_profit|intcomma }}</div>
+        <div class="text-lg font-black font-mono text-white mt-0.5">{{ company_settings.currency_symbol|default:'$' }}{{ net_operating_profit|floatformat:2|intcomma }}</div>
       </div>
       <div class="w-8 h-8 rounded-xl bg-white/20 text-white flex items-center justify-center text-sm font-bold">
         <i class="fas fa-balance-scale"></i>
@@ -212,9 +212,9 @@
                 </span>
               </td>
               <td class="py-3 px-4 whitespace-nowrap">{{ s.customer.name }}</td>
-              <td class="py-3 px-4 text-right font-mono text-slate-500 whitespace-nowrap">${{ s.total_cost|intcomma }}</td>
-              <td class="py-3 px-4 text-right font-black font-mono text-slate-900 whitespace-nowrap">${{ s.total_amount|intcomma }}</td>
-              <td class="py-3 px-4 text-right font-black font-mono text-blue-600 whitespace-nowrap">+${{ s.total_profit|intcomma }}</td>
+              <td class="py-3 px-4 text-right font-mono text-slate-500 whitespace-nowrap">{{ company_settings.currency_symbol|default:'$' }}{{ s.total_cost|floatformat:2|intcomma }}</td>
+              <td class="py-3 px-4 text-right font-black font-mono text-slate-900 whitespace-nowrap">{{ company_settings.currency_symbol|default:'$' }}{{ s.total_amount|floatformat:2|intcomma }}</td>
+              <td class="py-3 px-4 text-right font-black font-mono text-blue-600 whitespace-nowrap">+{{ company_settings.currency_symbol|default:'$' }}{{ s.total_profit|floatformat:2|intcomma }}</td>
               <td class="py-3 px-4 text-center whitespace-nowrap">
                 <a href="{% url 'sales:receipt_pdf' s.id %}" target="_blank" 
                    title="Download PDF Receipt"
@@ -257,7 +257,7 @@
               </td>
               <td class="py-3 px-4 font-mono text-slate-500 whitespace-nowrap">{{ exp.reference_number|default:"-" }}</td>
               <td class="py-3 px-4 whitespace-nowrap">{{ exp.payment_method }}</td>
-              <td class="py-3 px-4 text-right font-black font-mono text-slate-900 whitespace-nowrap">${{ exp.amount|intcomma }}</td>
+              <td class="py-3 px-4 text-right font-black font-mono text-slate-900 whitespace-nowrap">{{ company_settings.currency_symbol|default:'$' }}{{ exp.amount|floatformat:2|intcomma }}</td>
             </tr>
           {% empty %}
             <tr>
@@ -286,9 +286,9 @@
             <tr class="hover:bg-blue-50/50 transition-colors">
               <td class="py-3 px-4 font-bold text-slate-900">{{ p.name }}</td>
               <td class="py-3 px-4 text-slate-500">{{ p.category.name|default:"—" }}</td>
-              <td class="py-3 px-4 font-mono font-bold text-center">{{ p.available_quantity }}</td>
-              <td class="py-3 px-4 text-right font-bold font-mono text-slate-900">${{ p.current_selling_price|intcomma }}</td>
-              <td class="py-3 px-4 text-right font-black font-mono text-blue-600">${{ p.current_selling_price|intcomma }}</td>
+              <td class="py-3 px-4 font-mono font-bold text-center">{{ p.available_quantity|intcomma }}</td>
+              <td class="py-3 px-4 text-right font-bold font-mono text-slate-900">{{ company_settings.currency_symbol|default:'$' }}{{ p.current_selling_price|floatformat:2|intcomma }}</td>
+              <td class="py-3 px-4 text-right font-black font-mono text-blue-600">{{ company_settings.currency_symbol|default:'$' }}{{ p.current_selling_price|floatformat:2|intcomma }}</td>
               <td class="py-3 px-4 text-center">
                 {% if p.available_quantity > 5 %}
                   <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">In Stock</span>

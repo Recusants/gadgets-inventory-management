@@ -38,7 +38,7 @@
           <!-- Available Units -->
           <td class="py-3 px-4 whitespace-nowrap text-center font-bold font-mono">
             <span class="text-sm {% if stock.quantity_available == 0 %}text-slate-400{% elif stock.quantity_available <= 5 %}text-blue-700{% else %}text-slate-900{% endif %}">
-              {{ stock.quantity_available }}
+              {{ stock.quantity_available|intcomma }}
             </span>
           </td>
 
@@ -46,7 +46,7 @@
           <td class="py-3 px-4 whitespace-nowrap text-right">
             <div class="inline-flex items-center space-x-1.5">
               <span class="font-black text-slate-900 font-mono text-sm">
-                ${{ stock.selling_price|intcomma }}
+                {{ company_settings.currency_symbol|default:'$' }}{{ stock.selling_price|floatformat:2|intcomma }}
               </span>
               <button type="button" 
                       data-modal-url="{% url 'inventory:stock_price_modal' stock.id %}"
@@ -62,7 +62,7 @@
           <!-- Stock Valuation (Available * Selling Price) -->
           <td class="py-3 px-4 whitespace-nowrap text-right font-mono font-black text-blue-600 text-xs">
             {% widthratio stock.selling_price 1 stock.quantity_available as val %}
-            ${{ val|intcomma }}
+            {{ company_settings.currency_symbol|default:'$' }}{{ val|floatformat:2|intcomma }}
           </td>
 
           <!-- Status -->

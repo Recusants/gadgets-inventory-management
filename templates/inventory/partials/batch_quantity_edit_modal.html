@@ -27,7 +27,7 @@
 
     <div class="p-3.5 rounded-xl bg-blue-50 border border-blue-200 space-y-1">
       <div class="text-slate-700 font-bold">Product: <span class="text-blue-900">{{ batch.product.name }}</span></div>
-      <div class="text-slate-600">Unit Cost: <span class="font-mono font-bold">${{ batch.cost_price|intcomma }}</span> &bull; Invoice: <span class="font-mono">{{ batch.supplier_invoice_number|default:"N/A" }}</span></div>
+      <div class="text-slate-600">Unit Cost: <span class="font-mono font-bold">{{ company_settings.currency_symbol|default:'$' }}{{ batch.cost_price|floatformat:2|intcomma }}</span> &bull; Invoice: <span class="font-mono">{{ batch.supplier_invoice_number|default:"N/A" }}</span></div>
     </div>
 
     <div class="grid grid-cols-2 gap-3">

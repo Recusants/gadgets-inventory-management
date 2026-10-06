@@ -544,6 +544,7 @@ def receipt_pdf_view(request, pk):
         ]
     ]
 
+    curr_sym = settings_obj.currency_symbol or '$'
     for idx, item in enumerate(sale.items.all(), 1):
         desc_parts = [f"<b>{item.product.name}</b>"]
         if item.serial_number:
@@ -554,9 +555,9 @@ def receipt_pdf_view(request, pk):
         item_rows.append([
             Paragraph(str(idx), cell_text),
             desc,
-            Paragraph(str(item.quantity), cell_text),
-            Paragraph(f"${item.unit_price:,.2f}", cell_text),
-            Paragraph(f"<b>${item.total_price:,.2f}</b>", bold_cell)
+            Paragraph(f"{item.quantity:,}", cell_text),
+            Paragraph(f"{curr_sym}{item.unit_price:,.2f}", cell_text),
+            Paragraph(f"<b>{curr_sym}{item.total_price:,.2f}</b>", bold_cell)
         ])
 
     items_table = Table(item_rows, colWidths=[25, 270, 45, 95, 97])
@@ -574,7 +575,7 @@ def receipt_pdf_view(request, pk):
     # 4. Total Calculation Box
     total_data = [
         [Paragraph("<b>TOTAL DUE:</b>", ParagraphStyle('TotalLabel', parent=bold_cell, alignment=2, fontSize=12)),
-         Paragraph(f"<b>${sale.total_amount:,.2f}</b>", ParagraphStyle('TotalVal', parent=bold_cell, alignment=2, fontSize=14, textColor=colors.HexColor('#059669')))]
+         Paragraph(f"<b>{curr_sym}{sale.total_amount:,.2f}</b>", ParagraphStyle('TotalVal', parent=bold_cell, alignment=2, fontSize=14, textColor=colors.HexColor('#059669')))]
     ]
     total_table = Table(total_data, colWidths=[400, 132])
     total_table.setStyle(TableStyle([

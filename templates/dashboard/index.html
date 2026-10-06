@@ -126,7 +126,7 @@
         </div>
       </div>
       <div class="mt-2">
-        <h3 class="text-2xl font-black font-mono text-[#0b192c]">${{ metrics.total_sales|intcomma }}</h3>
+        <h3 class="text-2xl font-black font-mono text-[#0b192c]">{{ company_settings.currency_symbol|default:'$' }}{{ metrics.total_sales|floatformat:2|intcomma }}</h3>
         <p class="text-[10px] text-blue-900/70 font-semibold mt-0.5">Gross sales revenue</p>
       </div>
     </div>
@@ -140,7 +140,7 @@
         </div>
       </div>
       <div class="mt-2">
-        <h3 class="text-2xl font-black font-mono text-[#0b192c]">${{ metrics.total_cost|intcomma }}</h3>
+        <h3 class="text-2xl font-black font-mono text-[#0b192c]">{{ company_settings.currency_symbol|default:'$' }}{{ metrics.total_cost|floatformat:2|intcomma }}</h3>
         <p class="text-[10px] text-indigo-900/70 font-semibold mt-0.5">Purchase cost of goods</p>
       </div>
     </div>
@@ -154,7 +154,7 @@
         </div>
       </div>
       <div class="mt-2">
-        <h3 class="text-2xl font-black font-mono text-[#0b192c]">${{ metrics.gross_profit|intcomma }}</h3>
+        <h3 class="text-2xl font-black font-mono text-[#0b192c]">{{ company_settings.currency_symbol|default:'$' }}{{ metrics.gross_profit|floatformat:2|intcomma }}</h3>
         <p class="text-[10px] text-blue-900/70 font-semibold mt-0.5">Revenue minus COGS</p>
       </div>
     </div>
@@ -168,7 +168,7 @@
         </div>
       </div>
       <div class="mt-2">
-        <h3 class="text-2xl font-black font-mono text-[#0b192c]">${{ metrics.total_expenses|intcomma }}</h3>
+        <h3 class="text-2xl font-black font-mono text-[#0b192c]">{{ company_settings.currency_symbol|default:'$' }}{{ metrics.total_expenses|floatformat:2|intcomma }}</h3>
         <p class="text-[10px] text-slate-600 font-semibold mt-0.5">Operating expenditures</p>
       </div>
     </div>
@@ -182,7 +182,7 @@
         </div>
       </div>
       <div class="mt-2">
-        <h3 class="text-2xl font-black font-mono text-[#0b192c]">${{ metrics.net_profit|intcomma }}</h3>
+        <h3 class="text-2xl font-black font-mono text-[#0b192c]">{{ company_settings.currency_symbol|default:'$' }}{{ metrics.net_profit|floatformat:2|intcomma }}</h3>
         <p class="text-[10px] text-blue-900 font-bold mt-0.5">Operating net income</p>
       </div>
     </div>
@@ -196,7 +196,7 @@
         </div>
       </div>
       <div class="mt-2">
-        <h3 class="text-2xl font-black font-mono text-[#0b192c]">${{ metrics.today_sales|intcomma }}</h3>
+        <h3 class="text-2xl font-black font-mono text-[#0b192c]">{{ company_settings.currency_symbol|default:'$' }}{{ metrics.today_sales|floatformat:2|intcomma }}</h3>
         <p class="text-[10px] text-sky-900/70 font-semibold mt-0.5">Closed today</p>
       </div>
     </div>
@@ -233,7 +233,7 @@
                 <td class="py-2 px-3 font-mono text-[11px] text-slate-500">{{ s.date_sold|date:"Y-m-d" }}</td>
                 <td class="py-2 px-3 font-mono font-bold text-blue-700">{{ s.invoice_number }}</td>
                 <td class="py-2 px-3 font-bold text-slate-900">{{ s.customer.name }}</td>
-                <td class="py-2 px-3 text-right font-black font-mono text-slate-900">${{ s.total_amount|intcomma }}</td>
+                <td class="py-2 px-3 text-right font-black font-mono text-slate-900">{{ company_settings.currency_symbol|default:'$' }}{{ s.total_amount|floatformat:2|intcomma }}</td>
                 <td class="py-2 px-3 text-center">
                   <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">
                     Paid
@@ -275,11 +275,11 @@
               <tr class="hover:bg-blue-50/50 transition-colors">
                 <td class="py-2 px-3 font-bold text-slate-900">{{ p.name }}</td>
                 <td class="py-2 px-3 text-slate-500">{{ p.category.name }}</td>
-                <td class="py-2 px-3 text-right font-black font-mono text-slate-900">${{ p.current_selling_price|intcomma }}</td>
+                <td class="py-2 px-3 text-right font-black font-mono text-slate-900">{{ company_settings.currency_symbol|default:'$' }}{{ p.current_selling_price|floatformat:2|intcomma }}</td>
                 <td class="py-2 px-3 text-center">
                   {% if p.available_quantity > 0 %}
                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">
-                      {{ p.available_quantity }} in stock
+                      {{ p.available_quantity|intcomma }} in stock
                     </span>
                   {% else %}
                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">
@@ -350,21 +350,21 @@
         labels: chartData.months,
         datasets: [
           {
-            label: 'Sales Revenue ($)',
+            label: 'Sales Revenue (' + (window.APP_CURRENCY_SYMBOL || '$') + ')',
             data: chartData.revenues,
             backgroundColor: '#1d4ed8',
             borderRadius: 6,
             barPercentage: 0.7,
           },
           {
-            label: 'Expenses ($)',
+            label: 'Expenses (' + (window.APP_CURRENCY_SYMBOL || '$') + ')',
             data: chartData.expenses,
             backgroundColor: '#0284c7',
             borderRadius: 6,
             barPercentage: 0.7,
           },
           {
-            label: 'Net Operating Profit ($)',
+            label: 'Net Operating Profit (' + (window.APP_CURRENCY_SYMBOL || '$') + ')',
             data: chartData.net_profits,
             backgroundColor: '#0b192c',
             borderRadius: 6,
@@ -379,6 +379,14 @@
           legend: {
             position: 'top',
             labels: { color: textColor, font: { family: 'Inter', size: 10, weight: 'bold' } }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const label = context.dataset.label ? context.dataset.label.split('(')[0].trim() : '';
+                return (label ? label + ': ' : '') + formatMoney(context.parsed.y);
+              }
+            }
           }
         },
         scales: {
@@ -391,7 +399,7 @@
             ticks: { 
               color: textColor, 
               font: { family: 'Inter', size: 10 },
-              callback: function(value) { return '$' + value; }
+              callback: function(value) { return formatMoney(value); }
             }
           }
         }

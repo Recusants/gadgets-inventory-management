@@ -39,7 +39,7 @@
           </span>
         </td>
         <td class="py-3 px-4 whitespace-nowrap text-right font-black font-mono text-slate-900 text-sm">
-          ${{ exp.amount|intcomma }}
+          {{ company_settings.currency_symbol|default:'$' }}{{ exp.amount|floatformat:2|intcomma }}
         </td>
         <td class="py-3 px-4 whitespace-nowrap text-center">
           <div class="inline-flex items-center justify-center space-x-1.5">

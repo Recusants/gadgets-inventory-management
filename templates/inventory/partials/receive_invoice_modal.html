@@ -1,4 +1,4 @@
-{% load static %}
+{% load static humanize %}
 <div class="p-6">
   
   <!-- Modal Header -->
@@ -169,9 +169,9 @@
                      data-id="{{ p.id }}" data-name="{{ p.name }}" data-price="{{ p.current_selling_price }}" data-stock="{{ p.available_quantity }}">
                   <div>
                     <span class="font-bold text-slate-800">{{ p.name }}</span>
-                    <span class="text-[10px] text-slate-400 ml-1">Stock: {{ p.available_quantity }}</span>
+                    <span class="text-[10px] text-slate-400 ml-1">Stock: {{ p.available_quantity|intcomma }}</span>
                   </div>
-                  <span class="font-mono text-blue-600 font-bold text-[11px]">${{ p.current_selling_price }}</span>
+                  <span class="font-mono text-blue-600 font-bold text-[11px]">{{ company_settings.currency_symbol|default:'$' }}{{ p.current_selling_price|floatformat:2|intcomma }}</span>
                 </div>
               {% endfor %}
             </div>
@@ -212,14 +212,14 @@
 
           <!-- Unit Cost (lg: 1 col) -->
           <div class="col-span-1 sm:col-span-1 md:col-span-1 lg:col-span-1">
-            <label class="block text-[11px] font-bold text-slate-600 mb-1">Cost ($) *</label>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Cost ({{ company_settings.currency_symbol|default:'$' }}) *</label>
             <input type="number" step="0.01" min="0" id="item-cost" placeholder="0.00"
                    class="w-full px-2 py-2 rounded-xl border border-slate-300 bg-white text-xs font-mono font-bold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none text-right">
           </div>
 
           <!-- Selling Price (lg: 1 col) -->
           <div class="col-span-1 sm:col-span-1 md:col-span-1 lg:col-span-1">
-            <label class="block text-[11px] font-bold text-slate-600 mb-1">Sell ($)</label>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Sell ({{ company_settings.currency_symbol|default:'$' }})</label>
             <input type="number" step="0.01" min="0" id="item-selling" placeholder="0.00"
                    class="w-full px-2 py-2 rounded-xl border border-slate-300 bg-white text-xs font-mono font-bold text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none text-right">
           </div>
@@ -267,7 +267,7 @@
           (<span id="tab2-total-units" class="font-bold text-blue-900">0</span> units total)
         </div>
         <div>
-          Total Cost: <span id="tab2-grand-total" class="font-mono font-black text-blue-900 text-sm">$0.00</span>
+          Total Cost: <span id="tab2-grand-total" class="font-mono font-black text-blue-900 text-sm">{{ company_settings.currency_symbol|default:'$' }}0.00</span>
         </div>
       </div>
 
@@ -635,7 +635,7 @@
       $('#items-count-badge').addClass('hidden').text('0');
       $('#tab2-total-items-count').text('0');
       $('#tab2-total-units').text('0');
-      $('#tab2-grand-total').text('$0.00');
+      $('#tab2-grand-total').text(formatMoney(0));
       $('#wizard-items-json').val('[]');
       return;
     }
@@ -661,10 +661,10 @@
           <td class="py-2.5 px-3.5">
             ${item.expiration_date ? `<span class="font-mono text-[11px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 font-bold">${item.expiration_date}</span>` : `<span class="text-slate-400 italic text-[11px]">None</span>`}
           </td>
-          <td class="py-2.5 px-3 text-center font-bold font-mono">${item.quantity}</td>
-          <td class="py-2.5 px-3.5 text-right font-mono">$${parseFloat(item.cost_price).toFixed(2)}</td>
-          <td class="py-2.5 px-3.5 text-right font-mono font-bold text-slate-900">$${parseFloat(item.subtotal).toFixed(2)}</td>
-          <td class="py-2.5 px-3.5 text-right font-mono text-blue-600 font-bold">$${parseFloat(item.selling_price).toFixed(2)}</td>
+          <td class="py-2.5 px-3 text-center font-bold font-mono">${formatNumber(item.quantity)}</td>
+          <td class="py-2.5 px-3.5 text-right font-mono">${formatMoney(item.cost_price)}</td>
+          <td class="py-2.5 px-3.5 text-right font-mono font-bold text-slate-900">${formatMoney(item.subtotal)}</td>
+          <td class="py-2.5 px-3.5 text-right font-mono text-blue-600 font-bold">${formatMoney(item.selling_price)}</td>
           <td class="py-2.5 px-3 text-center">
             <button type="button" onclick="removeItemFromInvoice(${idx})" class="w-6 h-6 rounded-md bg-blue-900 hover:bg-red-600 text-white flex items-center justify-center text-[10px] mx-auto transition-colors">
               <i class="fas fa-trash-alt"></i>
@@ -676,8 +676,8 @@
 
     $('#items-count-badge').removeClass('hidden').text(window.wizardItems.length);
     $('#tab2-total-items-count').text(window.wizardItems.length);
-    $('#tab2-total-units').text(totalUnits);
-    $('#tab2-grand-total').text('$' + grandTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+    $('#tab2-total-units').text(formatNumber(totalUnits));
+    $('#tab2-grand-total').text(formatMoney(grandTotal));
     $('#wizard-items-json').val(JSON.stringify(window.wizardItems));
   }
 
@@ -710,15 +710,15 @@
           <td class="py-2.5 px-3.5">
             ${item.expiration_date ? `<span class="font-mono text-[11px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 font-bold">${item.expiration_date}</span>` : `<span class="text-slate-400 italic text-[11px]">None</span>`}
           </td>
-          <td class="py-2.5 px-3 text-center font-bold font-mono">${item.quantity}</td>
-          <td class="py-2.5 px-3.5 text-right font-mono">$${parseFloat(item.cost_price).toFixed(2)}</td>
-          <td class="py-2.5 px-3.5 text-right font-mono font-bold text-slate-900">$${parseFloat(item.subtotal).toFixed(2)}</td>
-          <td class="py-2.5 px-3.5 text-right font-mono text-blue-600 font-bold">$${parseFloat(item.selling_price).toFixed(2)}</td>
+          <td class="py-2.5 px-3 text-center font-bold font-mono">${formatNumber(item.quantity)}</td>
+          <td class="py-2.5 px-3.5 text-right font-mono">${formatMoney(item.cost_price)}</td>
+          <td class="py-2.5 px-3.5 text-right font-mono font-bold text-slate-900">${formatMoney(item.subtotal)}</td>
+          <td class="py-2.5 px-3.5 text-right font-mono text-blue-600 font-bold">${formatMoney(item.selling_price)}</td>
         </tr>
       `);
     });
 
-    $('#verify-grand-total').text('$' + grandTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+    $('#verify-grand-total').text(formatMoney(grandTotal));
   }
 
   // Explicit window exposures for inline onclick handlers

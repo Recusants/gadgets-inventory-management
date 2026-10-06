@@ -31,19 +31,19 @@
       <div>
         <span class="text-slate-500 text-[10px] uppercase font-bold block">Total Received</span>
         <span class="text-lg font-black text-slate-900 mt-0.5 block">
-          {{ total_qty }} units
+          {{ total_qty|intcomma }} units
         </span>
       </div>
       <div>
         <span class="text-slate-500 text-[10px] uppercase font-bold block">Available Units</span>
         <span class="text-lg font-black text-emerald-600 mt-0.5 block">
-          {{ total_rem }} units
+          {{ total_rem|intcomma }} units
         </span>
       </div>
       <div>
         <span class="text-slate-500 text-[10px] uppercase font-bold block">Total Invoice Cost</span>
         <span class="text-lg font-black text-blue-700 mt-0.5 block font-mono">
-          ${{ total_cost|intcomma }}
+          {{ company_settings.currency_symbol|default:'$' }}{{ total_cost|floatformat:2|intcomma }}
         </span>
       </div>
     </div>
@@ -86,13 +86,13 @@
                   {% endif %}
                 </td>
                 <td class="py-2 px-3 text-slate-600">{{ b.product.category.name|default:"General" }}</td>
-                <td class="py-2 px-3 font-mono font-bold text-slate-900 text-right">${{ b.cost_price|floatformat:2|intcomma }}</td>
-                <td class="py-2 px-3 text-center font-bold text-slate-900">{{ b.quantity_received }}</td>
+                <td class="py-2 px-3 font-mono font-bold text-slate-900 text-right">{{ company_settings.currency_symbol|default:'$' }}{{ b.cost_price|floatformat:2|intcomma }}</td>
+                <td class="py-2 px-3 text-center font-bold text-slate-900">{{ b.quantity_received|intcomma }}</td>
                 <td class="py-2 px-3 text-center font-bold {% if b.quantity_remaining > 0 %}text-emerald-700{% else %}text-slate-400{% endif %}">
-                  {{ b.quantity_remaining }}
+                  {{ b.quantity_remaining|intcomma }}
                 </td>
                 <td class="py-2 px-3 font-mono font-black text-slate-900 text-right">
-                  ${{ b.total_cost|floatformat:2|intcomma }}
+                  {{ company_settings.currency_symbol|default:'$' }}{{ b.total_cost|floatformat:2|intcomma }}
                 </td>
               </tr>
             {% endfor %}

@@ -116,6 +116,31 @@ window.paginateTable = function (containerSelector, pageNumber) {
   refreshTable(containerSelector, { page: pageNumber });
 };
 
+// Global Number & Currency Formatting Helpers (Localisation)
+window.formatMoney = function (amount, symbol) {
+  const sym = symbol !== undefined ? symbol : (window.APP_CURRENCY_SYMBOL || '$');
+  if (amount === null || amount === undefined || amount === '') {
+    return sym + '0.00';
+  }
+  const cleaned = String(amount).replace(/[^0-9.-]/g, '');
+  const num = parseFloat(cleaned);
+  if (isNaN(num)) return sym + '0.00';
+  return sym + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+
+window.formatNumber = function (val, decimals = 0) {
+  if (val === null || val === undefined || val === '') {
+    return '0';
+  }
+  const cleaned = String(val).replace(/[^0-9.-]/g, '');
+  const num = parseFloat(cleaned);
+  if (isNaN(num)) return '0';
+  return num.toLocaleString('en-US', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  });
+};
+
 // Reusable Modal Shell Controller
 const ModalManager = {
   shell: null,

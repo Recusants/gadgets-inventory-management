@@ -47,15 +47,15 @@
       </div>
       <div class="p-3.5 rounded-xl border border-slate-200 bg-white">
         <div class="text-slate-950 uppercase tracking-wider font-black text-[10px]">Unit Cost Price</div>
-        <div class="font-black text-blue-700 mt-1 font-mono text-sm">${{ batch.cost_price|intcomma }}</div>
+        <div class="font-black text-blue-700 mt-1 font-mono text-sm">{{ company_settings.currency_symbol|default:'$' }}{{ batch.cost_price|floatformat:2|intcomma }}</div>
       </div>
       <div class="p-3.5 rounded-xl border border-slate-200 bg-white">
         <div class="text-slate-950 uppercase tracking-wider font-black text-[10px]">Qty Received</div>
-        <div class="font-black text-blue-700 mt-1 font-mono text-sm">{{ batch.quantity_received }} units</div>
+        <div class="font-black text-blue-700 mt-1 font-mono text-sm">{{ batch.quantity_received|intcomma }} units</div>
       </div>
       <div class="p-3.5 rounded-xl border border-slate-200 bg-white">
         <div class="text-slate-950 uppercase tracking-wider font-black text-[10px]">Qty Available</div>
-        <div class="font-black text-blue-700 mt-1 font-mono text-sm">{{ batch.quantity_remaining }} units</div>
+        <div class="font-black text-blue-700 mt-1 font-mono text-sm">{{ batch.quantity_remaining|intcomma }} units</div>
       </div>
     </div>
 

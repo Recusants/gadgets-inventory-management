@@ -41,7 +41,7 @@
           <td class="py-3 px-4 whitespace-nowrap text-right">
             <div class="inline-flex items-center space-x-1.5">
               <span class="font-black font-mono text-slate-900 text-sm">
-                ${{ product.current_selling_price|intcomma }}
+                {{ company_settings.currency_symbol|default:'$' }}{{ product.current_selling_price|floatformat:2|intcomma }}
               </span>
               {% if product.stock %}
               <button type="button" 
@@ -58,7 +58,7 @@
           <!-- Available Stock -->
           <td class="py-3 px-4 whitespace-nowrap text-center">
             <span class="font-bold font-mono text-sm {% if product.available_quantity == 0 %}text-slate-400{% elif product.available_quantity <= 5 %}text-blue-700{% else %}text-slate-900{% endif %}">
-              {{ product.available_quantity }} units
+              {{ product.available_quantity|intcomma }} units
             </span>
           </td>
 

@@ -39,7 +39,7 @@
     <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
       <div>
         <div class="text-[10px] font-extrabold uppercase text-slate-400">Total Spent</div>
-        <div class="text-lg font-black font-mono text-slate-900 mt-0.5">${{ total_spent|intcomma }}</div>
+        <div class="text-lg font-black font-mono text-slate-900 mt-0.5">{{ company_settings.currency_symbol|default:'$' }}{{ total_spent|floatformat:2|intcomma }}</div>
       </div>
       <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-sm">
         <i class="fas fa-coins"></i>
@@ -48,7 +48,7 @@
     <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
       <div>
         <div class="text-[10px] font-extrabold uppercase text-slate-400">This Month</div>
-        <div class="text-lg font-black font-mono text-blue-600 mt-0.5">${{ month_spent|intcomma }}</div>
+        <div class="text-lg font-black font-mono text-blue-600 mt-0.5">{{ company_settings.currency_symbol|default:'$' }}{{ month_spent|floatformat:2|intcomma }}</div>
       </div>
       <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-sm">
         <i class="fas fa-calendar-alt"></i>
@@ -57,7 +57,7 @@
     <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
       <div>
         <div class="text-[10px] font-extrabold uppercase text-slate-400">Transactions</div>
-        <div class="text-lg font-black text-slate-900 mt-0.5">{{ total_count }}</div>
+        <div class="text-lg font-black text-slate-900 mt-0.5">{{ total_count|intcomma }}</div>
       </div>
       <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-sm">
         <i class="fas fa-receipt"></i>

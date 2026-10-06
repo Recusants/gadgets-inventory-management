@@ -99,14 +99,14 @@
                 {{ b.supplier_name|default:"—" }}
               </td>
               <td class="py-3 px-4 font-bold font-mono text-slate-900 text-right whitespace-nowrap">
-                ${{ b.cost_price|intcomma }}
+                {{ company_settings.currency_symbol|default:'$' }}{{ b.cost_price|floatformat:2|intcomma }}
               </td>
               <td class="py-3 px-4 font-bold text-center whitespace-nowrap">
-                {{ b.quantity_received }}
+                {{ b.quantity_received|intcomma }}
               </td>
               <td class="py-3 px-4 font-black text-center whitespace-nowrap">
                 <span class="{% if b.quantity_remaining > 0 %}text-blue-700 font-black{% else %}text-slate-400{% endif %}">
-                  {{ b.quantity_remaining }}
+                  {{ b.quantity_remaining|intcomma }}
                 </span>
               </td>
               <td class="py-3 px-4 text-center whitespace-nowrap">

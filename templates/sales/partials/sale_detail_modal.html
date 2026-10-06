@@ -51,9 +51,9 @@
                   </div>
                 {% endif %}
               </td>
-              <td class="py-2.5 px-3 text-center font-bold">{{ item.quantity }}</td>
-              <td class="py-2.5 px-3 text-right font-mono">${{ item.unit_price|intcomma }}</td>
-              <td class="py-2.5 px-3 text-right font-bold font-mono">${{ item.total_price|intcomma }}</td>
+              <td class="py-2.5 px-3 text-center font-bold">{{ item.quantity|intcomma }}</td>
+              <td class="py-2.5 px-3 text-right font-mono">{{ company_settings.currency_symbol|default:'$' }}{{ item.unit_price|floatformat:2|intcomma }}</td>
+              <td class="py-2.5 px-3 text-right font-bold font-mono">{{ company_settings.currency_symbol|default:'$' }}{{ item.total_price|floatformat:2|intcomma }}</td>
             </tr>
           {% endfor %}
         </tbody>
@@ -64,11 +64,11 @@
     <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
       <div class="flex justify-between text-slate-600">
         <span>Total Sale Amount:</span>
-        <span class="font-black text-slate-900 text-base font-mono">${{ sale.total_amount|intcomma }}</span>
+        <span class="font-black text-slate-900 text-base font-mono">{{ company_settings.currency_symbol|default:'$' }}{{ sale.total_amount|floatformat:2|intcomma }}</span>
       </div>
       <div class="flex justify-between text-slate-600">
         <span>FIFO Net Profit:</span>
-        <span class="font-black text-emerald-700 font-mono">+${{ sale.total_profit|intcomma }}</span>
+        <span class="font-black text-emerald-700 font-mono">+{{ company_settings.currency_symbol|default:'$' }}{{ sale.total_profit|floatformat:2|intcomma }}</span>
       </div>
       <div class="flex justify-between text-slate-600">
         <span>Payment Method:</span>

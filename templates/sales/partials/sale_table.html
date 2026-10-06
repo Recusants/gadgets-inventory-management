@@ -36,12 +36,12 @@
 
           <!-- Amount Sold -->
           <td class="py-3 px-4 text-right whitespace-nowrap font-black font-mono text-slate-900 text-sm">
-            ${{ sale.total_amount|intcomma }}
+            {{ company_settings.currency_symbol|default:'$' }}{{ sale.total_amount|floatformat:2|intcomma }}
           </td>
 
           <!-- Net Profit (FIFO label removed as requested) -->
           <td class="py-3 px-4 text-right whitespace-nowrap font-black font-mono text-blue-600">
-            +${{ sale.total_profit|intcomma }}
+            +{{ company_settings.currency_symbol|default:'$' }}{{ sale.total_profit|floatformat:2|intcomma }}
           </td>
 
           <!-- Payment -->

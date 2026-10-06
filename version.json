@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.13",
-  "build": "v2.4.13-86a0d30",
-  "commit_count": 13,
-  "commit_hash": "86a0d30",
+  "version": "v2.4.15",
+  "build": "v2.4.15-f4bccde",
+  "commit_count": 15,
+  "commit_hash": "f4bccde",
   "branch": "main",
-  "commit_subject": "Update: ~0,4dt:~4,2dt:~6,2dt:~8,2dt:~10,2",
-  "updated_at": "2026-09-29 20:13",
-  "last_pushed_at": "2026-09-29 20:42:59"
+  "commit_subject": "Fix syntax error in setup_dev_machine.bat and pull_from_github.bat",
+  "updated_at": "2026-09-29 20:52",
+  "last_pushed_at": "2026-10-06 19:36:48"
 }

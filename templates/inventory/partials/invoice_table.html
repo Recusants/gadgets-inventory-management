@@ -42,17 +42,17 @@
 
           <!-- Total Units Received -->
           <td class="py-3 px-4 text-center font-bold font-mono text-slate-900 whitespace-nowrap">
-            {{ inv.total_qty_received }}
+            {{ inv.total_qty_received|intcomma }}
           </td>
 
           <!-- Units Remaining -->
           <td class="py-3 px-4 text-center font-black font-mono whitespace-nowrap {% if inv.total_qty_remaining > 0 %}text-blue-700{% else %}text-slate-400{% endif %}">
-            {{ inv.total_qty_remaining }}
+            {{ inv.total_qty_remaining|intcomma }}
           </td>
 
           <!-- Total Invoice Cost -->
           <td class="py-3 px-4 text-right font-mono font-black text-slate-900 text-sm whitespace-nowrap">
-            ${{ inv.total_cost|intcomma }}
+            {{ company_settings.currency_symbol|default:'$' }}{{ inv.total_cost|floatformat:2|intcomma }}
           </td>
 
           <!-- Actions -->

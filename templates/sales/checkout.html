@@ -130,10 +130,10 @@
           <!-- Selling Price (Left) -->
           <div>
             <label class="block text-[11px] font-bold text-slate-700 mb-1">
-              Unit Selling Price (USD)
+              Unit Selling Price ({{ company_settings.currency_code|default:'USD' }})
             </label>
             <div class="relative">
-              <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 font-bold">$</span>
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 font-bold">{{ company_settings.currency_symbol|default:'$' }}</span>
               <input type="number" 
                      step="0.01" 
                      min="0" 
@@ -200,16 +200,16 @@
         <div class="px-4 py-2 bg-slate-50 border-t border-slate-200 space-y-1 text-xs flex-shrink-0">
           <div class="flex justify-between text-slate-600">
             <span>Subtotal:</span>
-            <span id="summary-subtotal" class="font-bold font-mono text-slate-900">$0.00</span>
+            <span id="summary-subtotal" class="font-bold font-mono text-slate-900">{{ company_settings.currency_symbol|default:'$' }}0.00</span>
           </div>
           <div class="flex justify-between text-slate-600">
             <span>Tax / VAT:</span>
-            <span class="font-bold font-mono text-slate-500">$0.00</span>
+            <span class="font-bold font-mono text-slate-500">{{ company_settings.currency_symbol|default:'$' }}0.00</span>
           </div>
           <hr class="border-slate-200 my-0.5">
           <div class="flex items-baseline justify-between">
             <span class="text-xs font-black text-slate-900">TOTAL DUE:</span>
-            <span id="summary-grand-total" class="text-xl font-black text-blue-600 font-mono">$0.00</span>
+            <span id="summary-grand-total" class="text-xl font-black text-blue-600 font-mono">{{ company_settings.currency_symbol|default:'$' }}0.00</span>
           </div>
         </div>
 
@@ -561,9 +561,9 @@
               <div class="text-[10px] text-slate-500">${escapeHtml(p.category)}</div>
             </div>
             <div class="text-right flex-shrink-0">
-              <div class="font-black text-blue-600 font-mono text-xs">$${parseFloat(p.price).toFixed(2)}</div>
+              <div class="font-black text-blue-600 font-mono text-xs">${formatMoney(p.price)}</div>
               <span class="inline-block text-[10px] font-bold px-1.5 py-0.2 rounded ${p.stock > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
-                Stock: ${p.stock}
+                Stock: ${formatNumber(p.stock)}
               </span>
             </div>
           </div>
@@ -673,7 +673,7 @@
       $('#pos-unit-price-input').val(price.toFixed(2));
       $prodClearBtn.removeClass('hidden');
 
-      $prodBadge.text(`Available: ${stock}`).removeClass('hidden');
+      $prodBadge.text(`Available: ${formatNumber(stock)}`).removeClass('hidden');
       if (stock > 0) {
         $prodBadge.removeClass('bg-rose-100 text-rose-800').addClass('bg-emerald-100 text-emerald-800');
       } else {
@@ -823,8 +823,8 @@
         `);
         $('#cart-item-count').text(0);
         $('#btn-clear-cart').addClass('hidden');
-        $('#summary-subtotal').text('$0.00');
-        $('#summary-grand-total').text('$0.00');
+        $('#summary-subtotal').text(formatMoney(0));
+        $('#summary-grand-total').text(formatMoney(0));
         validateReadyForCheckout();
         return;
       }
@@ -843,12 +843,12 @@
             <div class="flex-1 pr-2 min-w-0">
               <div class="font-bold text-slate-900 truncate text-[11px]">${escapeHtml(item.name)}</div>
               <div class="flex items-center space-x-2 text-[10px] text-slate-500">
-                <span class="font-bold text-blue-700">Qty: ${item.qty} &times; $${item.unitPrice.toFixed(2)}</span>
+                <span class="font-bold text-blue-700">Qty: ${formatNumber(item.qty)} &times; ${formatMoney(item.unitPrice)}</span>
                 ${item.serialNumber ? `<span class="font-mono text-emerald-700 bg-emerald-50 px-1 rounded text-[9px] font-bold">SN: ${escapeHtml(item.serialNumber)}</span>` : ''}
               </div>
             </div>
             <div class="flex items-center space-x-2 flex-shrink-0">
-              <span class="font-black font-mono text-slate-900 text-xs">$${lineTotal.toFixed(2)}</span>
+              <span class="font-black font-mono text-slate-900 text-xs">${formatMoney(lineTotal)}</span>
               <button type="button" 
                       data-remove-cart-id="${item.cartId}" 
                       title="Remove item"
@@ -860,9 +860,9 @@
         `);
       });
 
-      $('#cart-item-count').text(totalUnits);
-      $('#summary-subtotal').text('$' + grandTotal.toFixed(2));
-      $('#summary-grand-total').text('$' + grandTotal.toFixed(2));
+      $('#cart-item-count').text(formatNumber(totalUnits));
+      $('#summary-subtotal').text(formatMoney(grandTotal));
+      $('#summary-grand-total').text(formatMoney(grandTotal));
 
       validateReadyForCheckout();
       savePosState();

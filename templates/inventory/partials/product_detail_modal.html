@@ -25,19 +25,19 @@
       <div>
         <span class="text-slate-500 text-[10px] uppercase font-bold block">Available Stock</span>
         <span class="text-lg font-black mt-0.5 block {% if product.available_quantity == 0 %}text-rose-600{% elif product.available_quantity <= 5 %}text-amber-600{% else %}text-emerald-600{% endif %}">
-          {{ product.available_quantity }} units
+          {{ product.available_quantity|intcomma }} units
         </span>
       </div>
       <div>
         <span class="text-slate-500 text-[10px] uppercase font-bold block">Current Selling Price</span>
         <span class="text-lg font-black text-blue-700 mt-0.5 block font-mono">
-          ${{ product.current_selling_price|intcomma }}
+          {{ company_settings.currency_symbol|default:'$' }}{{ product.current_selling_price|floatformat:2|intcomma }}
         </span>
       </div>
       <div>
         <span class="text-slate-500 text-[10px] uppercase font-bold block">Total Valuation</span>
         <span class="text-lg font-black text-slate-900 mt-0.5 block font-mono">
-          ${{ product.stock_value|intcomma|default:"0.00" }}
+          {{ company_settings.currency_symbol|default:'$' }}{{ product.stock_value|floatformat:2|intcomma|default:"0.00" }}
         </span>
       </div>
     </div>
@@ -111,10 +111,10 @@
                     <span class="text-slate-400 italic text-[10px]">—</span>
                   {% endif %}
                 </td>
-                <td class="py-2 px-3 font-mono font-bold text-slate-900">${{ b.cost_price|intcomma }}</td>
-                <td class="py-2 px-3 font-semibold text-slate-700">{{ b.quantity_received }}</td>
+                <td class="py-2 px-3 font-mono font-bold text-slate-900">{{ company_settings.currency_symbol|default:'$' }}{{ b.cost_price|floatformat:2|intcomma }}</td>
+                <td class="py-2 px-3 font-semibold text-slate-700">{{ b.quantity_received|intcomma }}</td>
                 <td class="py-2 px-3 font-bold {% if b.quantity_remaining > 0 %}text-emerald-700{% else %}text-slate-400{% endif %}">
-                  {{ b.quantity_remaining }}
+                  {{ b.quantity_remaining|intcomma }}
                 </td>
               </tr>
             {% empty %}

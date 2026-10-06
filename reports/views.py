@@ -170,7 +170,8 @@ def export_sales_excel(request):
     ws['A2'].font = subtitle_font
 
     # Column Headers
-    headers = ['Date', 'Invoice #', 'Product(s)', 'Qty', 'Customer', 'Cost ($)', 'Total Sold ($)', 'Profit ($)', 'Payment']
+    curr_sym = settings_obj.currency_symbol or '$'
+    headers = ['Date', 'Invoice #', 'Product(s)', 'Qty', 'Customer', f'Cost ({curr_sym})', f'Total Sold ({curr_sym})', f'Profit ({curr_sym})', 'Payment']
     row_num = 4
     for col_num, header in enumerate(headers, 1):
         cell = ws.cell(row=row_num, column=col_num, value=header)
@@ -280,7 +281,8 @@ def export_inventory_excel(request):
     ws['A2'] = f"Complete Physical Inventory Audit & Valuation — Generated {timezone.now().strftime('%d/%m/%Y %H:%M')}"
     ws['A2'].font = subtitle_font
 
-    headers = ['Product Name', 'Category', 'Available Qty', 'Selling Price ($)', 'Expected Value ($)']
+    curr_sym = settings_obj.currency_symbol or '$'
+    headers = ['Product Name', 'Category', 'Available Qty', f'Selling Price ({curr_sym})', f'Expected Value ({curr_sym})']
     row_num = 4
     for col_num, header in enumerate(headers, 1):
         cell = ws.cell(row=row_num, column=col_num, value=header)
@@ -397,17 +399,18 @@ def export_sales_pdf(request):
     tot_cost = Decimal('0.00')
     tot_profit = Decimal('0.00')
 
+    curr_sym = settings_obj.currency_symbol or '$'
     for s in sales_qs:
         items_desc = ", ".join([f"{it.product.name} (x{it.quantity})" for it in s.items.all()])[:35]
         table_data.append([
             s.date_sold.strftime('%d/%m/%Y'),
             s.invoice_number,
             items_desc,
-            str(s.item_count),
+            f"{s.item_count:,}",
             s.customer.name[:18],
-            f"${s.total_cost:,.2f}",
-            f"${s.total_amount:,.2f}",
-            f"${s.total_profit:,.2f}",
+            f"{curr_sym}{s.total_cost:,.2f}",
+            f"{curr_sym}{s.total_amount:,.2f}",
+            f"{curr_sym}{s.total_profit:,.2f}",
             s.payment_method
         ])
         tot_cost += s.total_cost
@@ -416,8 +419,8 @@ def export_sales_pdf(request):
 
     # Total Row
     table_data.append([
-        'TOTALS', '', '', f"{sales_qs.count()} Sales", '',
-        f"${tot_cost:,.2f}", f"${tot_rev:,.2f}", f"${tot_profit:,.2f}", ''
+        'TOTALS', '', '', f"{sales_qs.count():,} Sales", '',
+        f"{curr_sym}{tot_cost:,.2f}", f"{curr_sym}{tot_rev:,.2f}", f"{curr_sym}{tot_profit:,.2f}", ''
     ])
 
     report_table = Table(table_data, colWidths=[65, 80, 160, 45, 110, 65, 75, 65, 65])
@@ -482,6 +485,7 @@ def export_inventory_pdf(request):
     tot_units = 0
     tot_val = Decimal('0.00')
 
+    curr_sym = settings_obj.currency_symbol or '$'
     for p in products:
         qty = p.available_quantity
         sp = p.current_selling_price
@@ -489,15 +493,15 @@ def export_inventory_pdf(request):
         table_data.append([
             p.name[:35],
             p.category.name[:25] if p.category else '—',
-            str(qty),
-            f"${sp:,.2f}",
-            f"${val:,.2f}"
+            f"{qty:,}",
+            f"{curr_sym}{sp:,.2f}",
+            f"{curr_sym}{val:,.2f}"
         ])
         tot_units += qty
         tot_val += val
 
     table_data.append([
-        'TOTAL INVENTORY VALUATION', '', str(tot_units), '', f"${tot_val:,.2f}"
+        'TOTAL INVENTORY VALUATION', '', f"{tot_units:,}", '', f"{curr_sym}{tot_val:,.2f}"
     ])
 
     report_table = Table(table_data, colWidths=[240, 160, 100, 110, 120])

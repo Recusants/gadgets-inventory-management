@@ -1,3 +1,4 @@
+{% load humanize %}
 <div class="overflow-x-auto max-h-[calc(100vh-285px)] overflow-y-auto custom-scrollbar">
   <table class="w-full text-left text-xs">
     <thead>
@@ -68,6 +69,6 @@
 
 {% if paginator.count > 0 %}
 <div class="px-5 py-3.5 bg-gray-50/60 dark:bg-gray-900/40 border-t border-gray-100 dark:border-gray-700/80 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-  <div>Total: <strong class="text-gray-700 dark:text-gray-300">{{ paginator.count }}</strong> customers</div>
+  <div>Total: <strong class="text-gray-700 dark:text-gray-300">{{ paginator.count|intcomma }}</strong> customers</div>
 </div>
 {% endif %}

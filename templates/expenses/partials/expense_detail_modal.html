@@ -20,7 +20,7 @@
     <div class="bg-blue-50/50 p-3.5 rounded-xl border border-blue-100 flex items-center justify-between">
       <div>
         <div class="text-[10px] font-bold uppercase text-blue-600">Total Expense</div>
-        <div class="text-xl font-black font-mono text-slate-900 mt-0.5">${{ expense.amount|intcomma }}</div>
+        <div class="text-xl font-black font-mono text-slate-900 mt-0.5">{{ company_settings.currency_symbol|default:'$' }}{{ expense.amount|floatformat:2|intcomma }}</div>
       </div>
       <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
         {{ expense.category.name }}

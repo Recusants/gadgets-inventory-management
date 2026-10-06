@@ -1,3 +1,4 @@
+{% load humanize %}
 <div class="flex-1 min-h-0 overflow-y-auto">
   <table class="w-full text-left border-collapse text-xs">
     <thead class="sticky top-0 z-20 bg-slate-100 border-b border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
@@ -26,7 +27,7 @@
           {{ cat.description|default:"—" }}
         </td>
         <td class="py-3 px-4 whitespace-nowrap text-right font-mono font-bold text-slate-900">
-          ${{ cat.default_amount|floatformat:2 }}
+          {{ company_settings.currency_symbol|default:'$' }}{{ cat.default_amount|floatformat:2|intcomma }}
         </td>
         <td class="py-3 px-4 whitespace-nowrap text-center">
           {% if cat.is_recurring %}
@@ -41,7 +42,7 @@
         </td>
         <td class="py-3 px-4 whitespace-nowrap text-center">
           <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-800">
-            {{ cat.expenses.count }}
+            {{ cat.expenses.count|intcomma }}
           </span>
         </td>
         <td class="py-3 px-4 whitespace-nowrap text-center">
