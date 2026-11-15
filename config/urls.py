@@ -20,7 +20,9 @@ urlpatterns = [
     path('notifications/', core_views.notification_list_view, name='notifications_direct'),
     path('settings/', core_views.settings_view, name='settings_direct'),
     path('system/', core_views.system_view, name='system_direct'),
+    path('whats-new/', core_views.whats_new_view, name='whats_new_direct'),
     path('expenses/', include('expenses.urls')),
+    path('fiscalisation/', include('fiscalisation.urls')),
 ]
 
 if settings.DEBUG:

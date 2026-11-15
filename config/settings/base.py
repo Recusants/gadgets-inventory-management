@@ -35,6 +35,12 @@ INSTALLED_APPS = [
     'dashboard.apps.DashboardConfig',
     'reports.apps.ReportsConfig',
     'expenses.apps.ExpensesConfig',
+    'fiscalisation.apps.FiscalisationConfig',
+]
+
+AUTHENTICATION_BACKENDS = [
+    'accounts.auth_backends.EmailOrUsernameModelBackend',
+    'django.contrib.auth.backends.ModelBackend',
 ]
 
 MIDDLEWARE = [

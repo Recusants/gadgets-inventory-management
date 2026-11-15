@@ -34,7 +34,7 @@ echo   [1] Accounts (Auth, Roles, Permissions, Staff Management)
 echo.
 echo   [2] Inventory (Products, Categories, IMEI/Serials, Stock Limits)
 echo.
-echo   [3] Sales & POS (Cart, Checkouts, Receipts, Cashier Sessions)
+echo   [3] Sales and POS (Cart, Checkouts, Receipts, Cashier Sessions)
 echo.
 echo   [4] Reports (Daily Sales, Profit Margins, Stock Valuation)
 echo.
@@ -43,11 +43,17 @@ echo.
 echo   [6] Dashboard (Overview Analytics, Low Stock Alerts)
 echo.
 echo   [7] Core (Company Settings, Localization, Notifications)
+echo.
+echo   [8] Fiscalisation (ZIMRA FDMS, Signatures, Counters)
 echo ------------------------------------------------------------
 echo.
 
-set "CHOICE=0"
-set /p "CHOICE=Enter selection [0-7, Press Enter for default]: "
+if not "%~1"=="" (
+    set "CHOICE=%~1"
+) else (
+    set "CHOICE=0"
+    set /p "CHOICE=Enter selection [0-8, Press Enter for default]: "
+)
 if "!CHOICE!"=="" set "CHOICE=0"
 
 set "TARGET_APP="
@@ -75,6 +81,9 @@ if "!CHOICE!"=="0" (
 ) else if "!CHOICE!"=="7" (
     set "TARGET_NAME=Core Module"
     set "TARGET_APP=core"
+) else if "!CHOICE!"=="8" (
+    set "TARGET_NAME=Fiscalisation Module"
+    set "TARGET_APP=fiscalisation"
 ) else (
     echo [WARN] Invalid choice "!CHOICE!"; defaulting to FULL TEST SUITE.
     set "TARGET_NAME=FULL SYSTEM TEST SUITE"
@@ -115,5 +124,5 @@ if %TEST_EXIT_CODE% equ 0 (
 )
 
 echo.
-pause
+if "%CI%"=="" if not "%~1"=="--no-pause" if not "%~2"=="--no-pause" pause
 exit /b %TEST_EXIT_CODE%

@@ -71,4 +71,4 @@ echo 2. Extract to "C:\avail\GadgetStore\".
 echo 3. Configure .env and double-click "update.bat".
 echo ============================================================
 echo.
-pause
+if "%CI%"=="" if not "%~1"=="--no-pause" pause

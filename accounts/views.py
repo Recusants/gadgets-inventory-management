@@ -35,14 +35,14 @@ def login_view(request):
             if is_ajax:
                 return error_response(
                     title="Login Failed",
-                    message="Please enter your username and password.",
+                    message="Please enter your email and password.",
                     errors=errors
                 )
             return render(request, 'accounts/login.html', {'errors': errors})
 
-        username = request.POST.get('username', '').strip()
+        identifier = request.POST.get('email', '').strip() or request.POST.get('username', '').strip()
         password = request.POST.get('password', '').strip()
-        user = authenticate(request, username=username, password=password)
+        user = authenticate(request, username=identifier, password=password)
 
         if user is not None:
             if not user.is_active:
@@ -60,7 +60,7 @@ def login_view(request):
             if is_ajax:
                 return success_response(
                     title="Signed In",
-                    message=f"Logged in as {user.get_full_name() or user.username}",
+                    message=f"Logged in as {user.get_full_name() or user.email or user.username}",
                     data={"redirect_url": "/"}
                 )
             return redirect('dashboard:index')
@@ -68,12 +68,12 @@ def login_view(request):
             if is_ajax:
                 return error_response(
                     title="Invalid Credentials",
-                    message="Incorrect username or password. Please try again.",
-                    errors={"password": "Username and password do not match our records."},
+                    message="Incorrect email or password. Please try again.",
+                    errors={"password": "Email/Username and password do not match our records."},
                     status=401
                 )
             return render(request, 'accounts/login.html', {
-                'general_error': "Incorrect username or password. Please try again."
+                'general_error': "Incorrect email or password. Please try again."
             })
 
     return render(request, 'accounts/login.html')

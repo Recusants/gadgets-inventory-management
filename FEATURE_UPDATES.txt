@@ -6,6 +6,15 @@ Version Track: 2026.x Release Series
 Last Updated: October 2026
 
 ================================================================================
+[NOVEMBER 2026] - v2.4.17
+================================================================================
+
+* Fiscalisation, What's New & Email Login
+  - Fiscalisation: Ported full ZIMRA fiscalisation module with offline queue, daily counters, and SPA dashboard
+  - What's New: Added interactive feature updates changelog interface and raw viewer
+  - Authentication: Switched primary login to email address with seamless username fallback.
+
+================================================================================
 [NOVEMBER 2026] - v2.4.162
 ================================================================================
 

@@ -76,17 +76,18 @@
 
       <div>
         <label class="block text-xs font-black text-white mb-1.5 tracking-wide">
-          Username <span class="text-rose-400">*</span>
+          Email Address <span class="text-rose-400">*</span>
         </label>
         <div class="relative">
           <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-cyan-400 font-bold">
-            <i class="fas fa-user text-xs"></i>
+            <i class="fas fa-envelope text-xs"></i>
           </div>
           <input type="text" 
-                 name="username" 
+                 name="email" 
+                 id="id_email"
                  required 
                  autofocus
-                 placeholder="e.g. admin"
+                 placeholder="e.g. admin@21void.com or username"
                  class="w-full pl-9 pr-3.5 py-3 rounded-xl border-2 border-slate-600 bg-black text-xs text-white placeholder-slate-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-400 outline-none transition-all font-semibold">
         </div>
       </div>
@@ -181,7 +182,7 @@
           error: function (xhr) {
             $btn.prop('disabled', false).removeClass('opacity-70');
             const res = xhr.responseJSON || {};
-            let msg = res.message || 'Incorrect username or password. Please try again.';
+            let msg = res.message || 'Incorrect email or password. Please try again.';
             if (res.errors && res.errors.password) {
               msg = res.errors.password;
             }

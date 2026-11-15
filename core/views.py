@@ -21,6 +21,8 @@ def test_ajax(request):
 
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from .feature_updates import parse_feature_updates
 
 import sys
 import os
@@ -49,6 +51,7 @@ def system_view(request):
 
     client_settings = CompanySetting.get_settings()
     sys_ver = get_system_version()
+    feature_updates, raw_updates_txt = parse_feature_updates()
 
     context = {
         'software_info': {
@@ -98,9 +101,29 @@ def system_view(request):
             'total_users': User.objects.count() if hasattr(User, 'objects') else 0,
             'total_products': Product.objects.count() if hasattr(Product, 'objects') else 0,
             'total_sales': Sale.objects.count() if hasattr(Sale, 'objects') else 0,
-        }
+        },
+        'feature_updates': feature_updates,
+        'raw_updates_txt': raw_updates_txt,
     }
     return render(request, 'core/system.html', context)
+
+
+@login_required
+def whats_new_view(request):
+    """
+    Renders What's New & Release Changelog parsed from FEATURE_UPDATES.txt.
+    """
+    from .version import get_system_version
+    sys_ver = get_system_version()
+    feature_updates, raw_updates_txt = parse_feature_updates()
+    client_settings = CompanySetting.get_settings()
+    return render(request, 'core/whats_new.html', {
+        'page_title': "What's New & Feature Updates",
+        'system_version': sys_ver,
+        'feature_updates': feature_updates,
+        'raw_updates_txt': raw_updates_txt,
+        'company_settings': client_settings,
+    })
 
 
 

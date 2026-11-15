@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}What's New & Release Changelog — Clarity Retail{% endblock %}
+
+{% block content %}
+<div class="h-full flex flex-col overflow-y-auto custom-scrollbar p-2 sm:p-4 bg-white">
+  <div class="max-w-5xl mx-auto w-full space-y-6 pb-20">
+    
+    <!-- Header with Breadcrumbs & Action Buttons -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b-2 border-black gap-4">
+      <div class="space-y-1">
+        <div class="flex items-center space-x-2 text-xs font-black text-black uppercase tracking-wider">
+          <i class="fas fa-bullhorn text-cyan-500"></i>
+          <span>Release Telemetry & Feature Updates</span>
+        </div>
+        <h1 class="text-3xl font-black tracking-tight text-black flex items-center">
+          What's New in Clarity Retail
+        </h1>
+        <p class="text-xs font-bold text-slate-800">
+          Changelog, system optimizations, and feature rollouts recorded in lockstep with every production release.
+        </p>
+      </div>
+
+      <div class="flex items-center space-x-3 flex-shrink-0">
+        <button type="button" 
+                onclick="toggleRawUpdatesModal()" 
+                class="inline-flex items-center px-3.5 py-2 rounded-xl text-xs font-black bg-white text-black border-2 border-black hover:bg-slate-100 transition-all shadow-sm">
+          <i class="fas fa-file-alt mr-2 text-cyan-600"></i> View FEATURE_UPDATES.txt
+        </button>
+        <a href="{% url 'core:system' %}" class="inline-flex items-center px-3.5 py-2 rounded-xl text-xs font-black bg-black text-white border-2 border-black hover:bg-slate-800 transition-all shadow-sm">
+          <i class="fas fa-server mr-2"></i> System Info
+        </a>
+      </div>
+    </div>
+
+    <!-- Active Release Banner -->
+    <div class="p-5 rounded-2xl bg-black text-white border-2 border-black shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div class="flex items-center space-x-4">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center font-mono font-black text-xl text-white shadow-md flex-shrink-0">
+          <i class="fas fa-sparkles"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2 flex-wrap gap-y-1">
+            <span class="text-xs font-black uppercase text-slate-300 tracking-wider">Active System Track:</span>
+            <span class="px-2.5 py-0.5 rounded bg-blue-600 text-white text-xs font-mono font-black">{{ system_version.version }}</span>
+            <span class="text-xs font-bold text-cyan-400 font-mono">{{ system_version.build }}</span>
+          </div>
+          <p class="text-xs text-slate-300 font-medium mt-1">
+            Engineered for high-throughput retail counters, offline resiliency, and real-time inventory tracking.
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2">
+        <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping mr-2"></span>
+          Up to date
+        </span>
+      </div>
+    </div>
+
+    <!-- Monthly Changelog Timeline -->
+    <div class="space-y-6">
+      {% for m in feature_updates %}
+      <div class="bg-slate-50 border-2 border-black rounded-2xl p-6 shadow-sm space-y-4">
+        
+        <!-- Month and Version Header -->
+        <div class="flex items-center justify-between pb-3 border-b-2 border-slate-300 flex-wrap gap-2">
+          <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 rounded-lg bg-black text-white flex items-center justify-center text-sm font-black shadow-sm">
+              <i class="fas fa-calendar-check text-cyan-400"></i>
+            </div>
+            <div>
+              <h2 class="text-lg font-black text-black leading-tight">{{ m.month }}</h2>
+              {% if m.version %}
+              <span class="text-[11px] font-mono font-bold text-slate-600">Release Tag: {{ m.version }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div>
+            {% if m.is_latest %}
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-black bg-emerald-600 text-white shadow-sm">
+              <i class="fas fa-check-circle mr-1.5 text-xs"></i> Latest Production Release
+            </span>
+            {% else %}
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-slate-200 text-slate-700 border border-slate-300">
+              Archived Release
+            </span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Sections & Bullet Points -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {% for sec in m.sections %}
+          <div class="bg-white border-2 border-slate-200 rounded-xl p-4.5 space-y-2.5 shadow-sm">
+            <h3 class="text-xs font-black uppercase text-blue-700 tracking-wider flex items-center">
+              <i class="fas fa-chevron-right text-[10px] mr-1.5 text-cyan-500"></i> {{ sec.title }}
+            </h3>
+            <ul class="space-y-2 text-xs text-slate-800">
+              {% for item in sec.items %}
+              <li class="flex items-start space-x-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-cyan-600 mt-1.5 flex-shrink-0"></span>
+                <span class="leading-relaxed">
+                  {% if item.title %}
+                  <strong class="font-black text-black">{{ item.title }}:</strong> {{ item.desc }}
+                  {% else %}
+                  {{ item }}
+                  {% endif %}
+                </span>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endfor %}
+        </div>
+
+      </div>
+      {% empty %}
+      <div class="text-center py-12 bg-slate-50 border-2 border-black rounded-2xl p-6 text-slate-600">
+        <i class="fas fa-info-circle text-3xl mb-3 text-slate-400 block"></i>
+        <p class="text-sm font-bold">No release update records found.</p>
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+
+<!-- Raw FEATURE_UPDATES.txt Modal -->
+<div id="raw-updates-modal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="bg-slate-900 border-2 border-cyan-500 rounded-3xl max-w-4xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+    
+    <!-- Modal Header -->
+    <div class="p-5 border-b border-slate-800 flex items-center justify-between bg-black flex-shrink-0">
+      <div class="flex items-center space-x-3">
+        <i class="fas fa-file-code text-cyan-400 text-lg"></i>
+        <h3 class="text-base font-black text-white">FEATURE_UPDATES.txt</h3>
+      </div>
+      <button type="button" 
+              onclick="toggleRawUpdatesModal()" 
+              class="w-8 h-8 rounded-full bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 flex items-center justify-center transition-colors">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="p-5 flex-1 min-h-0 flex flex-col space-y-3">
+      <div class="flex items-center justify-between text-xs text-slate-400 flex-shrink-0">
+        <span>Project Root Changelog File</span>
+        <button type="button" 
+                onclick="copyChangelogText()" 
+                id="btn-copy-changelog" 
+                class="px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs flex items-center space-x-1.5 transition-colors">
+          <i class="fas fa-copy"></i>
+          <span>Copy All</span>
+        </button>
+      </div>
+      <pre id="raw-changelog-content" class="flex-1 min-h-0 overflow-y-auto p-4 rounded-xl bg-black border border-slate-800 text-xs font-mono text-cyan-300 leading-relaxed whitespace-pre-wrap select-all custom-scrollbar">{{ raw_updates_txt }}</pre>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="p-4 border-t border-slate-800 bg-slate-950 flex justify-end flex-shrink-0">
+      <button type="button" 
+              onclick="toggleRawUpdatesModal()" 
+              class="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition-colors">
+        Close
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function toggleRawUpdatesModal() {
+  const modal = document.getElementById('raw-updates-modal');
+  modal.classList.toggle('hidden');
+}
+
+function copyChangelogText() {
+  const content = document.getElementById('raw-changelog-content').innerText;
+  navigator.clipboard.writeText(content).then(() => {
+    const btn = document.getElementById('btn-copy-changelog');
+    btn.innerHTML = '<i class="fas fa-check"></i> <span>Copied!</span>';
+    setTimeout(() => {
+      btn.innerHTML = '<i class="fas fa-copy"></i> <span>Copy All</span>';
+    }, 2000);
+  });
+}
+</script>
+{% endblock %}

@@ -54,13 +54,14 @@ def _parse_custom_date(value, default=None):
 
 
 def validate_login(data):
-    """Validate login inputs."""
+    """Validate login inputs (email or username)."""
     errors = {}
-    username = data.get('username', '').strip()
+    identifier = data.get('email', '').strip() or data.get('username', '').strip()
     password = data.get('password', '').strip()
 
-    if not username:
-        errors['username'] = 'Username is required.'
+    if not identifier:
+        errors['email'] = 'Email or username is required.'
+        errors['username'] = 'Email or username is required.'
     if not password:
         errors['password'] = 'Password is required.'
 

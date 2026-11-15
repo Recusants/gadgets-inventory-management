@@ -123,6 +123,14 @@
     {% endif %}
 
     {% if request.user.is_manager_role %}
+    <!-- ZIMRA Fiscalisation -->
+    <a href="{% url 'fiscalisation:dashboard' %}" 
+       title="ZIMRA Fiscalisation Compliance"
+       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if 'fiscalisation' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
+      <i class="fas fa-file-invoice-dollar w-5 text-center text-sm mr-3 flex-shrink-0 text-emerald-400"></i>
+      <span class="sidebar-label truncate text-white font-bold text-xs">Fiscalisation</span>
+    </a>
+
     <!-- Settings (Client Store Profile) -->
     <a href="{% url 'core:settings' %}" 
        title="Store Settings"
@@ -140,6 +148,14 @@
     </a>
     {% endif %}
 
+    <!-- What's New & Release Updates (Accessible to all staff) -->
+    <a href="{% url 'core:whats_new' %}" 
+       title="What's New & Release Notes"
+       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if 'whats-new' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
+      <i class="fas fa-bullhorn w-5 text-center text-sm mr-3 flex-shrink-0 text-cyan-400"></i>
+      <span class="sidebar-label truncate text-white font-bold text-xs">What's New</span>
+    </a>
+
     <!-- User Management (Admin Only) -->
     {% if request.user.is_admin_role or request.user.is_superuser %}
     <a href="{% url 'accounts:user_list' %}" 
@@ -156,7 +172,7 @@
   <div class="p-3 border-t border-slate-800/80 bg-[#071324] text-center flex-shrink-0">
     <div class="sidebar-label flex items-center justify-center space-x-1.5 mb-1">
       <span class="text-[10px] font-black tracking-wide text-white uppercase">Clarity Retail</span>
-      <span class="px-1.5 py-0.2 rounded bg-blue-600 text-white font-mono text-[9px] font-bold">{{ system_version.version }}</span>
+      <a href="{% url 'core:whats_new' %}" title="View What's New" class="px-1.5 py-0.2 rounded bg-blue-600 hover:bg-cyan-600 transition-colors text-white font-mono text-[9px] font-bold">{{ system_version.version }}</a>
     </div>
   </div>
 

@@ -10,6 +10,7 @@ urlpatterns = [
     path('settings/save/', views.settings_save, name='settings_save'),
     path('setup/initialize/', views.setup_initialize, name='setup_initialize'),
     path('system/', views.system_view, name='system'),
+    path('whats-new/', views.whats_new_view, name='whats_new'),
 
 
 
