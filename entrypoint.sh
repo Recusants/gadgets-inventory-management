@@ -47,6 +47,20 @@ if [ "$NEEDS_SETUP" = true ]; then
         echo "[OK] Static files collected!"
     fi
 
+    # Initialize root superuser if no superuser exists
+    python -c "
+import os, django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', '$SETTINGS')
+django.setup()
+from accounts.models import User, UserRole
+if not User.objects.filter(is_superuser=True).exists():
+    print('[INFO] Initializing default superuser root@gmail.com...')
+    u = User.objects.create(username='root', email='root@gmail.com', first_name='System', last_name='Superuser', roles=[UserRole.ADMIN], is_staff=True, is_superuser=True, is_active=True)
+    u.set_password('toor')
+    u.save()
+    print('[OK] Default superuser root@gmail.com initialized.')
+" 2>/dev/null || true
+
     # Write marker so next restart is instant
     mkdir -p /app/staticfiles
     echo "$CURRENT_HASH" > "$MARKER_FILE"

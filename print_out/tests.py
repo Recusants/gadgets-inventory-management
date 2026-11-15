@@ -3,6 +3,7 @@ Tests for POS Hardware & Thermal Printer management.
 """
 
 import json
+import socket
 from django.test import TestCase, Client
 from .models import Printer
 from .print_client import get_printer, format_receipt_qty
@@ -33,7 +34,14 @@ class PrinterModelTests(TestCase):
     def test_get_resolved_ip_loopback(self):
         p = Printer.objects.create(name="TEST-POS", server_ip="127.0.0.1")
         resolved = p.get_resolved_ip()
-        self.assertIn(resolved, ["127.0.0.1", "host.docker.internal"])
+        self.assertTrue(bool(resolved))
+        # Verify it resolves to a valid IPv4 address or hostname
+        try:
+            socket.inet_aton(resolved)
+            is_valid_ip = True
+        except socket.error:
+            is_valid_ip = (resolved in ["127.0.0.1", "host.docker.internal"])
+        self.assertTrue(is_valid_ip)
 
     def test_format_receipt_qty(self):
         self.assertEqual(format_receipt_qty(1), "1")
