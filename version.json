@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.39",
-  "build": "v2.4.39-730b55c",
-  "commit_count": 39,
-  "commit_hash": "730b55c",
+  "version": "v2.4.40",
+  "build": "v2.4.40-196ddba",
+  "commit_count": 40,
+  "commit_hash": "196ddba",
   "branch": "main",
-  "commit_subject": "Add Transactions journal and itemize Sales table as child line items under Daily Operations",
-  "updated_at": "2026-11-15 19:33",
-  "last_pushed_at": "2026-11-15 19:33:47"
+  "commit_subject": "Replace top right more options squircle with user profile circle dropdown menu containing settings and actions",
+  "updated_at": "2026-11-15 19:43",
+  "last_pushed_at": "2026-11-15 19:43:58"
 }
