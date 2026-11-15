@@ -559,11 +559,14 @@ window.refreshTable = refreshTable;
 // Sidebar Toggle Controller
 function updateSidebarToggleIcon(isCollapsed) {
   const $icon = $('#sidebar-toggle-icon');
+  const $btn = $('#sidebar-toggle-btn');
   if ($icon.length) {
     if (isCollapsed) {
-      $icon.removeClass('fa-indent fa-bars fa-bars-staggered').addClass('fa-outdent');
+      $icon.removeClass('fa-indent fa-outdent fa-chevron-left fa-bars fa-bars-staggered').addClass('fa-chevron-right');
+      if ($btn.length) $btn.attr('title', 'Expand Sidebar');
     } else {
-      $icon.removeClass('fa-outdent fa-bars-staggered').addClass('fa-indent');
+      $icon.removeClass('fa-indent fa-outdent fa-chevron-right fa-bars fa-bars-staggered').addClass('fa-chevron-left');
+      if ($btn.length) $btn.attr('title', 'Collapse Sidebar');
     }
   }
 }

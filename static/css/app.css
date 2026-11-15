@@ -166,15 +166,29 @@ html.sidebar-is-collapsed #app-sidebar .sidebar-brand-header,
   justify-content: center !important;
 }
 
-html.sidebar-is-collapsed #app-sidebar #sidebar-toggle-btn,
-#app-sidebar.collapsed #sidebar-toggle-btn {
+html.sidebar-is-collapsed #app-sidebar #sidebar-brand-logo,
+#app-sidebar.collapsed #sidebar-brand-logo {
   display: none !important;
 }
 
-html.sidebar-is-collapsed #app-sidebar #sidebar-brand-logo,
-#app-sidebar.collapsed #sidebar-brand-logo {
+html.sidebar-is-collapsed #app-sidebar #sidebar-toggle-btn,
+#app-sidebar.collapsed #sidebar-toggle-btn {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #0f172a;
   margin: 0 auto !important;
-  cursor: pointer;
+}
+
+html.sidebar-is-collapsed #app-sidebar #sidebar-toggle-btn:hover,
+#app-sidebar.collapsed #sidebar-toggle-btn:hover {
+  background-color: #f1f5f9;
+  color: #000000;
 }
 
 html.sidebar-is-collapsed #app-sidebar .sidebar-link,

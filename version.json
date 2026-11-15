@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.28",
-  "build": "v2.4.28-aa1381e",
-  "commit_count": 28,
-  "commit_hash": "aa1381e",
+  "version": "v2.4.29",
+  "build": "v2.4.29-a216754",
+  "commit_count": 29,
+  "commit_hash": "a216754",
   "branch": "main",
-  "commit_subject": "Fix login page card width constraint and enforce solid dark button visibility",
-  "updated_at": "2026-11-15 17:32",
-  "last_pushed_at": "2026-11-15 17:34:55"
+  "commit_subject": "Move Notifications into scrolling sidebar nav and show only software version in footer",
+  "updated_at": "2026-11-15 17:36",
+  "last_pushed_at": "2026-11-15 17:39:42"
 }

@@ -1,51 +1,37 @@
 {% load static %}
 <aside id="app-sidebar" class="flex flex-col h-screen select-none border-r border-slate-100 bg-white flex-shrink-0 text-slate-800 transition-all duration-200">
   
-  <!-- Sidebar Brand Header (Fixoria Inspired Squircle Badge + Collapse Button) -->
-  <div class="h-14 px-4 flex items-center justify-between border-b border-slate-100 flex-shrink-0 sidebar-brand-header">
-    <div class="flex items-center space-x-2.5 min-w-0">
+  <!-- Single Unified Brand & Store Header (Company Name, Branch Name & Collapse/Expand Arrow) -->
+  <div class="h-14 px-3 flex items-center justify-between border-b border-slate-100 flex-shrink-0 sidebar-brand-header">
+    <div class="flex items-center space-x-2.5 min-w-0 flex-1">
       <div id="sidebar-brand-logo" 
            class="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-sm shadow-xs flex-shrink-0 overflow-hidden cursor-pointer" 
            style="background-color: #0f172a; color: #ffffff;"
-           title="Toggle Sidebar">
+           title="{{ company_settings.company_name|default:'Gadget Store' }}">
         {% if company_settings.logo %}
           <img src="{{ company_settings.logo.url }}" alt="Logo" class="w-full h-full object-contain p-1">
         {% else %}
-          <i class="fas fa-cubes text-emerald-400 text-xs"></i>
+          <i class="fas fa-store text-emerald-400 text-xs"></i>
         {% endif %}
       </div>
-      <div class="sidebar-label flex items-center space-x-1 min-w-0 truncate">
-        <span class="font-bold text-sm text-slate-900 tracking-tight">Gadget Store</span>
-        <span class="text-[10px] text-slate-400 font-medium">™</span>
-      </div>
+      <a href="{% url 'core:settings' %}" 
+         class="truncate sidebar-label min-w-0 flex-1 block group text-left" 
+         title="{{ company_settings.company_name|default:'Gadget Store' }} — {{ company_settings.tagline|default:'Main Branch • Active LAN' }}">
+        <div class="text-xs font-bold text-slate-900 truncate leading-tight group-hover:text-black">
+          {{ company_settings.company_name|default:"Gadget Store" }}
+        </div>
+        <div class="text-[10px] text-slate-400 font-medium leading-tight truncate mt-0.5">
+          {{ company_settings.tagline|default:"Main Branch • Active LAN" }}
+        </div>
+      </a>
     </div>
     
     <button id="sidebar-toggle-btn" 
             type="button" 
-            class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors focus:outline-none"
+            class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors focus:outline-none flex-shrink-0"
             title="Collapse Sidebar">
-      <i id="sidebar-toggle-icon" class="fas fa-indent text-xs"></i>
+      <i id="sidebar-toggle-icon" class="fas fa-chevron-left text-xs"></i>
     </button>
-  </div>
-
-  <!-- Organization / Store Selector Card (Fixoria Inspired) -->
-  <div class="px-3 pt-3 pb-1 flex-shrink-0">
-    <a href="{% url 'core:settings' %}" 
-       class="p-2.5 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-100 flex items-center justify-between transition-colors group"
-       title="Store Settings & Profile">
-      <div class="flex items-center space-x-2.5 min-w-0">
-        <div class="w-7 h-7 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs flex items-center justify-center flex-shrink-0">
-          <i class="fas fa-store text-[11px]"></i>
-        </div>
-        <div class="truncate sidebar-label">
-          <div class="text-xs font-semibold text-slate-900 truncate leading-tight group-hover:text-slate-950">
-            {{ company_settings.company_name|default:"Main Branch Store" }}
-          </div>
-          <div class="text-[10px] text-slate-400 font-medium leading-tight mt-0.5">Active LAN Store</div>
-        </div>
-      </div>
-      <i class="fas fa-chevron-right text-[10px] text-slate-400 group-hover:text-slate-600 transition-transform sidebar-label"></i>
-    </a>
   </div>
 
   <!-- Navigation Links -->
