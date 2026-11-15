@@ -27,10 +27,14 @@
         <p class="text-xs text-slate-400 font-normal">Fast item combobox, keyboard arrow selection &amp; automatic FIFO batches</p>
       </div>
     </div>
-    <div>
-      <a href="{% url 'sales:sale_list' %}" class="px-3.5 py-1.5 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium rounded-xl border border-slate-200 shadow-xs transition-all inline-flex items-center space-x-1.5">
-        <i class="fas fa-arrow-left text-[10px] text-slate-400"></i>
-        <span>Sales History</span>
+    <div class="flex items-center space-x-2">
+      <a href="{% url 'sales:transaction_list' %}" class="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium rounded-xl border border-slate-200 shadow-xs transition-all inline-flex items-center space-x-1.5">
+        <i class="fas fa-arrow-right-arrow-left text-[10px] text-blue-500"></i>
+        <span>Transactions</span>
+      </a>
+      <a href="{% url 'sales:sale_list' %}" class="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium rounded-xl border border-slate-200 shadow-xs transition-all inline-flex items-center space-x-1.5">
+        <i class="fas fa-shopping-bag text-[10px] text-blue-500"></i>
+        <span>Sales</span>
       </a>
     </div>
   </div>

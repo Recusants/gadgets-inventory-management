@@ -4,7 +4,11 @@ from . import views
 app_name = 'sales'
 
 urlpatterns = [
-    # Sales listing & table
+    # Transactions journal (Parent receipts/invoices)
+    path('transactions/', views.transaction_list_view, name='transaction_list'),
+    path('transactions/table/', views.transaction_table_partial, name='transaction_table'),
+
+    # Sales listing & table (Itemized line items)
     path('', views.sale_list_view, name='sale_list'),
     path('table/', views.sale_table_partial, name='sale_table'),
     path('add/', views.sale_add_modal, name='sale_add_modal'),

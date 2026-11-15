@@ -118,11 +118,20 @@
         <span class="sidebar-label truncate">Dashboard</span>
       </a>
 
+      <!-- Transactions -->
+      <a href="/sales/transactions/" 
+         title="Transactions Journal"
+         data-keywords="transactions receipts invoices checkout payments journal ledger audit"
+         class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if 'transactions' in request.path %}sidebar-link-active{% endif %}">
+        <i class="fas fa-arrow-right-arrow-left w-4 text-center mr-2.5 flex-shrink-0"></i>
+        <span class="sidebar-label truncate">Transactions</span>
+      </a>
+
       <!-- Sales -->
       <a href="/sales/" 
-         title="Sales Records"
-         data-keywords="sales records orders receipts transactions history sold items revenue turnover"
-         class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if request.resolver_match.app_name == 'sales' and not 'checkout' in request.path and not 'customer' in request.path %}sidebar-link-active{% endif %}">
+         title="Sales Ledger (Line Items)"
+         data-keywords="sales items sold products ledger units lines history"
+         class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if request.resolver_match.app_name == 'sales' and not 'checkout' in request.path and not 'customer' in request.path and not 'transactions' in request.path %}sidebar-link-active{% endif %}">
         <i class="fas fa-shopping-bag w-4 text-center mr-2.5 flex-shrink-0"></i>
         <span class="sidebar-label truncate">Sales</span>
       </a>

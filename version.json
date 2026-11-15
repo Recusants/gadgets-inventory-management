@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.37",
-  "build": "v2.4.37-88ac7f9",
-  "commit_count": 37,
-  "commit_hash": "88ac7f9",
+  "version": "v2.4.38",
+  "build": "v2.4.38-2bc6ea0",
+  "commit_count": 38,
+  "commit_hash": "2bc6ea0",
   "branch": "main",
-  "commit_subject": "Streamline notifications center table and add details modal",
-  "updated_at": "2026-11-15 19:09",
-  "last_pushed_at": "2026-11-15 19:09:06"
+  "commit_subject": "Add Business Performance Graphics and Analytics dashboard section",
+  "updated_at": "2026-11-15 19:19",
+  "last_pushed_at": "2026-11-15 19:19:15"
 }

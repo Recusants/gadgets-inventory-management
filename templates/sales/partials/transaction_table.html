@@ -1,0 +1,235 @@
+{% load humanize %}
+
+<div class="flex-1 min-h-0 overflow-y-auto pb-20">
+  <table class="w-full text-left border-collapse text-xs">
+    <thead class="sticky top-0 z-20 bg-slate-100 border-b border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
+      <tr>
+        <th class="py-3 px-4">Date</th>
+        <th class="py-3 px-4">Receipt / Invoice #</th>
+        <th class="py-3 px-4">Customer</th>
+        <th class="py-3 px-4 text-center">Items</th>
+        <th class="py-3 px-4 text-right">Total Amount</th>
+        {% if request.user.is_supervisor_role %}
+        <th class="py-3 px-4 text-right">Profit</th>
+        {% endif %}
+        <th class="py-3 px-4 text-center">Payment</th>
+        <th class="py-3 px-4 text-left">Cashier</th>
+        <th class="py-3 px-4 text-center">Actions</th>
+      </tr>
+    </thead>
+
+    <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+      {% for sale in transactions %}
+        <tr class="hover:bg-blue-50/50 transition-colors">
+          
+          <!-- Date -->
+          <td class="py-3 px-4 whitespace-nowrap font-mono text-slate-500 text-[11px]">
+            <div>{{ sale.date_sold|date:"Y-m-d" }}</div>
+            <div class="text-[10px] text-slate-400">{{ sale.created_at|date:"H:i" }}</div>
+          </td>
+
+          <!-- Invoice Number -->
+          <td class="py-3 px-4 whitespace-nowrap font-mono font-bold text-blue-700">
+            <button type="button" 
+                    data-modal-url="{% url 'sales:sale_detail_modal' sale.id %}"
+                    data-modal-size="max-w-xl"
+                    title="View Receipt Details"
+                    class="hover:underline font-mono font-black text-blue-600 focus:outline-none">
+              {{ sale.invoice_number }}
+            </button>
+          </td>
+
+          <!-- Customer -->
+          <td class="py-3 px-4 whitespace-nowrap">
+            <div class="font-bold text-slate-900">{{ sale.customer.name }}</div>
+            <div class="text-[10px] text-slate-400 font-mono">{{ sale.customer.phone }}</div>
+          </td>
+
+          <!-- Items Count -->
+          <td class="py-3 px-4 text-center whitespace-nowrap">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+              <i class="fas fa-boxes-stacked mr-1 text-[9px]"></i> {{ sale.items.count }} item{{ sale.items.count|pluralize }}
+            </span>
+          </td>
+
+          <!-- Amount Sold -->
+          <td class="py-3 px-4 text-right whitespace-nowrap font-black font-mono text-slate-900 text-sm">
+            {{ company_settings.currency_symbol|default:'$' }}{{ sale.total_amount|floatformat:2|intcomma }}
+          </td>
+
+          <!-- Net Profit -->
+          {% if request.user.is_supervisor_role %}
+          <td class="py-3 px-4 text-right whitespace-nowrap font-black font-mono text-blue-600">
+            +{{ company_settings.currency_symbol|default:'$' }}{{ sale.total_profit|floatformat:2|intcomma }}
+          </td>
+          {% endif %}
+
+          <!-- Payment -->
+          <td class="py-3 px-4 text-center whitespace-nowrap">
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700">
+              {{ sale.payment_method }}
+            </span>
+          </td>
+
+          <!-- Cashier -->
+          <td class="py-3 px-4 whitespace-nowrap font-medium text-slate-600 text-[11px]">
+            <div class="flex items-center space-x-1.5">
+              <i class="fas fa-user-circle text-slate-400 text-xs"></i>
+              <span>{{ sale.user.get_full_name|default:sale.user.username|default:"System" }}</span>
+            </div>
+          </td>
+
+          <!-- Actions -->
+          <td class="py-3 px-4 text-center whitespace-nowrap">
+            <div class="inline-flex items-center justify-center space-x-1.5">
+              
+              <!-- Print Dropdown (POS, A5, A4, Share PDF) -->
+              <div class="relative inline-block text-left sale-print-dropdown-wrapper">
+                <button type="button" 
+                        onclick="toggleSalePrintMenu(event, '{{ sale.id }}')"
+                        title="Print / Share Receipt"
+                        class="h-7 px-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white inline-flex items-center space-x-1 text-xs font-bold shadow-sm transition-all focus:outline-none">
+                  <i class="fas fa-print text-[11px]"></i>
+                  <span class="text-[11px]">Print</span>
+                  <i class="fas fa-chevron-down text-[8px] opacity-80"></i>
+                </button>
+
+                <div id="sale-print-menu-{{ sale.id }}" 
+                     class="sale-print-dropdown hidden absolute right-0 mt-1 w-44 bg-white rounded-2xl shadow-xl border border-slate-200 py-1.5 z-50 text-left text-xs divide-y divide-slate-100 font-medium">
+                  
+                  <div class="px-3 py-1 text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                    Print Options
+                  </div>
+
+                  <div class="py-1">
+                    <!-- 1. POS Thermal Print -->
+                    <a href="javascript:void(0)" 
+                       onclick="printSalePOS('{{ sale.id }}', '{{ sale.invoice_number }}'); closeSalePrintMenus();"
+                       class="flex items-center px-3 py-1.5 text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors group">
+                      <div class="w-6 h-6 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-2 flex-shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                        <i class="fas fa-receipt text-[11px]"></i>
+                      </div>
+                      <div>
+                        <div class="font-bold text-xs leading-tight">POS Print</div>
+                        <div class="text-[10px] text-slate-400 leading-tight">Thermal slip</div>
+                      </div>
+                    </a>
+
+                    <!-- 2. A5 Print -->
+                    <a href="{% url 'sales:receipt_a4' sale.id %}?size=a5&auto_print=1" 
+                       target="_blank"
+                       onclick="closeSalePrintMenus();"
+                       class="flex items-center px-3 py-1.5 text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors group">
+                      <div class="w-6 h-6 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center mr-2 flex-shrink-0 group-hover:bg-blue-700 group-hover:text-white transition-colors">
+                        <i class="fas fa-file-alt text-[11px]"></i>
+                      </div>
+                      <div>
+                        <div class="font-bold text-xs leading-tight">A5 Print</div>
+                        <div class="text-[10px] text-slate-400 leading-tight">Half-page invoice</div>
+                      </div>
+                    </a>
+
+                    <!-- 3. A4 Print -->
+                    <a href="{% url 'sales:receipt_a4' sale.id %}?size=a4&auto_print=1" 
+                       target="_blank"
+                       onclick="closeSalePrintMenus();"
+                       class="flex items-center px-3 py-1.5 text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors group">
+                      <div class="w-6 h-6 rounded-lg bg-blue-50 text-blue-800 flex items-center justify-center mr-2 flex-shrink-0 group-hover:bg-blue-800 group-hover:text-white transition-colors">
+                        <i class="fas fa-file-invoice text-[11px]"></i>
+                      </div>
+                      <div>
+                        <div class="font-bold text-xs leading-tight">A4 Print</div>
+                        <div class="text-[10px] text-slate-400 leading-tight">Full page invoice</div>
+                      </div>
+                    </a>
+                  </div>
+
+                  <!-- 4. Share PDF -->
+                  <div class="pt-1">
+                    <a href="javascript:void(0)" 
+                       onclick="shareSalePDF('{{ sale.id }}', '{{ sale.invoice_number }}', '{% url 'sales:receipt_pdf' sale.id %}'); closeSalePrintMenus();"
+                       class="flex items-center px-3 py-1.5 text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors group">
+                      <div class="w-6 h-6 rounded-lg bg-blue-50 text-blue-900 flex items-center justify-center mr-2 flex-shrink-0 group-hover:bg-blue-900 group-hover:text-white transition-colors">
+                        <i class="fas fa-share-alt text-[11px]"></i>
+                      </div>
+                      <div>
+                        <div class="font-bold text-xs leading-tight">Share PDF</div>
+                        <div class="text-[10px] text-slate-400 leading-tight">Download &amp; share</div>
+                      </div>
+                    </a>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Detail Modal -->
+              <button type="button" 
+                      data-modal-url="{% url 'sales:sale_detail_modal' sale.id %}"
+                      data-modal-size="max-w-xl"
+                      title="View Details"
+                      class="w-7 h-7 rounded-lg bg-blue-700 hover:bg-blue-800 text-white flex items-center justify-center text-xs shadow-sm transition-all">
+                <i class="fas fa-eye"></i>
+              </button>
+
+              {% if request.user.is_manager_role %}
+              <!-- Delete / Void -->
+              <button type="button" 
+                      data-delete-url="{% url 'sales:sale_delete' sale.id %}"
+                      data-item-title="Transaction {{ sale.invoice_number }}"
+                      data-refresh-table="#transaction-table-container"
+                      title="Void Transaction"
+                      class="w-7 h-7 rounded-lg bg-blue-900 hover:bg-[#0a192f] text-white flex items-center justify-center text-xs shadow-sm transition-all">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+              {% endif %}
+            </div>
+          </td>
+
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="9" class="py-12 text-center text-slate-400">
+            <div class="flex flex-col items-center justify-center">
+              <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
+                <i class="fas fa-arrow-right-arrow-left text-lg text-blue-500"></i>
+              </div>
+              <p class="font-bold text-slate-600">No transactions found</p>
+              <p class="text-xs text-slate-400">Checkout receipts and transactions from POS will appear here.</p>
+            </div>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Pagination Footer -->
+{% if paginator.num_pages > 1 %}
+  <div class="py-2.5 px-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 flex-shrink-0">
+    <div>
+      Showing <span class="font-bold text-slate-700">{{ transactions.start_index }}</span> to <span class="font-bold text-slate-700">{{ transactions.end_index }}</span> of <span class="font-bold text-slate-700">{{ total_count }}</span> entries
+    </div>
+    
+    <div class="inline-flex space-x-1">
+      {% if transactions.has_previous %}
+        <button type="button" 
+                onclick="refreshTable('#transaction-table-container', {page: {{ transactions.previous_page_number }}})"
+                class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all">
+          <i class="fas fa-chevron-left mr-1"></i> Prev
+        </button>
+      {% endif %}
+
+      <span class="px-2.5 py-1 text-xs font-bold text-slate-700">
+        Page {{ transactions.number }} of {{ paginator.num_pages }}
+      </span>
+
+      {% if transactions.has_next %}
+        <button type="button" 
+                onclick="refreshTable('#transaction-table-container', {page: {{ transactions.next_page_number }}})"
+                class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all">
+          Next <i class="fas fa-chevron-right ml-1"></i>
+        </button>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}

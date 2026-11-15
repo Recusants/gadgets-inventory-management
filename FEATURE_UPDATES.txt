@@ -6,6 +6,17 @@ Version Track: 2026.x Release Series
 Last Updated: October 2026
 
 ================================================================================
+[NOVEMBER 2026] - v2.4.175
+================================================================================
+
+* Transactions Journal, Itemized Sales Separation & Operations Overhaul
+  - Transactions Journal: Added dedicated Transactions button under Daily Operations (/sales/transactions/) displaying parent receipt/invoice transactions with customer, items count, amount, cashier, and multi-format printing options (POS thermal, A5 invoice, A4 invoice, and Share PDF).
+  - Itemized Sales Ledger: Refactored Sales (/sales/) to represent individual line items sold on receipts (child of transactions), displaying product details, SKU, serial number/IMEI, quantity, unit price, line total, profit, and customer.
+  - Interactive Parent-Child Linking: Clicking the receipt/invoice number in the Sales Ledger instantly opens the parent transaction details modal with the full receipt breakdown.
+  - Strict Role-Based Access Control (RBAC): Restricted profit metrics and sensitive actions across both Transactions and Sales tables so cashiers see clean operational data while supervisors and managers retain complete audit and financial oversight.
+  - Global Command Palette Indexing: Added both Transactions Journal and Itemized Sales Ledger to the Ctrl+K search palette.
+
+================================================================================
 [NOVEMBER 2026] - v2.4.171
 ================================================================================
 

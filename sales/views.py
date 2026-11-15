@@ -26,44 +26,51 @@ from core.responses import success_response, error_response, permission_denied_r
 # SALES & TRANSACTIONS
 # ==============================================================================
 
-def sale_list_view(request):
-    """Render full page shell for Sales with initial table pre-rendered."""
-    categories = Category.objects.all().order_by('name')
+def transaction_list_view(request):
+    """
+    Render full page shell for Transactions Journal (Receipts / Invoices).
+    Parent transactions with totals, payment methods, customer links, and printing.
+    """
+    payment_methods = PaymentMethod.choices
     queryset = Sale.objects.select_related('customer', 'user').prefetch_related('items__product').all().order_by('-created_at')
     paginator = Paginator(queryset, 10)
-    sales = paginator.page(1)
-    return render(request, 'sales/sale_list.html', {
-        'categories': categories,
-        'sales': sales,
+    transactions = paginator.page(1)
+    company_settings = CompanySetting.get_settings()
+    return render(request, 'sales/transaction_list.html', {
+        'payment_methods': payment_methods,
+        'transactions': transactions,
         'paginator': paginator,
         'total_count': paginator.count,
+        'company_settings': company_settings,
     })
 
 
-def sale_table_partial(request):
+def transaction_table_partial(request):
     """
-    Returns table body and pagination partial for Sales.
-    Matches columns: Date | Invoice | Items | Customer | Amount Sold | Profit | Payment | Actions
+    Returns table body and pagination partial for Transactions Journal.
+    Columns: Date | Receipt # | Customer | Items | Total Amount | Profit | Payment | Cashier | Actions
     """
     query = request.GET.get('q', '').strip()
-    category_id = request.GET.get('category', '').strip()
+    payment_method = request.GET.get('payment_method', '').strip()
     from_date_raw = request.GET.get('from_date', '').strip()
     to_date_raw = request.GET.get('to_date', '').strip()
     page_num = request.GET.get('page', 1)
 
-    queryset = Sale.objects.select_related('customer', 'user').prefetch_related('items__product__category').all().order_by('-created_at')
+    queryset = Sale.objects.select_related('customer', 'user').prefetch_related('items__product').all().order_by('-created_at')
 
     if query:
         queryset = queryset.filter(
             Q(invoice_number__icontains=query) |
-            Q(items__product__name__icontains=query) |
-            Q(items__serial_number__icontains=query) |
             Q(customer__name__icontains=query) |
-            Q(customer__phone__icontains=query)
+            Q(customer__phone__icontains=query) |
+            Q(user__username__icontains=query) |
+            Q(user__first_name__icontains=query) |
+            Q(user__last_name__icontains=query) |
+            Q(notes__icontains=query)
         ).distinct()
 
-    if category_id:
-        queryset = queryset.filter(items__product__category_id=category_id).distinct()
+    if payment_method:
+        queryset = queryset.filter(payment_method=payment_method)
 
     if from_date_raw:
         from_date = _parse_custom_date(from_date_raw)
@@ -77,14 +84,91 @@ def sale_table_partial(request):
 
     paginator = Paginator(queryset, 10)
     try:
+        transactions = paginator.page(page_num)
+    except (PageNotAnInteger, EmptyPage):
+        transactions = paginator.page(1)
+
+    company_settings = CompanySetting.get_settings()
+    return render(request, 'sales/partials/transaction_table.html', {
+        'transactions': transactions,
+        'paginator': paginator,
+        'total_count': paginator.count,
+        'company_settings': company_settings,
+    })
+
+
+def sale_list_view(request):
+    """
+    Render full page shell for Sales Ledger (Itemized line items).
+    Each row is a product line item sold under a parent transaction.
+    """
+    categories = Category.objects.all().order_by('name')
+    queryset = SaleItem.objects.select_related(
+        'sale', 'sale__customer', 'sale__user', 'product', 'product__category'
+    ).all().order_by('-created_at')
+    paginator = Paginator(queryset, 10)
+    sales = paginator.page(1)
+    company_settings = CompanySetting.get_settings()
+    return render(request, 'sales/sale_list.html', {
+        'categories': categories,
+        'sales': sales,
+        'paginator': paginator,
+        'total_count': paginator.count,
+        'company_settings': company_settings,
+    })
+
+
+def sale_table_partial(request):
+    """
+    Returns table body and pagination partial for Sales Ledger (Line Items).
+    Columns: Date | Receipt # | Product / Item | Category | Serial # | Qty | Unit Price | Total | Profit | Customer | Actions
+    """
+    query = request.GET.get('q', '').strip()
+    category_id = request.GET.get('category', '').strip()
+    from_date_raw = request.GET.get('from_date', '').strip()
+    to_date_raw = request.GET.get('to_date', '').strip()
+    page_num = request.GET.get('page', 1)
+
+    queryset = SaleItem.objects.select_related(
+        'sale', 'sale__customer', 'sale__user', 'product', 'product__category'
+    ).all().order_by('-created_at')
+
+    if query:
+        queryset = queryset.filter(
+            Q(product__name__icontains=query) |
+            Q(product__sku__icontains=query) |
+            Q(serial_number__icontains=query) |
+            Q(email__icontains=query) |
+            Q(sale__invoice_number__icontains=query) |
+            Q(sale__customer__name__icontains=query) |
+            Q(sale__customer__phone__icontains=query)
+        ).distinct()
+
+    if category_id:
+        queryset = queryset.filter(product__category_id=category_id)
+
+    if from_date_raw:
+        from_date = _parse_custom_date(from_date_raw)
+        if from_date:
+            queryset = queryset.filter(sale__date_sold__gte=from_date)
+
+    if to_date_raw:
+        to_date = _parse_custom_date(to_date_raw)
+        if to_date:
+            queryset = queryset.filter(sale__date_sold__lte=to_date)
+
+    paginator = Paginator(queryset, 10)
+    try:
         sales = paginator.page(page_num)
     except (PageNotAnInteger, EmptyPage):
         sales = paginator.page(1)
 
+    company_settings = CompanySetting.get_settings()
     return render(request, 'sales/partials/sale_table.html', {
         'sales': sales,
         'paginator': paginator,
         'total_count': paginator.count,
+        'company_settings': company_settings,
     })
 
 

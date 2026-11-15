@@ -179,14 +179,14 @@
         </button>
 
         {% if request.user.is_supervisor_role %}
-        <a href="{% url 'sales:sale_list' %}" class="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 hover:bg-slate-50 flex items-center space-x-1.5 transition-colors">
-          <i class="far fa-file-pdf text-xs text-slate-400"></i>
-          <span>Export PDF</span>
+        <a href="{% url 'sales:transaction_list' %}" class="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 hover:bg-slate-50 flex items-center space-x-1.5 transition-colors">
+          <i class="fas fa-arrow-right-arrow-left text-xs text-blue-500"></i>
+          <span>Transactions</span>
         </a>
 
         <a href="{% url 'sales:sale_list' %}" class="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 hover:bg-slate-50 flex items-center space-x-1.5 transition-colors">
-          <i class="far fa-file-excel text-xs text-slate-400"></i>
-          <span>Export Excel</span>
+          <i class="fas fa-shopping-bag text-xs text-blue-500"></i>
+          <span>Sales Items</span>
         </a>
         {% endif %}
       </div>
@@ -236,7 +236,7 @@
                 </span>
               </td>
               <td class="py-3.5 px-4 text-center">
-                <a href="{% url 'sales:sale_list' %}" class="text-slate-400 hover:text-slate-700">
+                <a href="{% url 'sales:transaction_list' %}" class="text-slate-400 hover:text-slate-700" title="View in Transactions Journal">
                   <i class="fas fa-ellipsis-h text-xs"></i>
                 </a>
               </td>
