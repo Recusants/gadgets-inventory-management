@@ -2,6 +2,7 @@ from django.db import models
 
 class CompanySetting(models.Model):
     company_name = models.CharField(max_length=200, default="21 Void Technologies")
+    branch_name = models.CharField(max_length=150, default="Main Branch", blank=True, help_text="Operating store branch name")
     tagline = models.CharField(max_length=250, default="Fusing Technology With Market Intelligence")
     phone = models.CharField(max_length=50, default="+263 77 123 4567")
     email = models.EmailField(default="info@21void.com")

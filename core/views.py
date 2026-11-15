@@ -145,6 +145,7 @@ def settings_save(request):
 
     settings_obj = CompanySetting.get_settings()
     settings_obj.company_name = request.POST.get('company_name', '').strip()
+    settings_obj.branch_name = request.POST.get('branch_name', '').strip() or 'Main Branch'
     settings_obj.tagline = request.POST.get('tagline', '').strip()
     settings_obj.phone = request.POST.get('phone', '').strip()
     settings_obj.email = request.POST.get('email', '').strip()

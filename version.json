@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.40",
-  "build": "v2.4.40-196ddba",
-  "commit_count": 40,
-  "commit_hash": "196ddba",
+  "version": "v2.4.41",
+  "build": "v2.4.41-4daa872",
+  "commit_count": 41,
+  "commit_hash": "4daa872",
   "branch": "main",
-  "commit_subject": "Replace top right more options squircle with user profile circle dropdown menu containing settings and actions",
-  "updated_at": "2026-11-15 19:43",
-  "last_pushed_at": "2026-11-15 19:43:58"
+  "commit_subject": "Remove search trigger from top navigation bar in favor of sidebar search",
+  "updated_at": "2026-11-15 20:04",
+  "last_pushed_at": "2026-11-15 20:05:01"
 }
