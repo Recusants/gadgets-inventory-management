@@ -1071,3 +1071,135 @@ function initFeatureSearch() {
   // Pre-fetch catalog in background when browser is idle
   setTimeout(loadAllSystemFeatures, 1500);
 }
+
+
+// ==============================================================================
+// SALES TABLE PRINT & SHARE DROPDOWN SYSTEM
+// ==============================================================================
+
+function toggleSalePrintMenu(e, id) {
+  if (e) {
+    e.stopPropagation();
+    e.preventDefault();
+  }
+  const targetMenu = document.getElementById(`sale-print-menu-${id}`);
+  if (!targetMenu) return;
+  const isCurrentlyOpen = !targetMenu.classList.contains('hidden');
+
+  // Close all open print menus first
+  closeSalePrintMenus();
+
+  if (!isCurrentlyOpen) {
+    targetMenu.classList.remove('hidden');
+
+    // Smart vertical positioning: flip upwards if near bottom of container/window
+    const rect = targetMenu.getBoundingClientRect();
+    const container = document.getElementById('sale-table-container');
+    const bottomBoundary = container ? container.getBoundingClientRect().bottom : window.innerHeight;
+    if (rect.bottom > bottomBoundary - 10) {
+      targetMenu.style.top = 'auto';
+      targetMenu.style.bottom = 'calc(100% + 4px)';
+    } else {
+      targetMenu.style.top = 'calc(100% + 4px)';
+      targetMenu.style.bottom = 'auto';
+    }
+  }
+}
+
+function closeSalePrintMenus() {
+  document.querySelectorAll('.sale-print-dropdown').forEach(el => el.classList.add('hidden'));
+}
+
+$(document).on('click', function (e) {
+  if (!$(e.target).closest('.sale-print-dropdown-wrapper').length) {
+    closeSalePrintMenus();
+  }
+});
+
+$(document).on('keydown', function (e) {
+  if (e.key === 'Escape') {
+    closeSalePrintMenus();
+  }
+});
+
+function printSalePOS(saleId, invoiceNum) {
+  if (typeof Swal !== 'undefined') {
+    Swal.fire({
+      title: 'Printing POS Slip...',
+      text: `Sending slip for #${invoiceNum || saleId} to thermal printer`,
+      allowOutsideClick: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+  }
+
+  $.ajax({
+    url: `/sales/${saleId}/thermal-print/`,
+    type: 'GET',
+    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+    success: function (res) {
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          icon: 'success',
+          title: 'Slip Printed',
+          text: res.message || 'Sent to thermal printer successfully.',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
+    },
+    error: function (xhr) {
+      const msg = xhr.responseJSON?.message || 'Could not communicate with POS thermal printer.';
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Printer Notice',
+          text: msg,
+          confirmButtonColor: '#0a192f',
+          confirmButtonText: 'OK'
+        });
+      } else {
+        alert(msg);
+      }
+    }
+  });
+}
+
+function shareSalePDF(saleId, invoiceNum, pdfUrl) {
+  const fullUrl = window.location.origin + pdfUrl;
+  const title = `Receipt #${invoiceNum}`;
+  const text = `Receipt for invoice #${invoiceNum}`;
+
+  if (navigator.share) {
+    navigator.share({
+      title: title,
+      text: text,
+      url: fullUrl
+    }).catch(err => {
+      if (err.name !== 'AbortError') {
+        fallbackSharePDF(fullUrl, pdfUrl);
+      }
+    });
+  } else {
+    fallbackSharePDF(fullUrl, pdfUrl);
+  }
+}
+
+function fallbackSharePDF(fullUrl, pdfUrl) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(fullUrl).then(() => {
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          icon: 'success',
+          title: 'Link Copied',
+          text: 'PDF receipt link copied to clipboard. Opening PDF...',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
+    });
+  }
+  window.open(pdfUrl, '_blank');
+}

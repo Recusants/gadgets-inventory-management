@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.34",
-  "build": "v2.4.34-119cd47",
-  "commit_count": 34,
-  "commit_hash": "119cd47",
+  "version": "v2.4.35",
+  "build": "v2.4.35-713a110",
+  "commit_count": 35,
+  "commit_hash": "713a110",
   "branch": "main",
-  "commit_subject": "Move What's New button to the bottom of the sidebar pinned footer",
-  "updated_at": "2026-11-15 18:46",
-  "last_pushed_at": "2026-11-15 18:46:04"
+  "commit_subject": "Direct sidebar brand title and branch to home/dashboard directly without role checks",
+  "updated_at": "2026-11-15 18:49",
+  "last_pushed_at": "2026-11-15 18:49:07"
 }

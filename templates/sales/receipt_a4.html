@@ -214,6 +214,22 @@
       font-size: 11px;
     }
 
+    {% if paper_size == 'a5' %}
+    @page {
+      size: A5 portrait;
+      margin: 8mm;
+    }
+    .invoice-wrapper {
+      max-width: 540px !important;
+      padding: 24px 28px !important;
+    }
+    {% else %}
+    @page {
+      size: A4 portrait;
+      margin: 12mm;
+    }
+    {% endif %}
+
     /* Print Media Rules */
     @media print {
       body {
@@ -227,7 +243,7 @@
       .invoice-wrapper {
         border: none !important;
         box-shadow: none !important;
-        padding: 24px 28px !important;
+        padding: {% if paper_size == 'a5' %}12px 16px{% else %}24px 28px{% endif %} !important;
         margin: 0 auto !important;
         max-width: 100% !important;
       }
@@ -239,8 +255,16 @@
   <!-- Non-Printing Top Controls Toolbar -->
   <div class="no-print no-print-toolbar">
     <div style="display:flex; align-items:center; gap:12px;">
-      <span style="font-size:13px; font-weight:700; color:#0f172a;">A4 Invoice Preview</span>
+      <span style="font-size:13px; font-weight:700; color:#0f172a;">
+        {% if paper_size == 'a5' %}A5 Invoice Preview{% else %}A4 Invoice Preview{% endif %}
+      </span>
       <span style="font-size:11px; color:#64748b; font-family:monospace;">#{{ sale.invoice_number }}</span>
+
+      <!-- Quick Switcher -->
+      <div style="display:inline-flex; border:1px solid #cbd5e1; border-radius:8px; overflow:hidden; margin-left:8px;">
+        <a href="?size=a4" class="toolbar-btn {% if paper_size != 'a5' %}toolbar-btn-primary{% else %}toolbar-btn-secondary{% endif %}" style="border-radius:0; border:none; padding:4px 10px; font-size:11px;">A4</a>
+        <a href="?size=a5" class="toolbar-btn {% if paper_size == 'a5' %}toolbar-btn-primary{% else %}toolbar-btn-secondary{% endif %}" style="border-radius:0; border:none; padding:4px 10px; font-size:11px;">A5</a>
+      </div>
     </div>
 
     <div style="display:flex; align-items:center; gap:8px;">
