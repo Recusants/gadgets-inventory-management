@@ -9,7 +9,7 @@ echo ============================================================
 echo   GADGET STORE SYSTEM - DEV ENVIRONMENT
 echo ============================================================
 echo.
-echo URL: http://localhost:8001
+echo URL: http://localhost:8087
 echo Database: PostgreSQL on localhost:5433
 echo Note: Code is volume-mounted; code edits reload live.
 echo.

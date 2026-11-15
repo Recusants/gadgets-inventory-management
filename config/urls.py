@@ -23,6 +23,7 @@ urlpatterns = [
     path('whats-new/', core_views.whats_new_view, name='whats_new_direct'),
     path('expenses/', include('expenses.urls')),
     path('fiscalisation/', include('fiscalisation.urls')),
+    path('printers/', include('print_out.urls')),
 ]
 
 if settings.DEBUG:

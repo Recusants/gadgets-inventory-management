@@ -1,6 +1,6 @@
 # docker-compose.dev.yml — Gadget Store System
 # Dev Environment: Live Reload with PostgreSQL (matching Clarity Retail LAN)
-# Web Port: 8001 | DB Port: 5433
+# Web Port: 8087 | DB Port: 5433
 
 services:
 
@@ -30,7 +30,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
-      - "${DEV_HTTP_PORT:-8001}:8000"
+      - "${DEV_HTTP_PORT:-8087}:8000"
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.docker_dev
       DEBUG: "True"

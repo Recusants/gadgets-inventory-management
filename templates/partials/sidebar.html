@@ -131,6 +131,14 @@
       <span class="sidebar-label truncate text-white font-bold text-xs">Fiscalisation</span>
     </a>
 
+    <!-- Thermal Printers (POS Hardware) -->
+    <a href="{% url 'print_out:printers_page' %}" 
+       title="Thermal Printers & POS Hardware"
+       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if 'printers' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
+      <i class="fas fa-print w-5 text-center text-sm mr-3 flex-shrink-0 text-cyan-400"></i>
+      <span class="sidebar-label truncate text-white font-bold text-xs">Printers</span>
+    </a>
+
     <!-- Settings (Client Store Profile) -->
     <a href="{% url 'core:settings' %}" 
        title="Store Settings"

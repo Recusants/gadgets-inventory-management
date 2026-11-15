@@ -2,11 +2,11 @@
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
   "version": "v2.4.17",
-  "build": "v2.4.17-4d2fbdc",
-  "commit_count": 19,
-  "commit_hash": "4d2fbdc",
+  "build": "v2.4.17-241e94c",
+  "commit_count": 20,
+  "commit_hash": "241e94c",
   "branch": "main",
-  "commit_subject": "Add ZIMRA fiscalisation module, What's New changelog, and email login backend",
-  "updated_at": "2026-11-15 14:39",
-  "last_pushed_at": "2026-11-15 14:39:08"
+  "commit_subject": "Add multi-environment support: SQLite for dev, Docker dev with PostgreSQL, Env dev with PostgreSQL, and Prod PostgreSQL",
+  "updated_at": "2026-11-15 15:06",
+  "last_pushed_at": "2026-11-15 15:06:22"
 }

@@ -1156,21 +1156,45 @@
           $btn.prop('disabled', false).html('<i class="fas fa-shopping-cart text-base mr-2"></i><span>Check Out &amp; Print Receipt</span>');
           if (res.icon === 'success' || res.status === 'success') {
             clearPosState(); // Immediately purge session storage on successful transaction
+            const saleId = res.data ? res.data.sale_id : null;
             const receiptUrl = res.data ? res.data.receipt_url : null;
             const inv = res.data ? res.data.invoice_number : '';
 
             Swal.fire({
               title: 'Sale Completed!',
-              html: `<p class="text-sm text-slate-600">Transaction recorded successfully with FIFO batch deduction.<br>Invoice: <b class="text-blue-600 font-mono">${inv}</b></p>`,
+              html: `
+                <div class="space-y-3 text-left">
+                  <p class="text-xs text-slate-600">Transaction recorded successfully with FIFO batch deduction.<br>Invoice: <b class="text-blue-600 font-mono text-sm">${inv}</b></p>
+                  <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs flex items-center justify-between">
+                    <span class="text-slate-700 font-semibold"><i class="fas fa-print text-cyan-600 mr-1.5"></i>Thermal Slip Hardware</span>
+                    <button type="button" id="btn-swal-thermal-print" class="px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs shadow transition-colors">
+                      <i class="fas fa-receipt mr-1"></i> Print Slip
+                    </button>
+                  </div>
+                </div>
+              `,
               icon: 'success',
               showCancelButton: true,
-              confirmButtonColor: '#059669',
-              cancelButtonColor: '#2563eb',
-              confirmButtonText: '<i class="fas fa-file-pdf mr-1.5"></i> Print / View PDF Receipt',
+              confirmButtonColor: '#2563eb',
+              cancelButtonColor: '#64748b',
+              confirmButtonText: '<i class="fas fa-file-pdf mr-1.5"></i> PDF Receipt',
               cancelButtonText: 'Next Sale &rarr;',
               background: '#ffffff',
               color: '#0f172a',
-              customClass: { popup: 'rounded-2xl shadow-2xl border border-slate-200' }
+              customClass: { popup: 'rounded-2xl shadow-2xl border border-slate-200' },
+              didOpen: () => {
+                $('#btn-swal-thermal-print').on('click', function() {
+                  const $pbtn = $(this);
+                  $pbtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Printing...');
+                  $.get(`/sales/${saleId}/thermal-print/`, function(pres) {
+                    $pbtn.html('<i class="fas fa-check mr-1"></i> Printed!').addClass('bg-emerald-600').removeClass('bg-cyan-600');
+                  }).fail(function(pxhr) {
+                    const msg = pxhr.responseJSON ? pxhr.responseJSON.message : 'Print failed. Ensure Windows Print Server is running on port 9101.';
+                    alert(msg);
+                    $pbtn.prop('disabled', false).html('<i class="fas fa-receipt mr-1"></i> Retry Print');
+                  });
+                });
+              }
             }).then((result) => {
               if (result.isConfirmed && receiptUrl) {
                 window.open(receiptUrl, '_blank');

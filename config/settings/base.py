@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'reports.apps.ReportsConfig',
     'expenses.apps.ExpensesConfig',
     'fiscalisation.apps.FiscalisationConfig',
+    'print_out.apps.PrintOutConfig',
 ]
 
 AUTHENTICATION_BACKENDS = [

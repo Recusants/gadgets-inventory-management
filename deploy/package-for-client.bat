@@ -26,6 +26,9 @@ copy /y "%PROJECT_ROOT%\rollback.bat" "%OUTPUT_DIR%\" >nul
 copy /y "%PROJECT_ROOT%\fresh-install.bat" "%OUTPUT_DIR%\" >nul
 copy /y "%PROJECT_ROOT%\create_desktop_shortcuts.bat" "%OUTPUT_DIR%\" >nul
 copy /y "%PROJECT_ROOT%\run_silent_docker.vbs" "%OUTPUT_DIR%\" >nul
+if exist "%PROJECT_ROOT%\ClarityPrintServer.exe" copy /y "%PROJECT_ROOT%\ClarityPrintServer.exe" "%OUTPUT_DIR%\" >nul
+if exist "%PROJECT_ROOT%\start_print_server.bat" copy /y "%PROJECT_ROOT%\start_print_server.bat" "%OUTPUT_DIR%\" >nul
+if exist "%PROJECT_ROOT%\run_silent_print_server.vbs" copy /y "%PROJECT_ROOT%\run_silent_print_server.vbs" "%OUTPUT_DIR%\" >nul
 copy /y "%PROJECT_ROOT%\.env.example" "%OUTPUT_DIR%\.env" >nul
 
 echo [3/4] Copying deployment instructions and generating launcher...

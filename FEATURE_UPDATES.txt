@@ -10,7 +10,8 @@ Last Updated: October 2026
 ================================================================================
 
 * Fiscalisation, What's New & Email Login
-  - Environments: Implemented multi-environment architecture matching Clarity Retail LAN: PostgreSQL for Prod, SQLite for Dev, and dual PostgreSQL Dev modes (Docker Dev container on port 8001 and Host Env Dev on port 8000).
+  - POS Printing: Ported thermal printer management engine with ESC/POS document rendering, Windows Print Server service on port 9101, and checkout slip printing.
+  - Environments: Implemented multi-environment architecture matching Clarity Retail LAN: PostgreSQL for Prod, SQLite for Dev, and dual PostgreSQL Dev modes (Docker Dev container on port 8087 and Host Env Dev on port 8000).
   - Fiscalisation: Ported full ZIMRA fiscalisation module with offline queue, daily counters, and SPA dashboard
   - What's New: Added interactive feature updates changelog interface and raw viewer
   - Authentication: Switched primary login to email address with seamless username fallback.

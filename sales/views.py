@@ -599,6 +599,38 @@ def receipt_pdf_view(request, pk):
     return response
 
 
+def sale_thermal_print_view(request, pk):
+    """
+    Triggers thermal slip printing of a sale to the default/active POS printer.
+    """
+    sale = get_object_or_404(Sale.objects.select_related('customer', 'user').prefetch_related('items__product'), pk=pk)
+    from print_out.print_client import get_printer, print_sale_receipt
+
+    printer = get_printer(request)
+    if not printer:
+        return error_response(
+            title="Printer Offline",
+            message="No active thermal printer found. Please configure a printer in Hardware Settings.",
+            status=404
+        )
+
+    is_copy = request.GET.get('is_copy', 'false').lower() in ('true', '1')
+    result = print_sale_receipt(printer, sale, is_copy=is_copy)
+
+    if result.get("status") == "success":
+        return success_response(
+            title="Receipt Printed",
+            message=f"Slip sent to '{printer.display_name or printer.name}' successfully.",
+            data={"printer": printer.display_name or printer.name}
+        )
+    else:
+        return error_response(
+            title="Print Failed",
+            message=result.get("message", "Print server rejected job. Ensure Windows Print Server is running on port 9101."),
+            status=500
+        )
+
+
 # ==============================================================================
 # CUSTOMERS CRUD
 # ==============================================================================

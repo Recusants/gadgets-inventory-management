@@ -45,6 +45,8 @@ echo.
 echo   [7] Core (Company Settings, Localization, Notifications)
 echo.
 echo   [8] Fiscalisation (ZIMRA FDMS, Signatures, Counters)
+echo.
+echo   [9] Thermal Printers (ESC/POS hardware & print client)
 echo ------------------------------------------------------------
 echo.
 
@@ -52,7 +54,7 @@ if not "%~1"=="" (
     set "CHOICE=%~1"
 ) else (
     set "CHOICE=0"
-    set /p "CHOICE=Enter selection [0-8, Press Enter for default]: "
+    set /p "CHOICE=Enter selection [0-9, Press Enter for default]: "
 )
 if "!CHOICE!"=="" set "CHOICE=0"
 
@@ -84,6 +86,9 @@ if "!CHOICE!"=="0" (
 ) else if "!CHOICE!"=="8" (
     set "TARGET_NAME=Fiscalisation Module"
     set "TARGET_APP=fiscalisation"
+) else if "!CHOICE!"=="9" (
+    set "TARGET_NAME=Thermal Printers Module"
+    set "TARGET_APP=print_out"
 ) else (
     echo [WARN] Invalid choice "!CHOICE!"; defaulting to FULL TEST SUITE.
     set "TARGET_NAME=FULL SYSTEM TEST SUITE"
