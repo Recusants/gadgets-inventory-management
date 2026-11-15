@@ -8,31 +8,17 @@
   <div class="max-w-4xl mx-auto w-full space-y-6 pb-24">
     
     <!-- Top Header & Breadcrumbs -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-slate-200 gap-4">
-      <div>
-        <div class="flex items-center space-x-2 text-[11px] font-bold text-blue-600 uppercase tracking-wider mb-1">
-          <i class="fas fa-sparkles text-xs"></i>
-          <span>Release Notes &amp; Updates</span>
-        </div>
-        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
-          What's New in Clarity Retail
-        </h1>
-        <p class="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">
-          Detailed feature release notes, system optimizations, and stability improvements.
-        </p>
+    <div class="pb-4 border-b border-slate-200">
+      <div class="flex items-center space-x-2 text-[11px] font-bold text-blue-600 uppercase tracking-wider mb-1">
+        <i class="fas fa-sparkles text-xs"></i>
+        <span>Release Notes &amp; Updates</span>
       </div>
-
-      <div class="flex items-center space-x-2.5 flex-shrink-0">
-        <button type="button" 
-                onclick="toggleRawUpdatesModal()" 
-                class="inline-flex items-center px-3.5 py-2 rounded-xl text-xs font-semibold bg-white text-slate-700 border border-slate-300 hover:bg-slate-100 transition-colors shadow-sm cursor-pointer">
-          <i class="fas fa-file-lines mr-1.5 text-slate-500"></i> View Raw Log
-        </button>
-        <a href="{% url 'core:system' %}" 
-           class="inline-flex items-center px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#0a192f] text-white hover:bg-blue-900 transition-colors shadow-sm">
-          <i class="fas fa-server mr-1.5 text-blue-300"></i> System Info
-        </a>
-      </div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+        What's New in Clarity Retail
+      </h1>
+      <p class="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">
+        Detailed feature release notes, system optimizations, and stability improvements.
+      </p>
     </div>
 
     <!-- Active Release Status Banner (Apple / Document style) -->
