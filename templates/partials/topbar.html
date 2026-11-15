@@ -247,6 +247,32 @@
               <div class="text-[10px] text-slate-400">Diagnostics, environment &amp; DB</div>
             </div>
           </a>
+
+          <!-- Backup Data -->
+          <a href="javascript:void(0)" 
+             @click="open = false; triggerDatabaseBackup();"
+             class="flex items-center px-3 py-2 rounded-xl text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors group cursor-pointer">
+            <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-2.5 flex-shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+              <i class="fas fa-cloud-arrow-down text-xs"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-xs text-slate-800 group-hover:text-blue-700">Backup Data</div>
+              <div class="text-[10px] text-slate-400">Create &amp; download compressed snapshot</div>
+            </div>
+          </a>
+
+          <!-- Restore Database -->
+          <a href="javascript:void(0)" 
+             @click="open = false; openDatabaseRestoreModal();"
+             class="flex items-center px-3 py-2 rounded-xl text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors group cursor-pointer">
+            <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-2.5 flex-shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+              <i class="fas fa-cloud-arrow-up text-xs"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-xs text-slate-800 group-hover:text-blue-700">Restore Database</div>
+              <div class="text-[10px] text-slate-400">Restore from server or file snapshot</div>
+            </div>
+          </a>
           {% endif %}
 
           {% if request.user.is_supervisor_role %}

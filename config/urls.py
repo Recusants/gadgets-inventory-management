@@ -26,6 +26,11 @@ urlpatterns = [
     path('expenses/', include('expenses.urls')),
     path('fiscalisation/', include('fiscalisation.urls')),
     path('printers/', include('print_out.urls')),
+    # Database Backup & Restore Direct Root Aliases
+    path('create_backup/', core_views.create_backup, name='create_backup'),
+    path('ajax_list_local_backups/', core_views.ajax_list_local_backups, name='ajax_list_local_backups'),
+    path('db/backup/restore/', core_views.db_backup_restore, name='db_backup_restore'),
+    path('db/backup/list/', core_views.ajax_list_local_backups),
 ]
 
 if settings.DEBUG:

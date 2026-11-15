@@ -246,56 +246,89 @@
         </p>
 
         <div class="flex flex-wrap items-center gap-3 pt-1">
+          <!-- Instant One-Click Compressed Backup (.json.gz) -->
+          <button type="button" 
+                  onclick="triggerDatabaseBackup()" 
+                  class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition-all inline-flex items-center cursor-pointer">
+            <i class="fas fa-cloud-arrow-down mr-2 text-sm"></i> Instant Backup (.json.gz)
+          </button>
+
           <!-- Universal JSON Backup -->
-          <a href="{% url 'core:backup_download' %}?format=json" 
-             class="btn-primary inline-flex items-center">
-            <i class="fas fa-file-code mr-2"></i> Download Universal JSON Backup
+          <a href="{% url 'core:create_backup' %}?format=json&download=1" 
+             class="btn-secondary inline-flex items-center">
+            <i class="fas fa-file-code mr-2 text-blue-600"></i> Universal JSON (.json)
           </a>
 
           <!-- Raw SQLite Backup -->
-          <a href="{% url 'core:backup_download' %}?format=sqlite" 
+          <a href="{% url 'core:create_backup' %}?format=sqlite&download=1" 
              class="btn-secondary inline-flex items-center">
-            <i class="fas fa-file-alt mr-2"></i> Download Raw SQLite Database
+            <i class="fas fa-database mr-2 text-blue-600"></i> Raw SQLite (.sqlite3)
           </a>
+
+          <!-- Open Dedicated Modal Button -->
+          <button type="button" 
+                  onclick="openDatabaseRestoreModal()" 
+                  class="px-4 py-2 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-all inline-flex items-center cursor-pointer">
+            <i class="fas fa-cloud-arrow-up mr-2 text-teal-600"></i> Open Dedicated Restore Modal
+          </button>
         </div>
         <p class="text-[11px] text-blue-800 font-medium">
-          <i class="fas fa-info-circle mr-1"></i> The <b>Universal JSON Backup</b> can be migrated across any server, operating system, PostgreSQL database, or Docker container seamlessly.
+          <i class="fas fa-info-circle mr-1"></i> The <b>Compressed Backup (.json.gz)</b> is 90% smaller, archives automatically to server storage, and can be restored seamlessly on SQLite, Docker containers, and PostgreSQL.
         </p>
       </div>
 
       <!-- Import / Restore Database -->
       <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
-        <div class="flex items-center space-x-2">
-          <i class="fas fa-upload text-blue-600 text-sm"></i>
-          <h4 class="text-xs font-black text-slate-900 uppercase tracking-wider">Import & Restore Backup</h4>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <i class="fas fa-upload text-blue-600 text-sm"></i>
+            <h4 class="text-xs font-black text-slate-900 uppercase tracking-wider">Import &amp; Restore Backup</h4>
+          </div>
+          <button type="button" 
+                  onclick="openDatabaseRestoreModal()" 
+                  class="text-[11px] font-bold text-blue-600 hover:text-blue-800 inline-flex items-center gap-1 cursor-pointer">
+            <i class="fas fa-up-right-from-square"></i> Use Modal Wizard
+          </button>
         </div>
         <p class="text-xs text-slate-500 leading-relaxed">
-          Restore data from a previously downloaded Universal JSON backup file (<code class="font-mono text-blue-600">.json</code>) or SQLite database file (<code class="font-mono text-blue-600">.sqlite3</code>).
+          Restore data from a previously created server backup archive, compressed snapshot (<code class="font-mono text-blue-600">.json.gz</code>), Universal JSON (<code class="font-mono text-blue-600">.json</code>), or SQLite database (<code class="font-mono text-blue-600">.sqlite3</code>).
         </p>
 
         <form id="db-restore-form" action="{% url 'core:backup_restore' %}" method="POST" enctype="multipart/form-data" class="space-y-4">
           {% csrf_token %}
 
+          <!-- Option 1: Choose from Server Backups -->
+          <div id="settings_server_backups_wrap" style="display: none;" class="p-3 bg-white border border-blue-200 rounded-xl space-y-1.5">
+            <label class="block text-xs font-bold text-blue-900">
+              <i class="fas fa-server mr-1 text-blue-600"></i> Option A: Choose from Server Archives
+            </label>
+            <select id="settings_local_backup_select" 
+                    name="local_backup_filename" 
+                    class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-slate-50 text-xs font-medium text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none">
+              <option value="">-- Choose from Server Backups --</option>
+            </select>
+            <p class="text-[10px] text-slate-400">Selecting a server backup will use the archive already safely stored on the host.</p>
+          </div>
+
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                Select Backup File (.json or .sqlite3) <span class="text-sky-500">*</span>
+                <i class="fas fa-file-arrow-up mr-1 text-teal-600"></i> Option B: Select Backup Archive File
               </label>
               <input type="file" 
                      name="backup_file" 
                      id="backup_file_input"
-                     accept=".json,.sqlite3,.db" 
-                     required
+                     accept=".json,.gz,.json.gz,.sqlite3,.db" 
                      class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs font-medium text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
 
               <!-- Real-time File Selection Preview Badge -->
               <div id="file-info-badge" class="hidden mt-2 p-2.5 rounded-xl bg-blue-50/80 border border-blue-200 flex items-center justify-between text-xs transition-all">
                 <div class="flex items-center space-x-2 text-blue-950 font-bold truncate mr-2">
                   <i class="fas fa-file-code text-blue-600 flex-shrink-0"></i>
-                  <span id="file-badge-name" class="truncate font-mono">filename.json</span>
+                  <span id="file-badge-name" class="truncate font-mono">filename.json.gz</span>
                   <span id="file-badge-size" class="text-[10px] text-blue-700 bg-white px-2 py-0.5 rounded-md border border-blue-200 flex-shrink-0 font-mono">0 KB</span>
                 </div>
-                <span id="file-badge-type" class="text-[10px] font-black text-[#0a192f] bg-sky-100 border border-sky-300 px-2 py-0.5 rounded-md flex-shrink-0">Universal JSON</span>
+                <span id="file-badge-type" class="text-[10px] font-black text-[#0a192f] bg-sky-100 border border-sky-300 px-2 py-0.5 rounded-md flex-shrink-0">Compressed JSON</span>
               </div>
             </div>
 
@@ -305,26 +338,50 @@
               </label>
               <div class="space-y-1.5 pt-1">
                 <label class="inline-flex items-center mr-4 cursor-pointer">
-                  <input type="radio" name="restore_mode" value="merge" checked class="text-blue-600 focus:ring-blue-500 w-4 h-4 mr-2">
-                  <span class="text-xs font-bold text-slate-800">Merge with Existing Data</span>
+                  <input type="radio" name="restore_mode" value="overwrite" checked class="text-rose-600 focus:ring-rose-500 w-4 h-4 mr-2">
+                  <span class="text-xs font-bold text-rose-700">Clean Overwrite (Replace All Data)</span>
                 </label>
                 <label class="inline-flex items-center cursor-pointer">
-                  <input type="radio" name="restore_mode" value="overwrite" class="text-[#0a192f] focus:ring-sky-400 w-4 h-4 mr-2">
-                  <span class="text-xs font-bold text-[#0a192f]">Clean Overwrite (Replace All Data)</span>
+                  <input type="radio" name="restore_mode" value="merge" class="text-blue-600 focus:ring-blue-500 w-4 h-4 mr-2">
+                  <span class="text-xs font-bold text-slate-800">Merge with Existing Data</span>
                 </label>
               </div>
               <p class="text-[10px] text-slate-400 mt-1">
-                <b>Merge</b> retains existing entries while adding missing records. <b>Overwrite</b> resets data cleanly before importing.
+                <b>Clean Overwrite</b> resets tables cleanly and restores exact snapshot state. <b>Merge</b> appends records without wiping.
               </p>
             </div>
           </div>
 
           <div class="pt-2 flex justify-end">
             <button type="submit" id="btn-submit-restore" class="btn-primary">
-              <i class="fas fa-sync-alt mr-2"></i> Confirm & Restore Database
+              <i class="fas fa-sync-alt mr-2"></i> Confirm &amp; Restore Database
             </button>
           </div>
         </form>
+
+        <!-- Server Backup Archives Quick Table (Populated dynamically) -->
+        <div id="settings-backups-table-wrap" style="display: none;" class="mt-4 pt-4 border-t border-slate-200 space-y-2">
+          <div class="flex items-center justify-between">
+            <h5 class="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+              <i class="fas fa-clock-rotate-left text-blue-600"></i> Server Backup Archives (BASE_DIR/backups)
+            </h5>
+            <span id="settings-backups-count" class="text-[10px] font-bold text-slate-400"></span>
+          </div>
+          <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-[10px] uppercase font-bold text-slate-500 border-b border-slate-200">
+                <tr>
+                  <th class="px-3 py-2">Archive Filename</th>
+                  <th class="px-3 py-2">File Size</th>
+                  <th class="px-3 py-2">Modified Timestamp</th>
+                  <th class="px-3 py-2 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="settings-backups-table-body" class="divide-y divide-slate-100 text-slate-700">
+              </tbody>
+            </table>
+          </div>
+        </div>
 
         <!-- Live Progress Band Container (Hidden until import starts) -->
         <div id="db-restore-progress-container" class="hidden mt-4 p-5 bg-white border border-blue-200 rounded-2xl shadow-sm space-y-3">
@@ -428,14 +485,20 @@ $(document).ready(function () {
   $('#backup_file_input').on('change', function () {
     const file = this.files && this.files[0];
     if (file) {
+      $('#settings_local_backup_select').val('');
       $('#file-badge-name').text(file.name);
       $('#file-badge-size').text((file.size / 1024).toFixed(1) + ' KB');
       const lowerName = file.name.toLowerCase();
-      const isJson = lowerName.endsWith('.json');
+      const isGz = lowerName.endsWith('.json.gz') || lowerName.endsWith('.gz');
+      const isJson = lowerName.endsWith('.json') && !isGz;
       const isSqlite = lowerName.endsWith('.sqlite3') || lowerName.endsWith('.db');
 
       const $badgeType = $('#file-badge-type');
-      if (isJson) {
+      if (isGz) {
+        $badgeType
+          .text('Compressed Snapshot (.json.gz)')
+          .attr('class', 'text-[10px] font-black text-white bg-blue-700 px-2 py-0.5 rounded-md flex-shrink-0');
+      } else if (isJson) {
         $badgeType
           .text('Universal JSON Backup')
           .attr('class', 'text-[10px] font-black text-[#0a192f] bg-sky-100 border border-sky-300 px-2 py-0.5 rounded-md flex-shrink-0');
@@ -446,7 +509,7 @@ $(document).ready(function () {
       } else {
         $badgeType
           .text('Unsupported Format')
-          .attr('class', 'text-[10px] font-black text-white bg-[#0a192f] border border-sky-400 px-2 py-0.5 rounded-md flex-shrink-0');
+          .attr('class', 'text-[10px] font-black text-white bg-rose-600 px-2 py-0.5 rounded-md flex-shrink-0');
       }
       $('#file-info-badge').removeClass('hidden');
     } else {
@@ -454,27 +517,72 @@ $(document).ready(function () {
     }
   });
 
+  $('#settings_local_backup_select').on('change', function () {
+    if ($(this).val()) {
+      $('#backup_file_input').val('');
+      $('#file-info-badge').addClass('hidden');
+    }
+  });
+
+  // Load server archives into dropdown and table
+  function loadSettingsServerBackups() {
+    $.getJSON("{% url 'core:ajax_list_local_backups' %}", function (data) {
+      if (data && data.status === 'success' && data.backups && data.backups.length > 0) {
+        let optionsHtml = '<option value="">-- Choose from Server Backups (' + data.backups.length + ' found) --</option>';
+        let tableRows = '';
+        data.backups.forEach(function (b) {
+          optionsHtml += `<option value="${b.filename}">${b.filename} (${b.size_kb} KB — ${b.modified})</option>`;
+          tableRows += `
+            <tr class="hover:bg-slate-50 transition-colors">
+              <td class="px-3 py-2 font-mono font-bold text-slate-900 truncate max-w-xs">${b.filename}</td>
+              <td class="px-3 py-2 font-mono text-slate-600">${b.size_kb} KB</td>
+              <td class="px-3 py-2 text-slate-500">${b.modified}</td>
+              <td class="px-3 py-2 text-right space-x-1.5 whitespace-nowrap">
+                <a href="{% url 'core:create_backup' %}?download=1" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold transition-colors inline-flex items-center gap-1">
+                  <i class="fas fa-download"></i> Download
+                </a>
+                <button type="button" onclick="openDatabaseRestoreModal(); setTimeout(() => { const sel = document.getElementById('db_local_backup_select'); if (sel) { sel.value = '${b.filename}'; handleLocalBackupChange(sel); } }, 200);" class="px-2 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold transition-colors inline-flex items-center gap-1">
+                  <i class="fas fa-rotate"></i> Restore
+                </button>
+              </td>
+            </tr>
+          `;
+        });
+        $('#settings_local_backup_select').html(optionsHtml);
+        $('#settings_server_backups_wrap').show();
+        $('#settings-backups-count').text(data.backups.length + ' archives found');
+        $('#settings-backups-table-body').html(tableRows);
+        $('#settings-backups-table-wrap').show();
+      }
+    });
+  }
+  loadSettingsServerBackups();
+
   // DB Restore Form Submission
   $('#db-restore-form').on('submit', function (e) {
     e.preventDefault();
     const fileInput = document.getElementById('backup_file_input');
-    if (!fileInput.files || fileInput.files.length === 0) {
+    const localBackupVal = $('#settings_local_backup_select').val();
+    const hasFile = fileInput.files && fileInput.files.length > 0;
+
+    if (!hasFile && !localBackupVal) {
       if (typeof notifySwal === 'function') {
-        notifySwal('No File Selected', 'Please select a backup file (.json or .sqlite3) to restore.', 'error');
+        notifySwal('No Backup Selected', 'Please select a backup archive file or choose an existing server backup.', 'error');
       } else {
-        alert('Please select a backup file (.json or .sqlite3) to restore.');
+        alert('Please select a backup archive file or choose an existing server backup.');
       }
       return;
     }
 
-    const file = fileInput.files[0];
-    const mode = $('input[name="restore_mode"]:checked').val() || 'merge';
+    const targetName = hasFile ? fileInput.files[0].name : localBackupVal;
+    const targetSize = hasFile ? (fileInput.files[0].size / 1024).toFixed(1) + ' KB' : 'Server Archive';
+    const mode = $('input[name="restore_mode"]:checked').val() || 'overwrite';
     const modeLabel = mode === 'overwrite' ? 'Clean Overwrite' : 'Merge Mode';
     const modeText = mode === 'overwrite' 
       ? 'WARNING: Clean Overwrite will replace existing system records with the backup data!' 
       : 'Merge Mode will import backup records on top of existing database data.';
 
-    const confirmMsg = `${modeText}\n\nSelected File: "${file.name}" (${(file.size / 1024).toFixed(1)} KB)\nRestoration Mode: ${modeLabel}.\n\nDo you wish to proceed?`;
+    const confirmMsg = `${modeText}\n\nSelected Target: "${targetName}" (${targetSize})\nRestoration Mode: ${modeLabel}.\n\nDo you wish to proceed?`;
 
     const executeRestore = function () {
       const formData = new FormData(document.getElementById('db-restore-form'));

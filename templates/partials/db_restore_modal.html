@@ -1,0 +1,142 @@
+<!-- ── Universal Database Restore Modal ────────────────────────────────────── -->
+<div id="dbRestoreModal" 
+     class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm transition-opacity duration-200" 
+     style="display: none;" 
+     onclick="handleDbRestoreOverlayClick(event)">
+  
+  <div class="relative w-full max-w-lg bg-[#0a192f] border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden flex flex-col text-slate-100 animate-in fade-in zoom-in-95 duration-150" 
+       onclick="event.stopPropagation()">
+    
+    <!-- Modal Header -->
+    <div class="px-5 py-4 border-b border-slate-800 bg-[#061120] flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-teal-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/20 text-base">
+          <i class="fas fa-cloud-arrow-up"></i>
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-white tracking-tight">Restore Database</h3>
+          <p class="text-[11px] text-slate-400">Restore from snapshot (.json, .json.gz, or .sqlite3)</p>
+        </div>
+      </div>
+      <button type="button" 
+              onclick="closeDatabaseRestoreModal()" 
+              class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-colors focus:outline-none"
+              title="Close (ESC)">
+        <i class="fas fa-times text-sm"></i>
+      </button>
+    </div>
+
+    <!-- Form Body -->
+    <form id="dbRestoreForm" onsubmit="handleDatabaseRestoreSubmit(event)" class="p-5 space-y-4">
+      {% csrf_token %}
+
+      <!-- Quick Info / Architecture Callout Banner -->
+      <div class="rounded-xl p-3 bg-blue-950/40 border border-blue-500/30 flex items-center justify-between gap-3">
+        <div class="flex items-center space-x-3 min-w-0">
+          <div class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center flex-shrink-0 text-sm">
+            <i class="fas fa-shield-halved"></i>
+          </div>
+          <div class="min-w-0">
+            <div class="text-xs font-bold text-blue-300">Disaster Recovery &amp; Portability</div>
+            <div class="text-[10px] text-slate-400 truncate">Constraint-safe loaddata with sequence reset on PostgreSQL &amp; SQLite.</div>
+          </div>
+        </div>
+        <button type="button" 
+                onclick="triggerDatabaseBackup()" 
+                class="px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold transition-colors flex-shrink-0 inline-flex items-center gap-1.5">
+          <i class="fas fa-download"></i> Backup First
+        </button>
+      </div>
+
+      <!-- Local Backups Selector (Populated dynamically via loadLocalBackups) -->
+      <div id="db_local_backup_wrap" style="display: none;" class="space-y-1.5">
+        <label class="block text-xs font-bold text-sky-400">
+          <i class="fas fa-server mr-1"></i> Option 1: Choose from Server Backups
+        </label>
+        <select id="db_local_backup_select" 
+                name="local_backup_filename" 
+                onchange="handleLocalBackupChange(this)"
+                class="w-full bg-[#061120] border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+          <option value="">-- Choose from Server Backups --</option>
+        </select>
+        
+        <div class="flex items-center space-x-2 pt-2">
+          <div class="flex-1 h-px bg-slate-800"></div>
+          <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">or upload new file</span>
+          <div class="flex-1 h-px bg-slate-800"></div>
+        </div>
+      </div>
+
+      <!-- Backup File Upload Input -->
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold text-slate-200">
+          <i class="fas fa-file-arrow-up mr-1 text-teal-400"></i> Option 2: Select Backup Archive File
+        </label>
+        <input type="file" 
+               id="db_restore_file" 
+               name="backup_file" 
+               accept=".json,.gz,.json.gz,.sqlite3,.db" 
+               onchange="handleFileInputChange(this)"
+               class="w-full bg-[#061120] border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-blue-600/30 file:text-blue-300 hover:file:bg-blue-600/50 cursor-pointer">
+        <small class="block text-[10px] text-slate-400">
+          Supported: Universal JSON (<code class="text-sky-300">.json</code>), Compressed JSON (<code class="text-sky-300">.json.gz</code>), SQLite (<code class="text-sky-300">.sqlite3</code>)
+        </small>
+      </div>
+
+      <!-- Restore Mode Radio Group -->
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold text-slate-200">Restoration Mode</label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          
+          <!-- Overwrite Option -->
+          <label class="relative flex items-start p-3 rounded-xl border border-rose-500/40 bg-rose-950/20 hover:bg-rose-950/30 transition-colors cursor-pointer" id="mode-label-overwrite">
+            <input type="radio" 
+                   name="restore_mode" 
+                   value="overwrite" 
+                   checked 
+                   class="mt-0.5 text-rose-500 focus:ring-rose-500 bg-slate-900 border-slate-700">
+            <div class="ml-2.5">
+              <div class="text-xs font-bold text-rose-400">Replace &amp; Overwrite</div>
+              <div class="text-[10px] text-slate-400 leading-tight mt-0.5">Cleanly replaces tables and restores exact snapshot state.</div>
+            </div>
+          </label>
+
+          <!-- Merge Option -->
+          <label class="relative flex items-start p-3 rounded-xl border border-slate-700 bg-[#061120] hover:bg-slate-850 transition-colors cursor-pointer" id="mode-label-merge">
+            <input type="radio" 
+                   name="restore_mode" 
+                   value="merge" 
+                   class="mt-0.5 text-blue-500 focus:ring-blue-500 bg-slate-900 border-slate-700">
+            <div class="ml-2.5">
+              <div class="text-xs font-bold text-sky-400">Merge / Append</div>
+              <div class="text-[10px] text-slate-400 leading-tight mt-0.5">Appends missing records without wiping existing data.</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Caution Notice Banner -->
+      <div class="p-3 rounded-xl bg-amber-950/30 border border-amber-500/30 flex items-start space-x-2.5 text-amber-200 text-xs">
+        <i class="fas fa-triangle-exclamation text-amber-400 mt-0.5 flex-shrink-0"></i>
+        <div class="text-[11px] leading-relaxed">
+          Restoring updates the operational database. We recommend downloading a backup first before proceeding.
+        </div>
+      </div>
+
+      <!-- Footer Action Buttons -->
+      <div class="flex items-center justify-end space-x-2.5 pt-2 border-t border-slate-800">
+        <button type="button" 
+                onclick="closeDatabaseRestoreModal()" 
+                class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-slate-800 hover:bg-slate-700 transition-colors">
+          Cancel
+        </button>
+        <button type="submit" 
+                id="dbRestoreSubmitBtn" 
+                class="px-5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-500 hover:to-teal-500 transition-all shadow-lg shadow-blue-500/20 inline-flex items-center gap-1.5 cursor-pointer">
+          <i class="fas fa-rotate"></i> Start Restore
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

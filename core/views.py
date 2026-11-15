@@ -345,202 +345,363 @@ def notification_delete(request, pk):
 # UNIVERSAL DATABASE BACKUP & RESTORE (SQLite, PostgreSQL, Docker)
 # ==============================================================================
 
-@admin_required
-def db_backup_download(request):
+@manager_or_admin_required
+def create_backup(request):
     """
-    Download database backup.
-    Supports 'json' (Universal DB-agnostic fixture) and 'sqlite' (Raw SQLite binary).
+    Generate a full snapshot of the database using Django dumpdata.
+    Supports ?download=1 to immediately download the compressed backup file (.json.gz).
+    Also supports ?format=json (uncompressed JSON) and ?format=sqlite (if SQLite DB).
+    Always automatically archives a safety copy in settings.BASE_DIR / 'backups'.
+    Returns JSON response for AJAX requests with file metadata.
     """
     import io
     import os
+    import gzip
     from django.utils import timezone
     from django.core.management import call_command
     from django.conf import settings
-    from django.http import HttpResponse
+    from django.http import HttpResponse, JsonResponse
+    from django.urls import reverse
 
-    fmt = request.GET.get('format', 'json').lower()
+    fmt = request.GET.get('format', 'gzip').lower()
+    if fmt in ('gz', 'json.gz'):
+        fmt = 'gzip'
+
     timestamp = timezone.now().strftime('%Y%m%d_%H%M%S')
+    backup_dir = settings.BASE_DIR / 'backups'
+    backup_dir.mkdir(parents=True, exist_ok=True)
 
+    # 1. Raw SQLite binary format if explicitly requested
     if fmt == 'sqlite':
         db_engine = settings.DATABASES['default']['ENGINE'].lower()
         if 'sqlite' in db_engine:
             db_path = settings.DATABASES['default']['NAME']
             if os.path.exists(db_path):
-                with open(db_path, 'rb') as f:
-                    content = f.read()
-                response = HttpResponse(content, content_type='application/x-sqlite3')
-                response['Content-Disposition'] = f'attachment; filename="gadget_store_raw_{timestamp}.sqlite3"'
-                return response
+                filename = f"gadget_store_raw_{timestamp}.sqlite3"
+                local_filepath = backup_dir / filename
+                with open(db_path, 'rb') as sf:
+                    content = sf.read()
+                with open(local_filepath, 'wb') as df:
+                    df.write(content)
+                file_size_kb = round(len(content) / 1024, 1)
+
+                is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('ajax') == '1'
+                if request.GET.get('download') == '1' or not is_ajax:
+                    response = HttpResponse(content, content_type='application/x-sqlite3')
+                    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+                    return response
+
+                return JsonResponse({
+                    'status': 'success',
+                    'type': 'success',
+                    'title': 'SQLite Backup Created',
+                    'message': f'Database backup ({file_size_kb} KB) created successfully as {filename}.',
+                    'filename': filename,
+                    'file_size': f'{file_size_kb} KB',
+                    'timestamp': timestamp,
+                    'download_url': f"{reverse('core:create_backup')}?format=sqlite&download=1"
+                })
             else:
                 return error_response(title="File Not Found", message="SQLite database file not found on disk.")
         else:
             return error_response(
                 title="Engine Incompatible",
-                message="Active database is not SQLite. Please download the Universal JSON backup instead."
+                message="Active database is not SQLite. Please download the Universal JSON or Compressed backup instead."
             )
 
-    # Universal JSON fixture export (works on SQLite, PostgreSQL, and Docker)
-    buf = io.StringIO()
+    # 2. Universal dumpdata (Compressed GZIP or JSON)
     try:
+        buf = io.StringIO()
         call_command(
             'dumpdata',
-            'accounts.User',
-            'core.CompanySetting',
-            'core.Notification',
-            'inventory',
-            'sales',
-            'expenses',
-            format='json',
-            indent=2,
-            use_natural_foreign_keys=True,
-            use_natural_primary_keys=True,
+            '--natural-foreign',
+            '--natural-primary',
+            exclude=['contenttypes', 'auth.permission', 'sessions'],
             stdout=buf
         )
-        data = buf.getvalue()
-        response = HttpResponse(data, content_type='application/json')
-        response['Content-Disposition'] = f'attachment; filename="gadget_store_backup_{timestamp}.json"'
-        return response
+        json_data = buf.getvalue().encode('utf-8')
+
+        if fmt == 'json':
+            filename = f"gadget_store_backup_{timestamp}.json"
+            file_bytes = json_data
+            content_type = 'application/json'
+        else:
+            filename = f"gadget_store_backup_{timestamp}.json.gz"
+            file_bytes = gzip.compress(json_data)
+            content_type = 'application/gzip'
+
+        # Save local archive copy in BASE_DIR / 'backups'
+        local_filepath = backup_dir / filename
+        with open(local_filepath, 'wb') as f:
+            f.write(file_bytes)
+
+        file_size_kb = round(len(file_bytes) / 1024, 1)
+
+        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('ajax') == '1'
+        if request.GET.get('download') == '1' or not is_ajax:
+            response = HttpResponse(file_bytes, content_type=content_type)
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            response['Content-Length'] = len(file_bytes)
+            return response
+
+        dl_url = f"{reverse('core:create_backup')}?download=1" if fmt != 'json' else f"{reverse('core:create_backup')}?format=json&download=1"
+        return JsonResponse({
+            'status': 'success',
+            'type': 'success',
+            'title': 'Backup Created',
+            'message': f'Database backup ({file_size_kb} KB) created successfully as {filename}.',
+            'filename': filename,
+            'file_size': f'{file_size_kb} KB',
+            'timestamp': timestamp,
+            'download_url': dl_url
+        })
     except Exception as e:
-        return error_response(title="Backup Failed", message=f"Failed to generate backup: {str(e)}")
+        return error_response(title="Backup Failed", message=f"Failed to generate database backup: {str(e)}")
 
 
-@require_POST
+@manager_or_admin_required
+def db_backup_download(request):
+    """
+    Backward-compatible download view delegating directly to create_backup.
+    """
+    return create_backup(request)
+
+
+@login_required
+def ajax_list_local_backups(request):
+    """
+    Returns a JSON list of backup archive files located in BASE_DIR/backups/.
+    """
+    import os
+    from django.conf import settings
+    from django.http import JsonResponse
+    from django.utils import timezone
+
+    backup_dir = settings.BASE_DIR / 'backups'
+    backups = []
+    if backup_dir.exists():
+        for f in sorted(os.listdir(backup_dir), reverse=True):
+            if f.endswith(('.json', '.json.gz', '.gz', '.sqlite3', '.db')):
+                fp = backup_dir / f
+                if fp.is_file():
+                    stat = fp.stat()
+                    backups.append({
+                        'filename': f,
+                        'size_kb': round(stat.st_size / 1024, 1),
+                        'modified': timezone.datetime.fromtimestamp(
+                            stat.st_mtime, 
+                            tz=timezone.get_current_timezone()
+                        ).strftime("%d %b %Y %H:%M"),
+                    })
+    return JsonResponse({'status': 'success', 'backups': backups})
+
+
 def db_backup_restore(request):
     """
-    Restore database from an uploaded JSON or SQLite file.
-    Supports Overwrite and Merge modes.
-    Works universally across SQLite, PostgreSQL, and Docker containers.
+    Restores the database from an uploaded backup snapshot (.json, .json.gz, or .sqlite3)
+    or an existing local backup archive on the server.
+    Cleanly wipes and replaces tables without foreign key or unique constraint errors.
+    Supports both PostgreSQL (Docker) and SQLite environments.
     """
-    # Allow if Admin OR if company profile is not yet configured (setup initialization phase)
-    if not (request.user.is_admin_role() or request.user.is_superuser or not CompanySetting.get_settings().is_customized):
+    if request.method != 'POST':
+        return error_response(title="Method Not Allowed", message="POST request required.", status=405)
+
+    from accounts.models import User
+    has_active_users = User.objects.filter(is_active=True).exists()
+    settings_obj = CompanySetting.get_settings()
+    is_unconfigured = not settings_obj.is_customized
+    is_first_run = (not has_active_users) or is_unconfigured
+
+    is_authorized = False
+    if request.user.is_authenticated:
+        is_authorized = (
+            request.user.is_admin_role() or
+            request.user.is_manager_role() or
+            request.user.is_superuser or
+            is_unconfigured
+        )
+    elif is_first_run:
+        is_authorized = True
+
+    if not is_authorized:
         return permission_denied_response(
             title="Access Denied",
-            message="Only Administrators are authorized to restore database archives."
+            message="Only Managers or Administrators are authorized to restore database archives."
         )
+
     import os
     import json
+    import gzip
     import tempfile
-    from django.db import connection, transaction
+    import time
+    from django.db import connection
     from django.core.management import call_command
     from django.conf import settings
+    from django.core.management.color import no_style
+    from django.apps import apps
+    from django.http import JsonResponse
 
     upload_file = request.FILES.get('backup_file')
-    restore_mode = request.POST.get('restore_mode', 'merge')  # 'overwrite' or 'merge'
+    local_backup = request.POST.get('local_backup_filename', '').strip()
+    restore_mode = request.POST.get('restore_mode', 'overwrite')  # 'overwrite' or 'merge'
 
-    if not upload_file:
-        return error_response(title="No File Selected", message="Please choose a backup file (.json or .sqlite3) to restore.")
+    if not upload_file and not local_backup:
+        return error_response(
+            title="No File Selected",
+            message="Please select a backup archive file to upload or choose an existing local backup."
+        )
 
-    fname = upload_file.name.lower()
-
-    import time
     start_time = time.time()
+    fname = ""
+    raw_bytes = None
 
-    if fname.endswith('.sqlite3') or fname.endswith('.db'):
+    if upload_file:
+        fname = upload_file.name.lower()
+        raw_bytes = upload_file.read()
+    elif local_backup:
+        safe_fname = os.path.basename(local_backup)
+        local_path = settings.BASE_DIR / 'backups' / safe_fname
+        if not local_path.exists():
+            return error_response(
+                title="Backup Not Found",
+                message=f"Local backup archive '{safe_fname}' does not exist on the server."
+            )
+        fname = safe_fname.lower()
+        with open(local_path, 'rb') as f:
+            raw_bytes = f.read()
+
+    # 1. Raw SQLite restore
+    if fname.endswith(('.sqlite3', '.db')):
         db_engine = settings.DATABASES['default']['ENGINE'].lower()
         if 'sqlite' not in db_engine:
             return error_response(
                 title="Engine Incompatible",
-                message="Raw .sqlite3 backup files can only be restored on SQLite databases. For PostgreSQL or Docker, use the Universal JSON format."
+                message="Raw .sqlite3 backup archives can only be restored onto SQLite databases. For PostgreSQL or Docker, please use Universal JSON (.json) or Compressed JSON (.json.gz) format."
             )
+
         try:
             db_path = settings.DATABASES['default']['NAME']
             connection.close()
             with open(db_path, 'wb+') as dest:
-                for chunk in upload_file.chunks():
-                    dest.write(chunk)
+                dest.write(raw_bytes)
             elapsed = round(time.time() - start_time, 2)
-            return success_response(
-                title="Database Restored Successfully",
-                message=f"Raw SQLite database restored successfully ({round(upload_file.size / 1024, 1)} KB).",
-                data={
-                    'reload': True,
-                    'format': 'SQLITE',
-                    'filename': upload_file.name,
-                    'size_kb': round(upload_file.size / 1024, 1),
-                    'mode': 'OVERWRITE',
-                    'elapsed_seconds': elapsed,
-                    'restored_at': timezone.now().strftime('%d %b %Y, %H:%M:%S')
-                }
-            )
+            return JsonResponse({
+                'status': 'success',
+                'type': 'success',
+                'title': 'Database Restored Successfully',
+                'message': f'Raw SQLite database restored successfully ({round(len(raw_bytes) / 1024, 1)} KB) in {elapsed}s.',
+                'reload': True
+            })
         except Exception as e:
             return error_response(title="Restore Failed", message=f"Failed to restore SQLite binary file: {str(e)}")
 
-    elif fname.endswith('.json'):
-        try:
-            raw_data = upload_file.read().decode('utf-8')
-            parsed_records = json.loads(raw_data)  # Validate valid JSON
-        except Exception as e:
-            return error_response(title="Invalid JSON", message=f"The uploaded file is not valid JSON: {str(e)}")
+    # 2. Universal JSON / Compressed JSON (.json, .json.gz, .gz)
+    is_gz = fname.endswith(('.gz', '.gzip'))
+    is_json = fname.endswith(('.json', '.json.gz', '.gz', '.gzip'))
 
-        total_records = len(parsed_records)
-        model_counts = {}
-        for r in parsed_records:
-            m = r.get('model', 'entry')
-            short_name = m.split('.')[-1].capitalize()
-            model_counts[short_name] = model_counts.get(short_name, 0) + 1
-
-        # Create temporary file for loaddata command
-        temp_fd, temp_path = tempfile.mkstemp(suffix='.json')
-        try:
-            with open(temp_fd, 'w', encoding='utf-8') as tf:
-                tf.write(raw_data)
-
-            with transaction.atomic():
-                if restore_mode == 'overwrite':
-                    from sales.models import SaleBatchDeduction, SaleItem, Sale, Customer
-                    from expenses.models import Expense, ExpenseCategory
-                    from inventory.models import StockBatch, Stock, Product, Supplier, Category
-                    from core.models import Notification
-
-                    SaleBatchDeduction.objects.all().delete()
-                    SaleItem.objects.all().delete()
-                    Sale.objects.all().delete()
-                    Customer.objects.all().delete()
-                    Expense.objects.all().delete()
-                    ExpenseCategory.objects.all().delete()
-                    StockBatch.objects.all().delete()
-                    Stock.objects.all().delete()
-                    Product.objects.all().delete()
-                    Supplier.objects.all().delete()
-                    Category.objects.all().delete()
-                    Notification.objects.all().delete()
-
-                # Load serialized fixture
-                call_command('loaddata', temp_path)
-
-            elapsed = round(time.time() - start_time, 2)
-            mode_label = "overwritten and restored" if restore_mode == 'overwrite' else "merged"
-            return success_response(
-                title="Database Restored Successfully",
-                message=f"Database data was successfully {mode_label} from JSON backup ({total_records} records restored).",
-                data={
-                    'reload': True,
-                    'format': 'JSON',
-                    'filename': upload_file.name,
-                    'size_kb': round(upload_file.size / 1024, 1),
-                    'mode': restore_mode.upper(),
-                    'total_records': total_records,
-                    'model_counts': model_counts,
-                    'elapsed_seconds': elapsed,
-                    'restored_at': timezone.now().strftime('%d %b %Y, %H:%M:%S')
-                }
-            )
-        except Exception as e:
-            return error_response(
-                title="Restore Failed",
-                message=f"Restoration failed and was safely rolled back: {str(e)}"
-            )
-        finally:
-            if os.path.exists(temp_path):
-                try:
-                    os.remove(temp_path)
-                except Exception:
-                    pass
-    else:
+    if not is_json:
         return error_response(
-            title="Unsupported File",
-            message="Please upload a .json backup file (Universal) or a .sqlite3 database file."
+            title="Unsupported File Format",
+            message="Please upload a Universal JSON (.json), Compressed JSON (.json.gz), or SQLite (.sqlite3) archive."
         )
+
+    try:
+        if is_gz:
+            raw_bytes = gzip.decompress(raw_bytes)
+        raw_text = raw_bytes.decode('utf-8')
+        parsed_records = json.loads(raw_text)
+    except Exception as e:
+        return error_response(
+            title="Invalid Archive",
+            message=f"The backup archive could not be decompressed or parsed as valid JSON: {str(e)}"
+        )
+
+    total_records = len(parsed_records) if isinstance(parsed_records, list) else 0
+
+    temp_fd, temp_path = tempfile.mkstemp(suffix='.json')
+    try:
+        with open(temp_fd, 'w', encoding='utf-8') as tf:
+            tf.write(raw_text)
+
+        vendor = connection.vendor
+
+        # Clean wipe if replace/overwrite mode
+        if restore_mode == 'overwrite':
+            with connection.cursor() as cursor:
+                if vendor == 'postgresql':
+                    # Temporarily disable foreign key triggers for this session
+                    cursor.execute("SET session_replication_role = 'replica';")
+                    try:
+                        cursor.execute("""
+                            SELECT tablename FROM pg_tables 
+                            WHERE schemaname = 'public' 
+                            AND tablename NOT IN ('django_migrations', 'django_content_type', 'auth_permission')
+                        """)
+                        tables = [r[0] for r in cursor.fetchall()]
+                        if tables:
+                            table_list_str = ', '.join(f'"{t}"' for t in tables)
+                            cursor.execute(f"TRUNCATE TABLE {table_list_str} RESTART IDENTITY CASCADE;")
+                    finally:
+                        cursor.execute("SET session_replication_role = 'origin';")
+                elif 'sqlite' in vendor:
+                    cursor.execute("PRAGMA foreign_keys = OFF;")
+                    try:
+                        cursor.execute("""
+                            SELECT name FROM sqlite_master 
+                            WHERE type='table' 
+                            AND name NOT IN ('django_migrations', 'django_content_type', 'auth_permission', 'sqlite_sequence')
+                        """)
+                        tables = [r[0] for r in cursor.fetchall()]
+                        for t in tables:
+                            cursor.execute(f'DELETE FROM "{t}";')
+                    finally:
+                        cursor.execute("PRAGMA foreign_keys = ON;")
+                else:
+                    for model in apps.get_models():
+                        if model._meta.app_label not in ('contenttypes', 'auth'):
+                            try:
+                                model.objects.all().delete()
+                            except Exception:
+                                pass
+
+        # Load data with session replication role disabled in PostgreSQL to prevent constraint conflicts
+        if vendor == 'postgresql':
+            with connection.cursor() as cursor:
+                cursor.execute("SET session_replication_role = 'replica';")
+        try:
+            call_command('loaddata', temp_path)
+        finally:
+            if vendor == 'postgresql':
+                with connection.cursor() as cursor:
+                    cursor.execute("SET session_replication_role = 'origin';")
+
+        # Reset sequences in PostgreSQL to prevent duplicate key errors on future inserts
+        if vendor == 'postgresql':
+            seq_sql = connection.ops.sequence_reset_sql(no_style(), apps.get_models())
+            with connection.cursor() as cursor:
+                for stmt in seq_sql:
+                    try:
+                        cursor.execute(stmt)
+                    except Exception:
+                        pass
+
+        elapsed = round(time.time() - start_time, 2)
+        mode_label = "overwritten and cleanly replaced" if restore_mode == 'overwrite' else "merged"
+        return JsonResponse({
+            'status': 'success',
+            'type': 'success',
+            'title': 'Database Restored Successfully',
+            'message': f'Database data was {mode_label} from backup archive ({total_records} records restored in {elapsed}s).',
+            'reload': True
+        })
+    except Exception as e:
+        return error_response(title="Restore Failed", message=f"Restoration encountered an error: {str(e)}")
+    finally:
+        if os.path.exists(temp_path):
+            try:
+                os.remove(temp_path)
+            except Exception:
+                pass
 
 
 @login_required
@@ -783,13 +944,22 @@ def load_all_search_features(request):
                 'badge': None,
             },
             {
-                'name': 'Database Backup Download',
-                'description': 'Create and download immediate SQL database backup archive',
-                'link': safe_reverse('core:backup_download', '/core/backup/download/'),
-                'icon': 'fas fa-download',
+                'name': 'Database Backup (Instant Snapshot)',
+                'description': 'Create and download immediate compressed database backup archive (.json.gz)',
+                'link': 'javascript:triggerDatabaseBackup()',
+                'icon': 'fas fa-cloud-arrow-down',
                 'category': 'Settings',
-                'keywords': ['backup', 'database backup', 'sql backup', 'download db', 'data export', 'safeguard'],
+                'keywords': ['backup', 'database backup', 'sql backup', 'download db', 'data export', 'snapshot', 'safeguard', 'save data'],
                 'badge': 'Backup',
+            },
+            {
+                'name': 'Database Restore Modal',
+                'description': 'Restore system data from compressed snapshot or server archive',
+                'link': 'javascript:openDatabaseRestoreModal()',
+                'icon': 'fas fa-cloud-arrow-up',
+                'category': 'Settings',
+                'keywords': ['restore', 'database restore', 'recover', 'import db', 'revert snapshot', 'upload backup'],
+                'badge': 'Restore',
             },
         ])
 

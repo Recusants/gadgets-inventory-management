@@ -27,6 +27,8 @@ urlpatterns = [
     path('notifications/<int:pk>/delete/', views.notification_delete, name='notification_delete'),
 
     # Database Backup & Restore Routes (Universal SQLite / Postgres / Docker)
+    path('backup/create/', views.create_backup, name='create_backup'),
+    path('backup/list/', views.ajax_list_local_backups, name='ajax_list_local_backups'),
     path('backup/download/', views.db_backup_download, name='backup_download'),
     path('backup/restore/', views.db_backup_restore, name='backup_restore'),
 ]

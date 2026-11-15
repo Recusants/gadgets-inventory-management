@@ -19,8 +19,8 @@ media/
 staticfiles/
 
 # System Backups (contain production/local data)
-backups/*.sqlite3
-backups/*.json
+backups/*
+!backups/.gitkeep
 scratch/
 
 # Environment and Secrets

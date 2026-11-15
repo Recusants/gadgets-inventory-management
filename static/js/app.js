@@ -1203,3 +1203,306 @@ function fallbackSharePDF(fullUrl, pdfUrl) {
   }
   window.open(pdfUrl, '_blank');
 }
+
+// ==============================================================================
+// UNIVERSAL DATABASE BACKUP & RESTORE MECHANISM (Clarity Retail LAN Compatible)
+// ==============================================================================
+
+function getCSRFToken() {
+  const token = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+  if (token) return token;
+  const match = document.cookie.match(/csrftoken=([^;]+)/);
+  return match ? match[1] : '';
+}
+window.getCSRFToken = getCSRFToken;
+
+/**
+ * One-click Database Backup Creation & Direct Download via SweetAlert2.
+ */
+function triggerDatabaseBackup() {
+  if (typeof Swal === 'undefined') {
+    window.location.href = '/core/backup/create/?download=1';
+    return;
+  }
+
+  Swal.fire({
+    title: 'Database Backup',
+    text: 'Do you want to create and download a complete compressed database snapshot (.json.gz)?',
+    icon: 'question',
+    background: '#0a192f',
+    color: '#f8fafc',
+    iconColor: '#38bdf8',
+    showCancelButton: true,
+    confirmButtonColor: '#2563eb',
+    cancelButtonColor: '#334155',
+    confirmButtonText: '<i class="fas fa-download mr-1.5"></i> Download Backup',
+    cancelButtonText: 'Cancel'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      Swal.fire({
+        title: 'Creating Backup...',
+        text: 'Exporting system models and compressing snapshot...',
+        background: '#0a192f',
+        color: '#f8fafc',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      // Trigger download via hidden anchor
+      const downloadUrl = '/core/backup/create/?download=1';
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = '';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      setTimeout(() => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Backup Download Started',
+          text: 'Your complete database snapshot has been generated and archived to server backups.',
+          background: '#0a192f',
+          color: '#f8fafc',
+          iconColor: '#10b981',
+          confirmButtonColor: '#2563eb',
+          timer: 3500,
+          timerProgressBar: true
+        });
+        if (typeof loadLocalBackups === 'function') {
+          loadLocalBackups();
+        }
+      }, 1200);
+    }
+  });
+}
+window.triggerDatabaseBackup = triggerDatabaseBackup;
+
+/**
+ * Open Database Restore Modal and fetch server-side local backup archives.
+ */
+function openDatabaseRestoreModal() {
+  const m = document.getElementById('dbRestoreModal');
+  if (m) {
+    m.style.display = 'flex';
+  }
+  loadLocalBackups();
+}
+window.openDatabaseRestoreModal = openDatabaseRestoreModal;
+
+/**
+ * Close Database Restore Modal.
+ */
+function closeDatabaseRestoreModal() {
+  const m = document.getElementById('dbRestoreModal');
+  if (m) {
+    m.style.display = 'none';
+  }
+}
+window.closeDatabaseRestoreModal = closeDatabaseRestoreModal;
+
+/**
+ * Close modal when clicking dark backdrop overlay.
+ */
+function handleDbRestoreOverlayClick(e) {
+  if (e.target && e.target.id === 'dbRestoreModal') {
+    closeDatabaseRestoreModal();
+  }
+}
+window.handleDbRestoreOverlayClick = handleDbRestoreOverlayClick;
+
+/**
+ * Reset local backup selector if a file was selected from user machine.
+ */
+function handleFileInputChange(input) {
+  if (input.files && input.files.length > 0) {
+    const localSel = document.getElementById('db_local_backup_select');
+    if (localSel) localSel.value = '';
+  }
+}
+window.handleFileInputChange = handleFileInputChange;
+
+/**
+ * Reset file upload input if a server archive was selected.
+ */
+function handleLocalBackupChange(select) {
+  if (select.value) {
+    const fileIn = document.getElementById('db_restore_file');
+    if (fileIn) fileIn.value = '';
+  }
+}
+window.handleLocalBackupChange = handleLocalBackupChange;
+
+/**
+ * Fetch list of local backup files stored in BASE_DIR / 'backups'.
+ */
+function loadLocalBackups() {
+  const sel = document.getElementById('db_local_backup_select');
+  const wrap = document.getElementById('db_local_backup_wrap');
+  if (!sel) return;
+
+  fetch('/core/backup/list/')
+    .then((r) => r.json())
+    .then((data) => {
+      if (data.status === 'success' && data.backups && data.backups.length > 0) {
+        let html = '<option value="">-- Choose from Server Backups (' + data.backups.length + ' found) --</option>';
+        data.backups.forEach((b) => {
+          html += `<option value="${b.filename}">${b.filename} (${b.size_kb} KB — ${b.modified})</option>`;
+        });
+        sel.innerHTML = html;
+        if (wrap) wrap.style.display = 'block';
+      } else {
+        if (wrap) wrap.style.display = 'none';
+      }
+    })
+    .catch(() => {
+      if (wrap) wrap.style.display = 'none';
+    });
+}
+window.loadLocalBackups = loadLocalBackups;
+
+/**
+ * Handle Restore Form Submission with verification and progress reporting.
+ */
+function handleDatabaseRestoreSubmit(e) {
+  e.preventDefault();
+  const fileInput = document.getElementById('db_restore_file');
+  const localSelect = document.getElementById('db_local_backup_select');
+
+  const hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
+  const hasLocal = localSelect && localSelect.value;
+
+  if (!hasFile && !hasLocal) {
+    if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        title: 'No Backup Selected',
+        text: 'Please choose an existing server backup from the dropdown or select a file (.json, .json.gz, .sqlite3).',
+        icon: 'warning',
+        background: '#0a192f',
+        color: '#f8fafc',
+        confirmButtonColor: '#2563eb'
+      });
+    } else {
+      alert('Please choose an existing server backup from the dropdown or select a file (.json, .json.gz, .sqlite3).');
+    }
+    return;
+  }
+
+  const filename = hasFile ? fileInput.files[0].name : localSelect.value;
+  const modeEl = document.querySelector('input[name="restore_mode"]:checked');
+  const mode = modeEl ? modeEl.value : 'overwrite';
+  const modeText = mode === 'overwrite' ? 'Cleanly replace & overwrite current database tables' : 'Merge missing records into current database';
+
+  if (typeof Swal === 'undefined') {
+    if (!confirm(`Confirm Database Restore:\n\nTarget Archive: ${filename}\nMode: ${modeText}\n\nDo you want to proceed?`)) {
+      return;
+    }
+    submitRestoreFormData();
+    return;
+  }
+
+  Swal.fire({
+    title: 'Confirm Database Restore',
+    html: `
+      <div style="text-align:left; font-size:.85rem; line-height:1.5;">
+        <p style="margin:0 0 8px; color:#cbd5e1;">Target Archive: <strong style="color:#38bdf8; word-break:break-all;">${filename}</strong></p>
+        <p style="margin:0 0 8px; color:#f87171;">Mode: <strong>${modeText}</strong></p>
+        <p style="margin:0; color:#94a3b8; font-size:.78rem;">
+          ${mode === 'overwrite' ? 'All existing application data will be cleanly wiped and replaced with this backup archive without integrity errors.' : 'Records will be merged into the current database.'}
+        </p>
+      </div>
+    `,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#ef4444',
+    cancelButtonColor: '#334155',
+    confirmButtonText: '<i class="fas fa-rotate mr-1.5"></i> Yes, Restore & Replace',
+    cancelButtonText: 'Cancel',
+    background: '#0a192f',
+    color: '#f8fafc'
+  }).then((res) => {
+    if (res.isConfirmed) {
+      submitRestoreFormData();
+    }
+  });
+
+  function submitRestoreFormData() {
+    closeDatabaseRestoreModal();
+    if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        title: 'Restoring Database...',
+        text: 'Processing backup archive, replacing tables, and resetting sequences. Please wait...',
+        background: '#0a192f',
+        color: '#f8fafc',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+    }
+
+    const formEl = document.getElementById('dbRestoreForm');
+    const formData = new FormData(formEl);
+
+    fetch('/core/backup/restore/', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCSRFToken()
+      },
+      body: formData
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.status === 'success' || data.type === 'success') {
+          if (typeof Swal !== 'undefined') {
+            Swal.fire({
+              icon: 'success',
+              title: data.title || 'Restore Completed',
+              text: data.message || 'Database restored successfully. Reloading...',
+              background: '#0a192f',
+              color: '#f8fafc',
+              confirmButtonColor: '#2563eb',
+              timer: 3000
+            }).then(() => {
+              window.location.reload();
+            });
+          } else {
+            alert(data.message || 'Database restored successfully.');
+            window.location.reload();
+          }
+        } else {
+          const errMsg = data.message || 'An error occurred during database restore.';
+          if (typeof Swal !== 'undefined') {
+            Swal.fire({
+              icon: 'error',
+              title: data.title || 'Restore Failed',
+              text: errMsg,
+              background: '#0a192f',
+              color: '#f8fafc',
+              confirmButtonColor: '#2563eb'
+            });
+          } else {
+            alert('Restore Failed: ' + errMsg);
+          }
+        }
+      })
+      .catch((err) => {
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            icon: 'error',
+            title: 'Network Error',
+            text: 'Could not communicate with server: ' + err.message,
+            background: '#0a192f',
+            color: '#f8fafc',
+            confirmButtonColor: '#2563eb'
+          });
+        } else {
+          alert('Could not communicate with server: ' + err.message);
+        }
+      });
+  }
+}
+window.handleDatabaseRestoreSubmit = handleDatabaseRestoreSubmit;
+

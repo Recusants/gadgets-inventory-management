@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.46",
-  "build": "v2.4.46-cd9e241",
-  "commit_count": 46,
-  "commit_hash": "cd9e241",
+  "version": "v2.4.48",
+  "build": "v2.4.48-76e9bfc",
+  "commit_count": 48,
+  "commit_hash": "76e9bfc",
   "branch": "main",
-  "commit_subject": "Bump version to v2.4.45",
-  "updated_at": "2026-11-15 20:40",
-  "last_pushed_at": "2026-11-15 20:40:20"
+  "commit_subject": "Add complete data backup and restore mechanism compatible with Clarity Retail LAN",
+  "updated_at": "2026-11-15 21:15",
+  "last_pushed_at": "2026-11-15 21:15:00"
 }
