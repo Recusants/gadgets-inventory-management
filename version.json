@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.45",
-  "build": "v2.4.45-eaa6908",
-  "commit_count": 45,
-  "commit_hash": "eaa6908",
+  "version": "v2.4.46",
+  "build": "v2.4.46-cd9e241",
+  "commit_count": 46,
+  "commit_hash": "cd9e241",
   "branch": "main",
-  "commit_subject": "Streamline all application data tables to eliminate horizontal scroll and enhance Details Modals",
-  "updated_at": "2026-11-15 20:39",
-  "last_pushed_at": "2026-11-15 20:39:41"
+  "commit_subject": "Bump version to v2.4.45",
+  "updated_at": "2026-11-15 20:40",
+  "last_pushed_at": "2026-11-15 20:40:20"
 }
