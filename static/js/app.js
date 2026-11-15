@@ -1114,6 +1114,12 @@ $(document).on('keydown', function (e) {
     if (typeof closeDatabaseRestoreModal === 'function') {
       closeDatabaseRestoreModal();
     }
+    if (typeof closeFeatureSearchModal === 'function') {
+      closeFeatureSearchModal();
+    }
+    if (typeof ModalManager !== 'undefined' && ModalManager.shell && ModalManager.shell.hasClass('flex')) {
+      ModalManager.close();
+    }
   }
 });
 

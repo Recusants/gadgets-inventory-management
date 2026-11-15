@@ -1,9 +1,9 @@
 <!-- Reusable Modal Shell for Add, Edit, Detail actions (100% Offline, AJAX powered) -->
-<div id="app-modal-shell" class="fixed inset-0 z-[9999] hidden items-center justify-center modal-backdrop p-4 overflow-y-auto">
-  <div class="modal-dialog relative w-full max-w-2xl bg-white rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-slate-100 overflow-hidden transform transition-all my-8 text-slate-900">
+<div id="app-modal-shell" class="fixed inset-0 hidden items-center justify-center modal-backdrop p-4 overflow-y-auto" style="z-index: 100000;">
+  <div class="modal-dialog relative w-full max-w-2xl bg-white rounded-[24px] shadow-2xl border border-slate-100 overflow-hidden transform transition-all my-8 text-slate-900" style="background-color: #ffffff; z-index: 100001;">
     
     <!-- Modal Dynamic Content Container (Swapped via AJAX) -->
-    <div id="modal-content-container">
+    <div id="modal-content-container" class="bg-white">
       <!-- AJAX content injected here -->
     </div>
 
