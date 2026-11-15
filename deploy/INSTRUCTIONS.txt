@@ -1,0 +1,103 @@
+================================================================================
+    GADGET STORE SYSTEM — ON-PREMISE STORE SERVER SETUP & MAINTENANCE GUIDE
+================================================================================
+
+1. SYSTEM REQUIREMENTS & PREREQUISITES
+--------------------------------------------------------------------------------
+   - Operating System : Windows 10 Pro / Windows 11 Pro / Windows Server 2019+
+   - RAM & Storage    : Minimum 4 GB RAM, 20 GB free disk space
+   - Required Software: Docker Desktop for Windows with WSL2 backend enabled
+     Download Docker  : https://www.docker.com/products/docker-desktop/
+
+--------------------------------------------------------------------------------
+2. SERVER INSTALLATION ON THIS MACHINE
+--------------------------------------------------------------------------------
+   Step 1: Extract this entire deployment package into:
+           C:\avail\GadgetStore\
+
+   Step 2: Open C:\avail\GadgetStore\.env in Notepad and review settings:
+           - DJANGO_SECRET_KEY : Set a secure, unique alphanumeric key.
+           - POSTGRES_PASSWORD : Set your PostgreSQL database password.
+           - ALLOWED_HOSTS     : Set to * (allows all terminals across your LAN).
+           - HTTP_PORT         : Default is 8086 (or customize if desired).
+           - TAG               : Set to latest (or a specific release tag).
+
+   Step 3: Double-click "update.bat"
+           - Automatically pulls the official production Docker images.
+           - Boots PostgreSQL database and Gunicorn application containers.
+           - Applies all database migrations automatically.
+           - Displays the store LAN IP address upon completion.
+
+   NOTE: If you ever need to perform a completely clean wipe and reinstall,
+         double-click "fresh-install.bat" (requires typing 'YES' to confirm).
+
+--------------------------------------------------------------------------------
+3. CONFIGURE DOCKER TO START SILENTLY IN THE BACKGROUND ON BOOT
+--------------------------------------------------------------------------------
+   Option A (Recommended — 1-Click via Setup Script):
+      When you run "create_desktop_shortcuts.bat", answer "Y" to the prompt:
+      "Would you like Docker to start completely in the background on boot?"
+      This installs a silent launcher in Windows Startup (run_silent_docker.vbs)
+      that runs Docker Desktop minimized into the system tray without ever
+      popping up the main window on screen!
+
+   Option B (Inside Docker Desktop Settings):
+      1. Open Docker Desktop -> Click the Gear icon (Settings).
+      2. Under "General", check: [x] "Start Docker Desktop when you sign in".
+      3. If visible in your version, check: [x] "Open Docker Desktop in the background".
+
+   Containers are configured with restart: unless-stopped, meaning your store
+   system automatically recovers and starts serving on boot after any power outage!
+
+--------------------------------------------------------------------------------
+4. INITIAL ADMINISTRATOR CREATION
+--------------------------------------------------------------------------------
+   Step 1: Open a Command Prompt in C:\avail\GadgetStore\
+   Step 2: Run the following command:
+           docker exec -it gadget-store-app python manage.py createsuperuser --settings=config.settings.docker_prod
+   Step 3: Enter your desired administrator username, email, and password.
+   Step 4: Navigate to http://localhost:8086 in your browser to log in.
+
+--------------------------------------------------------------------------------
+5. CREATE 1-CLICK DESKTOP SHORTCUTS
+--------------------------------------------------------------------------------
+   Double-click "create_desktop_shortcuts.bat" on the server PC.
+   This automatically creates:
+   - "Gadget Store System" on your Desktop (Direct browser shortcut).
+   - "Launch Gadget Store" on your Desktop (Smart IP network launcher).
+   - "Update Gadget Store" on your Desktop (1-click updater).
+   - Prompts to install Silent Docker Startup into Windows Startup.
+
+--------------------------------------------------------------------------------
+6. MULTI-TERMINAL & CASHIER ACCESS ACROSS LOCAL AREA NETWORK (LAN)
+--------------------------------------------------------------------------------
+   Step 1: Assign a Static IP or DHCP Reservation to this server on your router
+           (for example: 192.168.1.100).
+
+   Step 2: Open Windows Firewall ports on the server PC.
+           Open PowerShell as Administrator and run:
+           New-NetFirewallRule -DisplayName "Gadget Store Web" -Direction Inbound -LocalPort 8086 -Protocol TCP -Action Allow
+
+   Step 3: From any terminal, iPad, laptop, or cashier phone connected to the
+           same Wi-Fi or network switch, open Google Chrome or Safari:
+           http://192.168.1.100:8086
+
+--------------------------------------------------------------------------------
+7. DAILY OPERATIONS & MAINTENANCE CHECKS
+--------------------------------------------------------------------------------
+   A. How to Update to the Latest Release:
+      Double-click "update.bat". That is it! The system pulls the latest Docker
+      image, applies new migrations, compiles static files, and verifies health.
+
+   B. How to Rollback to a Previous Version:
+      If any issue occurs with a newly deployed update:
+      Double-click "rollback.bat" and enter the previous version (e.g. v2.4.16).
+
+   C. Viewing Live Application Logs:
+      Open Command Prompt and run:
+      docker logs -f gadget-store-app
+
+   D. Stopping the System:
+      Open Command Prompt and run:
+      docker compose -f docker-compose.prod.yml down
+================================================================================

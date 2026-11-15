@@ -1,0 +1,105 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    tags: ['v*.*.*']
+  release:
+    types: [created]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run Automated Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run automated test suite
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.local
+          DJANGO_SECRET_KEY: test-key-ci
+          DEBUG: "True"
+        run: python manage.py test --verbosity=2
+
+  build:
+    name: Build & Push Docker Image
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve Docker Hub Credentials
+        id: creds
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME || secrets.DOCKERHUB_USERNAME || secrets.DOCKER_USER }}
+          DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN || secrets.DOCKER_PASSWORD || secrets.DOCKERHUB_TOKEN || secrets.DOCKERHUB_PASSWORD }}
+        run: |
+          if [ -z "$DOCKER_USERNAME" ] || [ -z "$DOCKER_TOKEN" ]; then
+            echo "::warning title=Docker Hub Secrets Not Configured::Docker Hub credentials are not configured in GitHub Repository Secrets. Skipping Docker image publishing."
+            echo "has_creds=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_creds=true" >> $GITHUB_OUTPUT
+            echo "username=$DOCKER_USERNAME" >> $GITHUB_OUTPUT
+          fi
+
+      - uses: docker/setup-buildx-action@v3
+        if: steps.creds.outputs.has_creds == 'true'
+
+      - name: Log in to Docker Hub
+        if: steps.creds.outputs.has_creds == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ steps.creds.outputs.username }}
+          password: ${{ secrets.DOCKER_TOKEN || secrets.DOCKER_PASSWORD || secrets.DOCKERHUB_TOKEN || secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Extract metadata
+        if: steps.creds.outputs.has_creds == 'true'
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.creds.outputs.username }}/gadget-store-app
+          tags: |
+            type=raw,value=latest
+            type=semver,pattern={{version}}
+            type=semver,pattern=v{{version}}
+            type=sha,format=short
+
+      - name: Build and push Docker image
+        if: steps.creds.outputs.has_creds == 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          build-args: |
+            BUILD_HASH=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Summary
+        run: |
+          if [ "${{ steps.creds.outputs.has_creds }}" = "true" ]; then
+            echo "### Docker image pushed" >> $GITHUB_STEP_SUMMARY
+            echo "**Tags:**" >> $GITHUB_STEP_SUMMARY
+            echo '${{ steps.meta.outputs.tags }}' | tr ',' '\n' | sed 's/^/- /' >> $GITHUB_STEP_SUMMARY
+            echo "**Build hash:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### Docker image build skipped" >> $GITHUB_STEP_SUMMARY
+            echo "Docker Hub credentials (\`DOCKER_USERNAME\` and \`DOCKER_TOKEN\`) are not configured in GitHub Secrets." >> $GITHUB_STEP_SUMMARY
+          fi

@@ -1,0 +1,24 @@
+================================================================================
+CLARITY RETAIL: GADGETS STORE - FEATURE UPDATES & CHANGELOG
+================================================================================
+Product: Clarity Retail - Gadgets Store Inventory & POS System
+Version Track: 2026.x Release Series
+Last Updated: October 2026
+
+================================================================================
+[NOVEMBER 2026] - v2.4.162
+================================================================================
+
+* Improved pipeline
+  - The pipline is being optmised for docker auto deploy
+
+================================================================================
+[OCTOBER 2026] - v2.4.16
+================================================================================
+
+* System Localization & Core Hardening
+  - Core Localization: Standardized local currency symbol rendering and timezone formatting.
+  - Inventory & Stock Management: Real-time stock counts, IMEI/serial tracking, and automatic threshold notifications.
+  - Point of Sale Checkout: Rapid barcode scanning, sales receipts, invoice printing, and cashier session accounting.
+  - Security & Access Control: Role-based permissions across admin and sales staff with automated session protection.
+  - Multi-Channel Reporting: Daily sales summaries, profit margins, inventory valuation, and exportable reports.

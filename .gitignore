@@ -29,6 +29,10 @@ scratch/
 !.env.example
 .dockerhub_user
 
+# Client Package Generated Directories & Artifacts
+deploy/client-package/
+deploy/*.zip
+
 # IDE & Editor
 .vscode/
 .idea/

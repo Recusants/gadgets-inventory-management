@@ -1,0 +1,26 @@
+#!/bin/sh
+# Git pre-push hook: Runs automated tests before allowing git push
+echo "============================================================"
+echo " [Git Pre-Push Hook] Running automated test suite..."
+echo "============================================================"
+
+export DJANGO_SETTINGS_MODULE=config.settings.local
+export DJANGO_SECRET_KEY=test-key-ci
+python manage.py test
+
+STATUS=$?
+if [ $STATUS -ne 0 ]; then
+    echo ""
+    echo "============================================================"
+    echo " [Git Pre-Push ERROR] Automated tests FAILED (exit code: $STATUS)!"
+    echo " Push aborted to prevent breaking remote repositories."
+    echo " Please fix failing tests locally before pushing."
+    echo "============================================================"
+    echo ""
+    exit 1
+fi
+
+echo "============================================================"
+echo " [Git Pre-Push OK] All automated tests passed. Pushing code..."
+echo "============================================================"
+exit 0
