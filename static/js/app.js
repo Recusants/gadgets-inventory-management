@@ -54,12 +54,12 @@ function notifySwal(title, message, icon, timer = 2500) {
     timer: timer,
     timerProgressBar: timer ? true : false,
     showConfirmButton: timer ? false : true,
-    confirmButtonColor: '#0a192f',
-    background: $('html').hasClass('dark') ? '#0a192f' : '#ffffff',
-    color: $('html').hasClass('dark') ? '#ffffff' : '#0a192f',
+    confirmButtonColor: '#0f172a',
+    background: '#ffffff',
+    color: '#0f172a',
     customClass: {
       container: 'swal-high-z',
-      popup: 'rounded-2xl shadow-2xl border border-sky-300 dark:border-sky-500'
+      popup: 'rounded-[24px] shadow-2xl border border-slate-100'
     }
   });
 }
@@ -78,16 +78,16 @@ function confirmSwal(title, text, confirmButtonText = 'Yes, proceed', onConfirm 
     text: text || "This action cannot be undone.",
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#0a192f',
-    cancelButtonColor: '#38bdf8',
+    confirmButtonColor: '#0f172a',
+    cancelButtonColor: '#94a3b8',
     confirmButtonText: confirmButtonText,
     cancelButtonText: 'Cancel',
     reverseButtons: true,
-    background: $('html').hasClass('dark') ? '#0a192f' : '#ffffff',
-    color: $('html').hasClass('dark') ? '#ffffff' : '#0a192f',
+    background: '#ffffff',
+    color: '#0f172a',
     customClass: {
       container: 'swal-high-z',
-      popup: 'rounded-2xl shadow-2xl border border-sky-300 dark:border-sky-500'
+      popup: 'rounded-[24px] shadow-2xl border border-slate-100'
     }
   });
 
@@ -561,9 +561,9 @@ function updateSidebarToggleIcon(isCollapsed) {
   const $icon = $('#sidebar-toggle-icon');
   if ($icon.length) {
     if (isCollapsed) {
-      $icon.removeClass('fa-bars').addClass('fa-bars-staggered');
+      $icon.removeClass('fa-indent fa-bars fa-bars-staggered').addClass('fa-outdent');
     } else {
-      $icon.removeClass('fa-bars-staggered').addClass('fa-bars');
+      $icon.removeClass('fa-outdent fa-bars-staggered').addClass('fa-indent');
     }
   }
 }

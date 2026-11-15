@@ -1,6 +1,6 @@
 /* ==========================================================================
-   21 Void Technologies - Native Desktop App-like Styling
-   High-Contrast, Offline, App-Like Interface
+   21 Void Technologies - Apple Minimalist Clean Design System
+   Inspired by macOS Sonoma / Fixoria Clean Dashboard
    ========================================================================== */
 
 @import url('../fonts/inter/inter.css');
@@ -9,17 +9,19 @@
 @import url('../vendor/sweetalert2.min.css');
 
 :root {
-  --bg-app: #f0f7ff;
+  --bg-app: #f5f6f8;
   --bg-surface: #ffffff;
-  --bg-sidebar: #0a192f;
-  --bg-topbar: #071324;
-  --bg-sidebar-hover: #132a4a;
-  --bg-sidebar-active: #1e3a8a;
-  --text-primary: #0a192f;
-  --text-secondary: #1e3a8a;
-  --text-sidebar: #ffffff;
-  --border-color: #bfdbfe;
-  --card-shadow: 0 1px 3px 0 rgba(10, 25, 47, 0.08), 0 1px 2px -1px rgba(10, 25, 47, 0.04);
+  --bg-sidebar: #ffffff;
+  --bg-topbar: #ffffff;
+  --bg-sidebar-hover: #f8fafc;
+  --bg-sidebar-active: #0f172a;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --border-color: #f1f5f9;
+  --border-subtle: #e2e8f0;
+  --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
+  --apple-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", system-ui, sans-serif;
 }
 
 * {
@@ -38,44 +40,37 @@ html, body {
   width: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden; /* Strict App-like rule: no body scrolling */
+  overflow: hidden; /* Strict native desktop app-like view */
   background-color: var(--bg-app);
   color: var(--text-primary);
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  font-size: 14px;
+  font-family: var(--apple-font);
+  font-size: 13px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* App Viewport Structure */
+/* App Viewport Structure: Sidebar Full-Height on Left, Main Content on Right */
 #app-root {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
+  background-color: var(--bg-app);
 }
 
-/* Topbar (Full width 100vw across the entire top edge) */
-#app-topbar {
-  width: 100vw;
-  height: 64px;
-  flex-shrink: 0;
-  background-color: var(--bg-topbar);
-  z-index: 50;
-}
-
-/* Sidebar (Docked on far left underneath topbar, height 100% of body container) */
+/* Sidebar (Full Height docked on far left) */
 #app-sidebar {
-  width: 260px;
-  min-width: 260px;
-  max-width: 260px;
-  height: 100%;
-  background-color: var(--bg-sidebar);
+  width: 256px;
+  min-width: 256px;
+  max-width: 256px;
+  height: 100vh;
+  background-color: #ffffff;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  border-right: 1px solid #f1f5f9;
   z-index: 40;
   overflow: hidden;
 }
@@ -105,17 +100,6 @@ html.sidebar-is-collapsed #app-sidebar .sidebar-brand-header,
   justify-content: center !important;
 }
 
-html.sidebar-is-collapsed #app-sidebar .sidebar-brand-inner,
-#app-sidebar.collapsed .sidebar-brand-inner {
-  justify-content: center !important;
-  margin: 0 auto !important;
-}
-
-html.sidebar-is-collapsed #app-sidebar .sidebar-logo,
-#app-sidebar.collapsed .sidebar-logo {
-  margin: 0 auto !important;
-}
-
 html.sidebar-is-collapsed #app-sidebar .sidebar-link,
 #app-sidebar.collapsed .sidebar-link {
   justify-content: center !important;
@@ -126,35 +110,42 @@ html.sidebar-is-collapsed #app-sidebar .sidebar-link,
 html.sidebar-is-collapsed #app-sidebar .sidebar-link i,
 #app-sidebar.collapsed .sidebar-link i {
   margin-right: 0 !important;
-  font-size: 1.2rem !important;
+  font-size: 1.15rem !important;
 }
 
-html.sidebar-is-collapsed #app-sidebar .sidebar-collapse-btn,
-#app-sidebar.collapsed .sidebar-collapse-btn {
-  justify-content: center !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
+/* Right Side: Main Application Column */
+#app-main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  min-width: 0;
+  overflow: hidden;
+  background-color: var(--bg-app);
 }
 
-html.sidebar-is-collapsed #app-sidebar .sidebar-collapse-btn .sidebar-collapse-icon,
-#app-sidebar.collapsed .sidebar-collapse-btn .sidebar-collapse-icon {
-  margin-right: 0 !important;
-  transform: rotate(180deg);
+/* Topbar */
+#app-topbar {
+  width: 100%;
+  height: 56px;
+  flex-shrink: 0;
+  background-color: #ffffff;
+  border-bottom: 1px solid #f1f5f9;
+  z-index: 30;
 }
-
 
 /* Main Content Area */
 #app-main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: calc(100vh - 56px);
   min-width: 0;
   overflow-y: auto;
   background-color: var(--bg-app);
 }
 
-/* Scrollable Inner Panel */
+/* Inner Scrollable Panel */
 #app-content-panel {
   flex: 1;
   overflow-y: auto;
@@ -163,11 +154,11 @@ html.sidebar-is-collapsed #app-sidebar .sidebar-collapse-btn .sidebar-collapse-i
   scroll-behavior: smooth;
 }
 
-/* Custom Thin Scrollbar */
+/* macOS Thin Minimalist Scrollbar */
 #app-content-panel::-webkit-scrollbar,
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 #app-content-panel::-webkit-scrollbar-track,
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -175,61 +166,59 @@ html.sidebar-is-collapsed #app-sidebar .sidebar-collapse-btn .sidebar-collapse-i
 }
 #app-content-panel::-webkit-scrollbar-thumb,
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #93c5fd;
+  background: #cbd5e1;
   border-radius: 9999px;
 }
-.dark #app-content-panel::-webkit-scrollbar-thumb,
-.dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #38bdf8;
+#app-content-panel::-webkit-scrollbar-thumb:hover,
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
-/* High-Contrast Cards & Surfaces */
+/* Minimalist Apple Cards */
 .app-card {
-  background-color: var(--bg-surface) !important;
-  border: 1px solid var(--border-color) !important;
-  border-radius: 16px;
-  box-shadow: var(--card-shadow);
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  background-color: #ffffff !important;
+  border: 1px solid #f1f5f9 !important;
+  border-radius: 20px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+.app-card:hover {
+  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.04);
 }
 
-/* High-Contrast Tables */
+/* Minimalist Apple Tables */
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
 table thead tr {
-  background-color: #e0f2fe !important;
-  border-bottom: 2px solid #93c5fd !important;
+  background-color: #fafbfc !important;
+  border-bottom: 1px solid #f1f5f9 !important;
 }
-.dark table thead tr {
-  background-color: #0b192c !important;
-  border-bottom: 2px solid #1e3a8a !important;
-}
-
 table thead th {
-  color: #0a192f !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.025em;
+  color: #94a3b8 !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  padding: 12px 16px !important;
+  border-bottom: 1px solid #f1f5f9 !important;
 }
-.dark table thead th {
-  color: #ffffff !important;
-  font-weight: 800 !important;
-}
-
 table tbody tr {
-  border-bottom: 1px solid #dbeafe;
+  border-bottom: 1px solid #f8fafc;
+  transition: background-color 0.15s ease;
 }
 table tbody tr:hover {
-  background-color: #eff6ff !important;
+  background-color: #f8fafc !important;
 }
-.dark table tbody tr {
-  border-bottom: 1px solid #1e293b;
-}
-
 table tbody td {
-  color: #0a192f;
-}
-.dark table tbody td {
-  color: #f0f7ff;
+  color: #1e293b;
+  font-size: 13px;
+  padding: 14px 16px !important;
+  border-bottom: 1px solid #f8fafc;
 }
 
-/* High-Contrast Inputs & Select Controls */
+/* Apple Rounded Inputs & Selects */
 input[type="text"],
 input[type="number"],
 input[type="date"],
@@ -238,60 +227,122 @@ input[type="password"],
 select,
 textarea {
   background-color: #ffffff !important;
-  border: 1.5px solid #93c5fd !important;
-  color: #0a192f !important;
-  font-weight: 600;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  color: #0f172a !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  transition: all 0.15s ease;
 }
 
 input:focus,
 select:focus,
 textarea:focus {
-  border-color: #0a192f !important;
+  border-color: #0f172a !important;
   outline: none !important;
-  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.35) !important;
-}
-
-.dark input[type="text"],
-.dark input[type="number"],
-.dark input[type="date"],
-.dark input[type="email"],
-.dark input[type="password"],
-.dark select,
-.dark textarea {
-  background-color: #0f172a !important;
-  border: 1.5px solid #475569 !important;
-  color: #f8fafc !important;
-  font-weight: 600;
+  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.06) !important;
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: #64748b !important;
+  color: #94a3b8 !important;
   font-weight: 400;
 }
-.dark input::placeholder,
-.dark textarea::placeholder {
-  color: #94a3b8 !important;
+
+/* Button System */
+.btn-primary {
+  background-color: #0f172a !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  border-radius: 12px !important;
+  padding: 0.5rem 1rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  transition: all 0.15s ease !important;
+  border: 1px solid transparent !important;
+}
+.btn-primary:hover {
+  background-color: #1e293b !important;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1) !important;
 }
 
-/* Modal Shell Transitions & Placement */
+.btn-secondary {
+  background-color: #ffffff !important;
+  color: #334155 !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  border-radius: 12px !important;
+  padding: 0.5rem 1rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02) !important;
+  transition: all 0.15s ease !important;
+}
+.btn-secondary:hover {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+.btn-default {
+  background-color: #f1f5f9 !important;
+  color: #334155 !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  border-radius: 12px !important;
+  padding: 0.5rem 1rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid transparent !important;
+  transition: all 0.15s ease !important;
+}
+.btn-default:hover {
+  background-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+.btn-danger {
+  background-color: #fff1f2 !important;
+  color: #e11d48 !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  border-radius: 12px !important;
+  padding: 0.5rem 1rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid #ffe4e6 !important;
+  transition: all 0.15s ease !important;
+}
+.btn-danger:hover {
+  background-color: #ffe4e6 !important;
+  color: #be123c !important;
+}
+
+/* Modal Shell Transitions & Apple Glass Backdrop */
 #app-modal-shell {
   z-index: 9999 !important;
 }
-
 .modal-backdrop {
-  background-color: rgba(15, 23, 42, 0.7);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  background-color: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   transition: opacity 0.2s ease;
 }
-
 .modal-dialog {
-  transform: translateY(20px) scale(0.98);
+  transform: translateY(14px) scale(0.98);
   opacity: 0;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
 }
-
 .modal-active .modal-dialog {
   transform: translateY(0) scale(1);
   opacity: 1;
@@ -312,9 +363,9 @@ textarea::placeholder {
   left: 50%;
   margin-top: -8px;
   margin-left: -8px;
-  border: 2px solid rgba(255, 255, 255, 0.4);
+  border: 2px solid rgba(0, 0, 0, 0.2);
   border-radius: 50%;
-  border-top-color: #ffffff;
+  border-top-color: #0f172a;
   animation: spin 0.6s linear infinite;
 }
 
@@ -324,122 +375,24 @@ textarea::placeholder {
 
 /* Skeleton Loading Shimmer */
 .skeleton {
-  background: linear-gradient(90deg, #eff6ff 25%, #bfdbfe 50%, #eff6ff 75%);
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
-  border-radius: 8px;
-}
-.dark .skeleton {
-  background: linear-gradient(90deg, #0a192f 25%, #1e3a8a 50%, #0a192f 75%);
-  background-size: 200% 100%;
+  border-radius: 12px;
 }
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
 
-/* Input validation error highlight - Navy/Light Blue Accent */
-.input-error {
-  border-color: #0a192f !important;
-  background-color: #eff6ff !important;
-}
-.dark .input-error {
-  border-color: #38bdf8 !important;
-  background-color: #0c1a30 !important;
-}
-.field-error-text {
-  color: #0a192f;
-  font-size: 12px;
-  font-weight: 700;
-  margin-top: 4px;
-}
-
-/* =========================================================================
-   Standardized Button Design System (Navy Blue, Light Blue & White Only)
-   btn-primary   : Solid Navy Blue with crisp white text
-   btn-secondary : Pure White surface with Light Blue border and Navy Blue text
-   btn-default   : Soft Light Blue surface with Navy Blue text
-   btn-danger    : Deep Midnight Navy with Light Blue border & crisp white text
-   ========================================================================= */
-.btn-primary {
-  background-color: #0a192f !important;
-  color: #ffffff !important;
-  font-weight: 700 !important;
-  border-radius: 0.75rem !important;
-  padding: 0.5rem 1rem !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  box-shadow: 0 4px 6px -1px rgba(10, 25, 47, 0.3) !important;
-  transition: all 0.15s ease-in-out !important;
-  border: 1px solid #1e3a8a !important;
-}
-.btn-primary:hover {
-  background-color: #1e3a8a !important;
-  box-shadow: 0 6px 12px -2px rgba(10, 25, 47, 0.4) !important;
-}
-
-.btn-secondary {
-  background-color: #ffffff !important;
-  color: #0a192f !important;
-  font-weight: 700 !important;
-  border-radius: 0.75rem !important;
-  padding: 0.5rem 1rem !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border: 1.5px solid #bfdbfe !important;
-  transition: all 0.15s ease-in-out !important;
-}
-.btn-secondary:hover {
-  background-color: #eff6ff !important;
-  color: #1e3a8a !important;
-  border-color: #93c5fd !important;
-}
-
-.btn-default {
-  background-color: #e0f2fe !important;
-  color: #0a192f !important;
-  font-weight: 700 !important;
-  border-radius: 0.75rem !important;
-  padding: 0.5rem 1rem !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border: 1.5px solid #93c5fd !important;
-  transition: all 0.15s ease-in-out !important;
-}
-.btn-default:hover {
-  background-color: #bae6fd !important;
-  color: #071324 !important;
-}
-
-.btn-danger {
-  background-color: #071324 !important;
-  color: #ffffff !important;
-  font-weight: 700 !important;
-  border-radius: 0.75rem !important;
-  padding: 0.5rem 1rem !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  box-shadow: 0 4px 6px -1px rgba(7, 19, 36, 0.3) !important;
-  transition: all 0.15s ease-in-out !important;
-  border: 1.5px solid #38bdf8 !important;
-}
-.btn-danger:hover {
-  background-color: #0a192f !important;
-  border-color: #60a5fa !important;
-}
-
-/* Ensure SweetAlert2 feedback always renders prominently above modal shells and backdrops */
+/* SweetAlert High Z */
 .swal2-container,
 div.swal2-container,
 .swal-high-z {
   z-index: 10000000 !important;
 }
 
-/* Mandatory Store Setup Modal - Absolute System Dominance & Pitch Dark Backdrop */
+/* Mandatory Store Setup Modal */
 #mandatory-setup-modal,
 div#mandatory-setup-modal {
   position: fixed !important;
@@ -448,10 +401,10 @@ div#mandatory-setup-modal {
   left: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
-  z-index: 9999999 !important; /* Above topbar (z-30), sidebar, and all page elements */
-  background-color: rgba(0, 0, 0, 0.94) !important; /* Dominant dark system takeover */
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
+  z-index: 9999999 !important;
+  background-color: rgba(15, 23, 42, 0.6) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -463,6 +416,3 @@ div#mandatory-setup-modal {
 div#mandatory-setup-modal.hidden {
   display: none !important;
 }
-
-
-

@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.21",
-  "build": "v2.4.21-d9af863",
-  "commit_count": 21,
-  "commit_hash": "d9af863",
+  "version": "v2.4.22",
+  "build": "v2.4.22-996d585",
+  "commit_count": 22,
+  "commit_hash": "996d585",
   "branch": "main",
-  "commit_subject": "Add root@gmail.com superuser and seed all database tables across SQLite and PostgreSQL environments",
-  "updated_at": "2026-11-15 15:23",
-  "last_pushed_at": "2026-11-15 15:27:41"
+  "commit_subject": "Apply strict navy blue, light blue, and white UI theme across all templates and styles",
+  "updated_at": "2026-11-15 15:54",
+  "last_pushed_at": "2026-11-15 16:11:03"
 }

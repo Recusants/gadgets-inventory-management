@@ -91,38 +91,38 @@ class Notification(models.Model):
             pct = min(100, max(0, round(ratio * 100)))
 
             if qty == 0:
-                color = 'navy'
-                badge_bg = 'bg-[#0a192f] text-white border border-sky-400'
-                badge_soft = 'bg-blue-100 text-[#0a192f] border-blue-300'
-                bar_bg = 'bg-[#0a192f]'
+                color = 'rose'
+                badge_bg = 'bg-slate-900 text-white'
+                badge_soft = 'bg-rose-50 text-rose-700 border border-rose-100'
+                bar_bg = 'bg-rose-500'
                 label = 'Depleted (0%)'
                 level = 'OUT_OF_STOCK'
             elif pct <= 25:
-                color = 'navy'
-                badge_bg = 'bg-[#0b192c] text-sky-200 border border-sky-500'
-                badge_soft = 'bg-sky-100 text-[#0a192f] border-sky-300'
-                bar_bg = 'bg-blue-700'
+                color = 'amber'
+                badge_bg = 'bg-slate-900 text-white'
+                badge_soft = 'bg-amber-50 text-amber-700 border border-amber-100'
+                bar_bg = 'bg-amber-500'
                 label = f'Critical ({pct}%)'
                 level = 'CRITICAL'
             elif pct <= 50:
-                color = 'blue'
-                badge_bg = 'bg-blue-800 text-white'
-                badge_soft = 'bg-blue-100 text-blue-950 border-blue-200'
-                bar_bg = 'bg-blue-600'
+                color = 'amber'
+                badge_bg = 'bg-slate-800 text-white'
+                badge_soft = 'bg-amber-50 text-amber-700 border border-amber-100'
+                bar_bg = 'bg-amber-400'
                 label = f'Urgent ({pct}%)'
                 level = 'URGENT'
             elif pct <= 75:
-                color = 'blue'
-                badge_bg = 'bg-blue-600 text-white'
-                badge_soft = 'bg-blue-50 text-blue-900 border-blue-200'
-                bar_bg = 'bg-sky-500'
+                color = 'sky'
+                badge_bg = 'bg-slate-800 text-white'
+                badge_soft = 'bg-sky-50 text-sky-700 border border-sky-100'
+                bar_bg = 'bg-sky-400'
                 label = f'Low ({pct}%)'
                 level = 'LOW'
             else:
-                color = 'sky'
-                badge_bg = 'bg-sky-600 text-white'
-                badge_soft = 'bg-sky-50 text-sky-950 border-sky-200'
-                bar_bg = 'bg-sky-400'
+                color = 'emerald'
+                badge_bg = 'bg-slate-800 text-white'
+                badge_soft = 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                bar_bg = 'bg-emerald-500'
                 label = f'Reorder ({pct}%)'
                 level = 'REORDER'
 
@@ -166,9 +166,9 @@ class Notification(models.Model):
                 'days': days,
                 'abs_days': abs(days),
                 'exp_date': exp_date,
-                'color': 'navy',
-                'badge_bg': 'bg-[#0a192f] text-white border border-sky-400',
-                'badge_soft': 'bg-blue-100 text-[#0a192f] border-blue-300',
+                'color': 'rose',
+                'badge_bg': 'bg-slate-900 text-white',
+                'badge_soft': 'bg-rose-50 text-rose-700 border border-rose-100',
                 'label': f'Expired ({abs(days)}d ago)',
                 'level': 'EXPIRED'
             }
@@ -177,9 +177,9 @@ class Notification(models.Model):
                 'days': days,
                 'abs_days': days,
                 'exp_date': exp_date,
-                'color': 'navy',
-                'badge_bg': 'bg-[#0b192c] text-sky-200 border border-sky-500',
-                'badge_soft': 'bg-sky-100 text-[#0a192f] border-sky-300',
+                'color': 'amber',
+                'badge_bg': 'bg-slate-900 text-white',
+                'badge_soft': 'bg-amber-50 text-amber-700 border border-amber-100',
                 'label': f'Expires in {days}d',
                 'level': 'CRITICAL'
             }
@@ -188,9 +188,9 @@ class Notification(models.Model):
                 'days': days,
                 'abs_days': days,
                 'exp_date': exp_date,
-                'color': 'blue',
-                'badge_bg': 'bg-blue-800 text-white',
-                'badge_soft': 'bg-blue-100 text-blue-950 border-blue-200',
+                'color': 'sky',
+                'badge_bg': 'bg-slate-800 text-white',
+                'badge_soft': 'bg-sky-50 text-sky-700 border border-sky-100',
                 'label': f'{days} days left',
                 'level': 'URGENT'
             }
@@ -199,9 +199,9 @@ class Notification(models.Model):
                 'days': days,
                 'abs_days': days,
                 'exp_date': exp_date,
-                'color': 'blue',
-                'badge_bg': 'bg-blue-600 text-white',
-                'badge_soft': 'bg-blue-50 text-blue-900 border-blue-200',
+                'color': 'emerald',
+                'badge_bg': 'bg-slate-800 text-white',
+                'badge_soft': 'bg-emerald-50 text-emerald-700 border border-emerald-100',
                 'label': f'{days} days left',
                 'level': 'WARNING'
             }

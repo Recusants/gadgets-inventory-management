@@ -1,188 +1,295 @@
 {% load static %}
-<aside id="app-sidebar" class="flex flex-col h-full text-white select-none border-r border-slate-800 bg-[#0a192f] flex-shrink-0">
+<aside id="app-sidebar" class="flex flex-col h-screen select-none border-r border-slate-100 bg-white flex-shrink-0 text-slate-800 transition-all duration-200">
   
-  <!-- Navigation Menu -->
-  <nav class="flex-1 px-3 py-3 space-y-1 overflow-y-auto custom-scrollbar">
-    
-    <!-- Dashboard -->
-    <a href="{% url 'dashboard:index' %}" 
-       title="Dashboard"
-       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if request.resolver_match.app_name == 'dashboard' %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
-      <i class="fas fa-home w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
-      <span class="sidebar-label truncate text-white font-bold text-xs">Dashboard</span>
-    </a>
-
-    <!-- POS Checkout (Outstanding High Priority Feature) -->
-    <a href="/sales/checkout/" 
-       title="POS Checkout"
-       class="sidebar-link flex items-center px-3.5 py-3 rounded-2xl transition-all duration-200 my-1.5 {% if 'checkout' in request.path %}bg-[#1e3a8a] text-white font-black shadow-xl ring-2 ring-sky-400{% else %}bg-[#0e213d] text-white hover:bg-[#1e3a8a] font-black shadow-md border border-sky-500/40 hover:scale-[1.02]{% endif %}">
-      <div class="w-6 h-6 rounded-lg bg-sky-500/30 text-sky-200 flex items-center justify-center text-xs mr-2.5 flex-shrink-0">
-        <i class="fas fa-cash-register"></i>
+  <!-- Sidebar Brand Header (Fixoria Inspired Squircle Badge + Collapse Button) -->
+  <div class="h-14 px-4 flex items-center justify-between border-b border-slate-100 flex-shrink-0 sidebar-brand-header">
+    <div class="flex items-center space-x-2.5 min-w-0">
+      <div class="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-sm shadow-xs flex-shrink-0 overflow-hidden">
+        {% if company_settings.logo %}
+          <img src="{{ company_settings.logo.url }}" alt="Logo" class="w-full h-full object-contain p-1">
+        {% else %}
+          <i class="fas fa-cubes text-emerald-400 text-xs"></i>
+        {% endif %}
       </div>
-      <span class="sidebar-label truncate text-white font-black text-xs uppercase tracking-wider">POS Checkout</span>
-      <span class="ml-auto w-2 h-2 rounded-full bg-sky-400 animate-pulse sidebar-label" title="POS Ready"></span>
-    </a>
+      <div class="sidebar-label flex items-center space-x-1 truncate">
+        <span class="font-bold text-sm text-slate-900 tracking-tight truncate">{{ company_settings.company_name|default:"Fixoria" }}</span>
+        <span class="text-[10px] text-slate-400 font-medium">™</span>
+      </div>
+    </div>
+    
+    <button id="sidebar-toggle-btn" 
+            type="button" 
+            class="sidebar-label p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors focus:outline-none"
+            title="Collapse Sidebar">
+      <i id="sidebar-toggle-icon" class="fas fa-indent text-xs"></i>
+    </button>
+  </div>
 
-    <!-- Products (Catalog) -->
-    <a href="/inventory/products/" 
-       title="Products"
-       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if '/inventory/products/' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
-      <i class="fas fa-box-open w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
-      <span class="sidebar-label truncate text-white font-bold text-xs">Products</span>
+  <!-- Organization / Store Selector Card (Fixoria Inspired) -->
+  <div class="px-3 pt-3 pb-1 flex-shrink-0 sidebar-label">
+    <a href="{% url 'core:settings' %}" 
+       class="p-2 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-100 flex items-center justify-between transition-colors group">
+      <div class="flex items-center space-x-2.5 min-w-0">
+        <div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center justify-center flex-shrink-0">
+          {{ company_settings.company_name|default:"G"|slice:":1"|upper }}
+        </div>
+        <div class="truncate">
+          <div class="text-xs font-semibold text-slate-900 truncate leading-tight group-hover:text-slate-950">
+            {{ company_settings.company_name|default:"Main Branch Store" }}
+          </div>
+          <div class="text-[10px] text-slate-400 font-medium leading-tight">Active LAN Store</div>
+        </div>
+      </div>
+      <i class="fas fa-chevron-right text-[10px] text-slate-400 group-hover:text-slate-600 transition-transform"></i>
     </a>
+  </div>
 
-    {% if request.user.is_supervisor_role %}
-    <!-- Stock & Pricing -->
-    <a href="/inventory/stock/" 
-       title="Stock & Pricing"
-       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if '/inventory/stock/' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
-      <i class="fas fa-cubes w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
-      <span class="sidebar-label truncate text-white font-bold text-xs">Stock (Prices)</span>
-    </a>
+  <!-- Navigation Links -->
+  <nav class="flex-1 px-3 py-2 space-y-4 overflow-y-auto custom-scrollbar">
+    
+    <!-- Group: Daily Operation -->
+    <div class="space-y-0.5">
+      <div class="sidebar-label px-3 pt-2 pb-1 text-[10px] font-semibold text-slate-400 tracking-wider uppercase">
+        Daily Operation
+      </div>
 
-    <!-- Stock Batches -->
-    <a href="/inventory/batches/" 
-       title="Stock Batches"
-       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if '/inventory/batches/' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
-      <i class="fas fa-layer-group w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
-      <span class="sidebar-label truncate text-white font-bold text-xs">Batches</span>
-    </a>
+      <!-- Dashboard -->
+      <a href="{% url 'dashboard:index' %}" 
+         title="Dashboard"
+         class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if request.resolver_match.app_name == 'dashboard' %}bg-white border border-slate-200 text-slate-900 font-semibold shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+        <i class="fas fa-th-large w-4 text-center mr-2.5 flex-shrink-0 {% if request.resolver_match.app_name == 'dashboard' %}text-slate-900{% else %}text-slate-400{% endif %}"></i>
+        <span class="sidebar-label truncate">Dashboard</span>
+      </a>
 
-    <!-- Invoices Received -->
-    <a href="/inventory/invoices/" 
-       title="Received Invoices"
-       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if '/inventory/invoices/' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
-      <i class="fas fa-file-invoice-dollar w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
-      <span class="sidebar-label truncate text-white font-bold text-xs">Invoices</span>
-    </a>
+      <!-- POS Checkout (Apple Squircle Action) -->
+      <a href="/sales/checkout/" 
+         title="POS Checkout"
+         class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if 'checkout' in request.path %}bg-slate-900 text-white font-semibold shadow-sm{% else %}bg-slate-50 hover:bg-slate-100/90 text-slate-900 border border-slate-200/60 font-semibold{% endif %}">
+        <i class="fas fa-cash-register w-4 text-center mr-2.5 flex-shrink-0 {% if 'checkout' in request.path %}text-emerald-400{% else %}text-slate-700{% endif %}"></i>
+        <span class="sidebar-label truncate flex-1">POS Checkout</span>
+        <span class="sidebar-label w-2 h-2 rounded-full bg-emerald-500 animate-pulse ml-auto" title="POS Ready"></span>
+      </a>
 
-    <!-- Suppliers (Dedicated Directory) -->
-    <a href="/inventory/suppliers/" 
-       title="Suppliers"
-       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if '/inventory/suppliers/' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
-      <i class="fas fa-truck-loading w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
-      <span class="sidebar-label truncate text-white font-bold text-xs">Suppliers</span>
-    </a>
+      <!-- Sales -->
+      <a href="/sales/" 
+         title="Sales Records"
+         class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if request.resolver_match.app_name == 'sales' and not 'checkout' in request.path and not 'customer' in request.path %}bg-white border border-slate-200 text-slate-900 font-semibold shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+        <i class="fas fa-shopping-bag w-4 text-center mr-2.5 flex-shrink-0 text-slate-400"></i>
+        <span class="sidebar-label truncate">Sales</span>
+      </a>
 
-    <!-- Categories (Fixed Active Highlighting) -->
-    <a href="/inventory/categories/" 
-       title="Categories"
-       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if '/inventory/categories/' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
-      <i class="fas fa-tags w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
-      <span class="sidebar-label truncate text-white font-bold text-xs">Categories</span>
-    </a>
-    {% endif %}
+      <!-- Customers -->
+      <a href="/sales/customers/" 
+         title="Customers"
+         class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if 'customer' in request.path %}bg-white border border-slate-200 text-slate-900 font-semibold shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+        <i class="fas fa-user-friends w-4 text-center mr-2.5 flex-shrink-0 text-slate-400"></i>
+        <span class="sidebar-label truncate">Customers</span>
+      </a>
+    </div>
 
-    <!-- Sales Records -->
-    <a href="/sales/" 
-       title="Sales Records"
-       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if request.resolver_match.app_name == 'sales' and not 'checkout' in request.path and not 'customer' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
-      <i class="fas fa-shopping-cart w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
-      <span class="sidebar-label truncate text-white font-bold text-xs">Sales</span>
-    </a>
+    <!-- Group: Inventory & Catalog -->
+    <div class="space-y-0.5">
+      <div class="sidebar-label px-3 pt-2 pb-1 text-[10px] font-semibold text-slate-400 tracking-wider uppercase">
+        Inventory
+      </div>
 
-    {% if request.user.is_supervisor_role %}
-    <!-- Expenses -->
-    <a href="/expenses/" 
-       title="Expenses Tracking"
-       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if request.resolver_match.app_name == 'expenses' %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
-      <i class="fas fa-wallet w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
-      <span class="sidebar-label truncate text-white font-bold text-xs">Expenses</span>
-    </a>
-    {% endif %}
+      <!-- Products (Catalog) -->
+      <a href="/inventory/products/" 
+         title="Products"
+         class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if '/inventory/products/' in request.path %}bg-white border border-slate-200 text-slate-900 font-semibold shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+        <i class="fas fa-boxes w-4 text-center mr-2.5 flex-shrink-0 text-slate-400"></i>
+        <span class="sidebar-label truncate">Products</span>
+      </a>
 
-    <!-- Customers -->
-    <a href="/sales/customers/" 
-       title="Customers"
-       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if 'customer' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
-      <i class="fas fa-users w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
-      <span class="sidebar-label truncate text-white font-bold text-xs">Customers</span>
-    </a>
+      {% if request.user.is_supervisor_role %}
+      <!-- Stock & Pricing -->
+      <a href="/inventory/stock/" 
+         title="Stock & Pricing"
+         class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if '/inventory/stock/' in request.path %}bg-white border border-slate-200 text-slate-900 font-semibold shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+        <i class="fas fa-cubes w-4 text-center mr-2.5 flex-shrink-0 text-slate-400"></i>
+        <span class="sidebar-label truncate">Stock &amp; Pricing</span>
+      </a>
 
-    <!-- Notifications & Alerts -->
-    <a href="/notifications/" 
-       title="Notifications & Alerts"
-       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if 'notifications' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
-      <i class="fas fa-bell w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
-      <span class="sidebar-label truncate text-white font-bold text-xs">Alerts</span>
+      <!-- Stock Batches -->
+      <a href="/inventory/batches/" 
+         title="Stock Batches"
+         class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if '/inventory/batches/' in request.path %}bg-white border border-slate-200 text-slate-900 font-semibold shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+        <i class="fas fa-layer-group w-4 text-center mr-2.5 flex-shrink-0 text-slate-400"></i>
+        <span class="sidebar-label truncate">Batches</span>
+      </a>
+
+      <!-- Invoices -->
+      <a href="/inventory/invoices/" 
+         title="Received Invoices"
+         class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if '/inventory/invoices/' in request.path %}bg-white border border-slate-200 text-slate-900 font-semibold shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+        <i class="fas fa-receipt w-4 text-center mr-2.5 flex-shrink-0 text-slate-400"></i>
+        <span class="sidebar-label truncate">Invoices</span>
+      </a>
+
+      <!-- Suppliers -->
+      <a href="/inventory/suppliers/" 
+         title="Suppliers"
+         class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if '/inventory/suppliers/' in request.path %}bg-white border border-slate-200 text-slate-900 font-semibold shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+        <i class="fas fa-truck w-4 text-center mr-2.5 flex-shrink-0 text-slate-400"></i>
+        <span class="sidebar-label truncate">Suppliers</span>
+      </a>
+
+      <!-- Categories -->
+      <a href="/inventory/categories/" 
+         title="Categories"
+         class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if '/inventory/categories/' in request.path %}bg-white border border-slate-200 text-slate-900 font-semibold shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+        <i class="fas fa-tag w-4 text-center mr-2.5 flex-shrink-0 text-slate-400"></i>
+        <span class="sidebar-label truncate">Categories</span>
+      </a>
+      {% endif %}
+    </div>
+
+    <!-- Group: Accounting & Tools -->
+    <div class="space-y-0.5">
+      <div class="sidebar-label px-3 pt-2 pb-1 text-[10px] font-semibold text-slate-400 tracking-wider uppercase">
+        Accounting
+      </div>
+
+      {% if request.user.is_supervisor_role %}
+      <!-- Expenses -->
+      <a href="/expenses/" 
+         title="Expenses Tracking"
+         class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if request.resolver_match.app_name == 'expenses' %}bg-white border border-slate-200 text-slate-900 font-semibold shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+        <i class="fas fa-wallet w-4 text-center mr-2.5 flex-shrink-0 text-slate-400"></i>
+        <span class="sidebar-label truncate">Expenses</span>
+      </a>
+
+      <!-- Reports -->
+      <a href="/reports/" 
+         title="Reports & Analytics"
+         class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if request.resolver_match.app_name == 'reports' %}bg-white border border-slate-200 text-slate-900 font-semibold shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+        <i class="fas fa-chart-pie w-4 text-center mr-2.5 flex-shrink-0 text-slate-400"></i>
+        <span class="sidebar-label truncate">Reports</span>
+      </a>
+      {% endif %}
+
+      {% if request.user.is_manager_role %}
+      <!-- ZIMRA Fiscalisation -->
+      <a href="{% url 'fiscalisation:dashboard' %}" 
+         title="ZIMRA Fiscalisation"
+         class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if 'fiscalisation' in request.path %}bg-white border border-slate-200 text-slate-900 font-semibold shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+        <i class="fas fa-file-invoice w-4 text-center mr-2.5 flex-shrink-0 text-slate-400"></i>
+        <span class="sidebar-label truncate">Fiscalisation</span>
+      </a>
+
+      <!-- Thermal Printers -->
+      <a href="{% url 'print_out:printers_page' %}" 
+         title="Printers"
+         class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if 'printers' in request.path %}bg-white border border-slate-200 text-slate-900 font-semibold shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+        <i class="fas fa-print w-4 text-center mr-2.5 flex-shrink-0 text-slate-400"></i>
+        <span class="sidebar-label truncate">Printers</span>
+      </a>
+      {% endif %}
+    </div>
+
+    <!-- Group: System Options -->
+    <div class="space-y-0.5">
+      <div class="sidebar-label px-3 pt-2 pb-1 text-[10px] font-semibold text-slate-400 tracking-wider uppercase">
+        System Options
+      </div>
+
+      {% if request.user.is_manager_role %}
+      <!-- Settings -->
+      <a href="{% url 'core:settings' %}" 
+         title="Store Settings"
+         class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if 'settings' in request.path %}bg-white border border-slate-200 text-slate-900 font-semibold shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+        <i class="fas fa-sliders-h w-4 text-center mr-2.5 flex-shrink-0 text-slate-400"></i>
+        <span class="sidebar-label truncate">Settings</span>
+      </a>
+
+      <!-- System Info -->
+      <a href="{% url 'core:system' %}" 
+         title="System Info"
+         class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if 'system' in request.path %}bg-white border border-slate-200 text-slate-900 font-semibold shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+        <i class="fas fa-server w-4 text-center mr-2.5 flex-shrink-0 text-slate-400"></i>
+        <span class="sidebar-label truncate">System</span>
+      </a>
+      {% endif %}
+
+      <!-- What's New -->
+      <a href="{% url 'core:whats_new' %}" 
+         title="What's New"
+         class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if 'whats-new' in request.path %}bg-white border border-slate-200 text-slate-900 font-semibold shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+        <i class="fas fa-sparkles w-4 text-center mr-2.5 flex-shrink-0 text-slate-400"></i>
+        <span class="sidebar-label truncate">What's New</span>
+      </a>
+
+      {% if request.user.is_admin_role or request.user.is_superuser %}
+      <!-- Users -->
+      <a href="{% url 'accounts:user_list' %}" 
+         title="User Management"
+         class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if 'accounts/users' in request.path %}bg-white border border-slate-200 text-slate-900 font-semibold shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+        <i class="fas fa-user-shield w-4 text-center mr-2.5 flex-shrink-0 text-slate-400"></i>
+        <span class="sidebar-label truncate">Users</span>
+      </a>
+      {% endif %}
+    </div>
+
+  </nav>
+
+  <!-- Sidebar Footer: Notifications & User Profile Card (Fixoria Inspired) -->
+  <div class="p-3 border-t border-slate-100 flex-shrink-0 space-y-2 bg-white">
+    
+    <!-- Quick Notifications Link -->
+    <a href="{% url 'core:notification_list' %}" 
+       class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors">
+      <div class="flex items-center">
+        <i class="fas fa-bell w-4 text-center mr-2.5 text-slate-400"></i>
+        <span class="sidebar-label">Notifications</span>
+      </div>
       {% if unread_notifications_count > 0 %}
-        <span class="ml-auto px-1.5 py-0.5 rounded-full bg-blue-500 text-white text-[9px] font-black sidebar-label">
+        <span class="sidebar-label px-1.5 py-0.2 rounded-full bg-rose-500 text-white font-bold text-[10px]">
           {{ unread_notifications_count }}
         </span>
       {% endif %}
     </a>
 
-    {% if request.user.is_supervisor_role %}
-    <!-- Reports -->
-    <a href="/reports/" 
-       title="Reports & Analytics"
-       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if request.resolver_match.app_name == 'reports' %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
-      <i class="fas fa-chart-bar w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
-      <span class="sidebar-label truncate text-white font-bold text-xs">Reports</span>
-    </a>
-    {% endif %}
+    <!-- User Profile Card -->
+    <div class="p-2 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between sidebar-label">
+      <div class="flex items-center space-x-2.5 min-w-0">
+        <div class="w-8 h-8 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 shadow-xs">
+          {% if request.user.is_authenticated %}
+            {{ request.user.first_name|default:request.user.username|slice:":1"|upper }}
+          {% else %}
+            U
+          {% endif %}
+        </div>
+        <div class="truncate">
+          <div class="text-xs font-semibold text-slate-900 truncate leading-tight">
+            {% if request.user.is_authenticated %}
+              {{ request.user.get_full_name|default:request.user.username }}
+            {% else %}
+              Staff User
+            {% endif %}
+          </div>
+          <div class="text-[10px] text-slate-400 font-medium leading-tight truncate">
+            {% if request.user.is_authenticated %}
+              {{ request.user.get_roles_display }}
+            {% else %}
+              Staff
+            {% endif %}
+          </div>
+        </div>
+      </div>
 
-    {% if request.user.is_manager_role %}
-    <!-- ZIMRA Fiscalisation -->
-    <a href="{% url 'fiscalisation:dashboard' %}" 
-       title="ZIMRA Fiscalisation Compliance"
-       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if 'fiscalisation' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
-      <i class="fas fa-file-invoice-dollar w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
-      <span class="sidebar-label truncate text-white font-bold text-xs">Fiscalisation</span>
-    </a>
-
-    <!-- Thermal Printers (POS Hardware) -->
-    <a href="{% url 'print_out:printers_page' %}" 
-       title="Thermal Printers & POS Hardware"
-       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if 'printers' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
-      <i class="fas fa-print w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
-      <span class="sidebar-label truncate text-white font-bold text-xs">Printers</span>
-    </a>
-
-    <!-- Settings (Client Store Profile) -->
-    <a href="{% url 'core:settings' %}" 
-       title="Store Settings"
-       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if 'settings' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
-      <i class="fas fa-store w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
-      <span class="sidebar-label truncate text-white font-bold text-xs">Settings</span>
-    </a>
-
-    <!-- System & Developer Support -->
-    <a href="{% url 'core:system' %}" 
-       title="System Information & Support"
-       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if 'system' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
-      <i class="fas fa-server w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
-      <span class="sidebar-label truncate text-white font-bold text-xs">System</span>
-    </a>
-    {% endif %}
-
-    <!-- What's New & Release Updates (Accessible to all staff) -->
-    <a href="{% url 'core:whats_new' %}" 
-       title="What's New & Release Notes"
-       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if 'whats-new' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
-      <i class="fas fa-bullhorn w-5 text-center text-sm mr-3 flex-shrink-0 text-cyan-400"></i>
-      <span class="sidebar-label truncate text-white font-bold text-xs">What's New</span>
-    </a>
-
-    <!-- User Management (Admin Only) -->
-    {% if request.user.is_admin_role or request.user.is_superuser %}
-    <a href="{% url 'accounts:user_list' %}" 
-       title="User Management"
-       class="sidebar-link flex items-center px-3.5 py-2.5 rounded-xl transition-all duration-150 {% if 'accounts/users' in request.path %}bg-blue-600 text-white font-black shadow-lg shadow-blue-600/40{% else %}text-white hover:bg-slate-800/80 font-bold{% endif %}">
-      <i class="fas fa-users-cog w-5 text-center text-sm mr-3 flex-shrink-0 text-white"></i>
-      <span class="sidebar-label truncate text-white font-bold text-xs">Users</span>
-    </a>
-    {% endif %}
-
-  </nav>
-
-  <!-- Sidebar Footer: Clarity Retail & Client Store Name -->
-  <div class="p-3 border-t border-slate-800/80 bg-[#071324] text-center flex-shrink-0">
-    <div class="sidebar-label flex items-center justify-center space-x-1.5 mb-1">
-      <span class="text-[10px] font-black tracking-wide text-white uppercase">Clarity Retail</span>
-      <a href="{% url 'core:whats_new' %}" title="View What's New" class="px-1.5 py-0.2 rounded bg-blue-600 hover:bg-cyan-600 transition-colors text-white font-mono text-[9px] font-bold">{{ system_version.version }}</a>
+      <!-- Logout Form Button -->
+      {% if request.user.is_authenticated %}
+        <form action="{% url 'accounts:logout' %}" method="POST" class="m-0 p-0 flex items-center">
+          {% csrf_token %}
+          <button type="submit" 
+                  title="Sign Out" 
+                  class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-white transition-colors">
+            <i class="fas fa-sign-out-alt text-xs"></i>
+          </button>
+        </form>
+      {% endif %}
     </div>
-  </div>
 
+  </div>
 
 </aside>

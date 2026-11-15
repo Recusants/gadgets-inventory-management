@@ -46,38 +46,38 @@
 
   {% block extra_css %}{% endblock %}
 </head>
-<body class="bg-[#f0f7ff] text-[#0a192f] antialiased overflow-hidden font-sans">
+<body class="bg-[#f5f6f8] text-slate-900 antialiased overflow-hidden font-sans">
   
-  <div id="app-root" class="flex flex-col h-screen w-screen overflow-hidden">
+  <div id="app-root" class="flex flex-row h-screen w-screen overflow-hidden bg-[#f5f6f8]">
     
-    <!-- Topbar across the entire top edge (full width 100vw) -->
-    {% include 'partials/topbar.html' %}
+    <!-- Collapsible Full-Height Sidebar docked on far left -->
+    {% include 'partials/sidebar.html' %}
 
-    {% if needs_mandatory_setup %}
-      <!-- Persistent Top Calibration Alert Banner -->
-      <div class="w-full bg-[#0a192f] border-b border-sky-400 text-white px-4 py-2 text-xs font-bold flex items-center justify-between shadow-md z-20 flex-shrink-0">
-        <div class="flex items-center space-x-2">
-          <i class="fas fa-exclamation-triangle text-sky-300"></i>
-          <span><b>Action Required:</b> Store setup incomplete — operating store profile, contact phone, and currency calibration are required.</span>
-        </div>
-        <button type="button" 
-                onclick="$('#mandatory-setup-modal').removeClass('hidden').addClass('flex')" 
-                class="px-3 py-1 rounded-lg bg-white text-[#0a192f] hover:bg-sky-100 font-black text-[11px] shadow transition-colors flex items-center space-x-1 whitespace-nowrap">
-          <i class="fas fa-cogs text-sky-600"></i>
-          <span>Open Setup Wizard</span>
-        </button>
-      </div>
-    {% endif %}
-
-    <!-- Viewport area below topbar: Sidebar on left + Main Content on right -->
-    <div class="flex flex-1 min-h-0 overflow-hidden">
+    <!-- Right Side: Topbar + Main Content Viewport -->
+    <div id="app-main-wrapper" class="flex-1 min-w-0 flex flex-col h-screen overflow-hidden bg-[#f5f6f8]">
       
-      <!-- Collapsible Sidebar docked on the far left beneath topbar -->
-      {% include 'partials/sidebar.html' %}
+      {% if needs_mandatory_setup %}
+        <!-- Persistent Top Calibration Alert Banner -->
+        <div class="w-full bg-slate-900 border-b border-slate-800 text-white px-4 py-2 text-xs font-semibold flex items-center justify-between shadow-sm z-30 flex-shrink-0">
+          <div class="flex items-center space-x-2">
+            <i class="fas fa-exclamation-circle text-amber-400"></i>
+            <span><b>Action Required:</b> Store setup incomplete — store profile, contact phone, and currency calibration required.</span>
+          </div>
+          <button type="button" 
+                  onclick="$('#mandatory-setup-modal').removeClass('hidden').addClass('flex')" 
+                  class="px-3 py-1 rounded-lg bg-white text-slate-900 hover:bg-slate-100 font-bold text-[11px] shadow-sm transition-colors flex items-center space-x-1 whitespace-nowrap">
+            <i class="fas fa-sliders-h text-slate-600"></i>
+            <span>Open Setup Wizard</span>
+          </button>
+        </div>
+      {% endif %}
 
-      <!-- Scroll-Locked Main Content Area -->
-      <main id="app-main" class="flex-1 min-h-0 flex flex-col overflow-hidden bg-[#f0f7ff]">
-        <section id="app-content-panel" class="flex-1 min-h-0 flex flex-col p-3 sm:p-4 overflow-hidden">
+      <!-- Topbar Header -->
+      {% include 'partials/topbar.html' %}
+
+      <!-- Scrollable Main Content Area -->
+      <main id="app-main" class="flex-1 min-h-0 flex flex-col overflow-hidden bg-[#f5f6f8]">
+        <section id="app-content-panel" class="flex-1 min-h-0 flex flex-col p-4 sm:p-6 overflow-hidden">
           <div class="h-full w-full flex-1 min-h-0 flex flex-col overflow-hidden">
             {% block content %}{% endblock %}
           </div>
