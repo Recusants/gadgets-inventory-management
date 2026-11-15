@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.27",
-  "build": "v2.4.27-ec28272",
-  "commit_count": 27,
-  "commit_hash": "ec28272",
+  "version": "v2.4.28",
+  "build": "v2.4.28-aa1381e",
+  "commit_count": 28,
+  "commit_hash": "aa1381e",
   "branch": "main",
-  "commit_subject": "Remove sidebar from POS Checkout (widescreen terminal mode with quick Dashboard exit button)",
-  "updated_at": "2026-11-15 17:28",
-  "last_pushed_at": "2026-11-15 17:31:20"
+  "commit_subject": "Fix login page card width constraint and enforce solid dark button visibility",
+  "updated_at": "2026-11-15 17:32",
+  "last_pushed_at": "2026-11-15 17:34:55"
 }

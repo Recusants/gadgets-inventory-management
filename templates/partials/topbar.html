@@ -182,6 +182,15 @@
         <a href="{% url 'core:system' %}" class="flex items-center px-3.5 py-2 text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-medium">
           <i class="fas fa-server w-4 mr-2 text-slate-400"></i> System Status
         </a>
+        {% if request.user.is_authenticated %}
+          <div class="border-t border-slate-100 my-1"></div>
+          <form action="{% url 'accounts:logout' %}" method="POST" class="m-0 p-0">
+            {% csrf_token %}
+            <button type="submit" class="w-full text-left flex items-center px-3.5 py-2 text-rose-600 hover:bg-rose-50 font-medium transition-colors cursor-pointer">
+              <i class="fas fa-sign-out-alt w-4 mr-2 text-rose-500"></i> Sign Out
+            </button>
+          </form>
+        {% endif %}
       </div>
     </div>
 

@@ -223,6 +223,21 @@
         <span class="sidebar-label truncate">What's New</span>
       </a>
 
+      <!-- Notifications (Part of Scrolling Menu) -->
+      <a href="{% url 'core:notification_list' %}" 
+         title="Notifications"
+         class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all {% if 'notification' in request.path %}bg-white border border-slate-200 text-slate-900 font-semibold shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-50{% endif %}">
+        <div class="flex items-center min-w-0">
+          <i class="fas fa-bell w-4 text-center mr-2.5 flex-shrink-0 text-slate-400"></i>
+          <span class="sidebar-label truncate">Notifications</span>
+        </div>
+        {% if unread_notifications_count > 0 %}
+          <span class="sidebar-label px-1.5 py-0.2 rounded-full bg-rose-500 text-white font-bold text-[10px]">
+            {{ unread_notifications_count }}
+          </span>
+        {% endif %}
+      </a>
+
       {% if request.user.is_admin_role or request.user.is_superuser %}
       <!-- Users -->
       <a href="{% url 'accounts:user_list' %}" 
@@ -236,65 +251,28 @@
 
   </nav>
 
-  <!-- Sidebar Footer: Notifications & User Profile Card (Fixoria Inspired) -->
-  <div class="p-3 border-t border-slate-100 flex-shrink-0 space-y-2 bg-white">
-    
-    <!-- Quick Notifications Link -->
-    <a href="{% url 'core:notification_list' %}" 
-       class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors">
-      <div class="flex items-center">
-        <i class="fas fa-bell w-4 text-center mr-2.5 text-slate-400"></i>
-        <span class="sidebar-label">Notifications</span>
-      </div>
-      {% if unread_notifications_count > 0 %}
-        <span class="sidebar-label px-1.5 py-0.2 rounded-full bg-rose-500 text-white font-bold text-[10px]">
-          {{ unread_notifications_count }}
-        </span>
-      {% endif %}
-    </a>
-
-    <!-- User Profile Card (Fixoria Minimalist) -->
-    <div class="p-2 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+  <!-- Sidebar Footer: Software Version Only -->
+  <div class="p-3 border-t border-slate-100 flex-shrink-0 bg-white">
+    <a href="{% url 'core:whats_new' %}" 
+       title="Software Version: {{ system_version.version|default:'v2.4.24' }}"
+       class="p-2.5 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-100 flex items-center justify-between transition-colors group">
       <div class="flex items-center space-x-2.5 min-w-0">
-        <div class="w-8 h-8 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 shadow-xs" 
-             title="{% if request.user.is_authenticated %}{{ request.user.get_full_name|default:request.user.username }} ({{ request.user.get_roles_display }}){% else %}Staff{% endif %}">
-          {% if request.user.is_authenticated %}
-            {{ request.user.first_name|default:request.user.username|slice:":1"|upper }}
-          {% else %}
-            U
-          {% endif %}
+        <div class="w-7 h-7 rounded-xl bg-slate-200/70 text-slate-600 text-xs flex items-center justify-center flex-shrink-0 group-hover:text-slate-900 transition-colors">
+          <i class="fas fa-code-branch text-[11px]"></i>
         </div>
         <div class="truncate sidebar-label">
-          <div class="text-xs font-semibold text-slate-900 truncate leading-tight">
-            {% if request.user.is_authenticated %}
-              {{ request.user.get_full_name|default:request.user.username }}
-            {% else %}
-              Staff User
-            {% endif %}
+          <div class="text-xs font-bold text-slate-900 truncate leading-tight font-mono group-hover:text-black">
+            {{ system_version.version|default:"v2.4.24" }}
           </div>
-          <div class="text-[10px] text-slate-400 font-medium leading-tight truncate">
-            {% if request.user.is_authenticated %}
-              {{ request.user.get_roles_display }}
-            {% else %}
-              Staff
-            {% endif %}
+          <div class="text-[10px] text-slate-400 font-medium leading-tight mt-0.5">
+            Build {{ system_version.commit_hash|default:"main" }}
           </div>
         </div>
       </div>
-
-      <!-- Logout Form Button -->
-      {% if request.user.is_authenticated %}
-        <form action="{% url 'accounts:logout' %}" method="POST" class="m-0 p-0 flex items-center sidebar-label">
-          {% csrf_token %}
-          <button type="submit" 
-                  title="Sign Out" 
-                  class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-white transition-colors">
-            <i class="fas fa-sign-out-alt text-xs"></i>
-          </button>
-        </form>
-      {% endif %}
-    </div>
-
+      <span class="sidebar-label px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-mono text-[9px] font-bold border border-emerald-100">
+        Live
+      </span>
+    </a>
   </div>
 
 </aside>
