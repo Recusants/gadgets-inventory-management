@@ -1,6 +1,157 @@
 {% load humanize %}
 
-<div class="flex-1 min-h-0 overflow-y-auto">
+<!-- View Switcher & Counter Header -->
+<div class="px-4 py-2.5 bg-slate-50/80 border-b border-slate-200/80 flex items-center justify-between flex-shrink-0 text-xs">
+  <div class="flex items-center space-x-2 text-slate-500 font-medium">
+    <span>Showing <strong class="text-slate-900 font-bold">{{ stocks.start_index|default:0 }}–{{ stocks.end_index|default:0 }}</strong> of <strong class="text-slate-900 font-bold">{{ total_count|default:0 }}</strong> items</span>
+  </div>
+
+  <div class="flex items-center space-x-1.5 bg-slate-200/70 p-0.5 rounded-xl text-[11px] font-bold">
+    <button type="button" 
+            onclick="setStockViewMode('feed')" 
+            id="stock-btn-feed"
+            title="Card & Message Feed View"
+            class="px-2.5 py-1 rounded-lg transition-all flex items-center space-x-1.5 bg-white text-slate-900 shadow-xs">
+      <i class="fas fa-message text-[10px] text-blue-600"></i>
+      <span>Message Feed</span>
+    </button>
+    <button type="button" 
+            onclick="setStockViewMode('table')" 
+            id="stock-btn-table"
+            title="Compact Table Grid View"
+            class="px-2.5 py-1 rounded-lg transition-all flex items-center space-x-1.5 text-slate-600 hover:text-slate-900">
+      <i class="fas fa-table-cells text-[10px]"></i>
+      <span>Table Grid</span>
+    </button>
+  </div>
+</div>
+
+<!-- ── VIEW 1: MESSAGE STREAM / CARD FEED VIEW (DEFAULT) ───────────────────── -->
+<div id="stock-view-feed" class="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 space-y-2.5 custom-scrollbar">
+  {% for stock in stocks %}
+    <div class="stock-message-card group p-3.5 sm:p-4 rounded-2xl bg-white hover:bg-blue-50/30 border border-slate-200/80 hover:border-blue-200 transition-all flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-xs hover:shadow-sm">
+      
+      <!-- Left Avatar & Details -->
+      <div class="flex items-start sm:items-center space-x-3.5 min-w-0 flex-1">
+        
+        <!-- Avatar Squircle Icon -->
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg flex-shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+          <i class="fas fa-box-open text-base"></i>
+        </div>
+        
+        <div class="min-w-0 flex-1">
+          <!-- Top Row: Product Name, Category & SKU -->
+          <div class="flex items-center space-x-2 flex-wrap gap-y-1">
+            <span role="button"
+                  data-modal-url="{% url 'inventory:product_detail_modal' stock.product.id %}"
+                  data-modal-size="max-w-4xl"
+                  title="Click to view full batches & specs"
+                  class="font-extrabold text-sm text-slate-900 truncate hover:text-blue-600 transition-colors cursor-pointer">
+              {{ stock.product.name }}
+            </span>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-lg font-bold text-[10px] bg-blue-100 text-blue-800">
+              {{ stock.product.category.name }}
+            </span>
+            {% if stock.product.sku %}
+              <span class="font-mono text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200/60">
+                SKU: {{ stock.product.sku }}
+              </span>
+            {% endif %}
+          </div>
+
+          <!-- Middle Row: Stock Progress Meter & Live Status -->
+          <div class="flex items-center space-x-3 mt-1.5 flex-wrap gap-y-1.5">
+            
+            <!-- Visual Stock Level Meter Bar -->
+            <div class="w-24 sm:w-28 h-2 bg-slate-100 rounded-full overflow-hidden flex flex-shrink-0" title="Stock availability depth">
+              {% if stock.quantity_available > 5 %}
+                <div class="bg-blue-600 h-full rounded-full transition-all" style="width: 100%;"></div>
+              {% elif stock.quantity_available > 0 %}
+                <div class="bg-sky-500 h-full rounded-full transition-all" style="width: {% widthratio stock.quantity_available 5 100 %}%;"></div>
+              {% else %}
+                <div class="bg-slate-300 h-full rounded-full" style="width: 0%;"></div>
+              {% endif %}
+            </div>
+
+            <!-- Status Pill Badge -->
+            {% if stock.quantity_available > 5 %}
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">
+                <span class="w-1.5 h-1.5 rounded-full bg-blue-600 mr-1.5"></span>
+                {{ stock.quantity_available|intcomma }} units In Stock
+              </span>
+            {% elif stock.quantity_available > 0 %}
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-[#0a192f] border border-sky-300">
+                <span class="w-1.5 h-1.5 rounded-full bg-sky-500 mr-1.5 animate-pulse"></span>
+                Low Stock ({{ stock.quantity_available|intcomma }} left)
+              </span>
+            {% else %}
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">
+                <i class="fas fa-ban mr-1 text-[9px]"></i> Out of Stock
+              </span>
+            {% endif %}
+
+            <!-- Total Valuation Subtext -->
+            <span class="text-[11px] font-medium text-slate-500">
+              Valuation: <strong class="font-mono font-bold text-slate-900">
+                {% widthratio stock.selling_price 1 stock.quantity_available as val %}
+                {{ company_settings.currency_symbol|default:'$' }}{{ val|floatformat:2|intcomma }}
+              </strong>
+            </span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Right Price Tag & Actions -->
+      <div class="flex items-center justify-between sm:justify-end space-x-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 flex-shrink-0">
+        
+        <!-- Retail Selling Price Box -->
+        <div class="bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200/80 text-right">
+          <div class="text-[9px] uppercase font-bold text-slate-400">Retail Price</div>
+          <div class="font-black text-slate-900 font-mono text-sm leading-tight">
+            {{ company_settings.currency_symbol|default:'$' }}{{ stock.selling_price|floatformat:2|intcomma }}
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="inline-flex items-center space-x-2">
+          {% if request.user.is_supervisor_role %}
+            <button type="button" 
+                    data-modal-url="{% url 'inventory:stock_price_modal' stock.id %}"
+                    data-modal-size="max-w-md"
+                    title="Edit Retail Selling Price"
+                    class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors inline-flex items-center space-x-1 border border-slate-200/90">
+              <i class="fas fa-pen text-[10px] text-slate-500"></i>
+              <span>Price</span>
+            </button>
+          {% endif %}
+
+          <button type="button" 
+                  data-modal-url="{% url 'inventory:product_detail_modal' stock.product.id %}"
+                  data-modal-size="max-w-4xl"
+                  title="View Full Product Details & Linked Batches"
+                  class="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition-all inline-flex items-center space-x-1.5">
+            <i class="fas fa-eye text-[11px]"></i>
+            <span>Details</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  {% empty %}
+    <div class="py-16 text-center text-slate-400">
+      <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 mx-auto mb-2.5">
+        <i class="fas fa-cubes text-xl"></i>
+      </div>
+      <p class="font-bold text-slate-700 text-sm">No stock items match your search</p>
+      <p class="text-xs text-slate-400 mt-0.5">Try clearing the search query or status filters.</p>
+    </div>
+  {% endfor %}
+</div>
+
+<!-- ── VIEW 2: COMPACT TABLE VIEW (TOGGLEABLE) ──────────────────────────────── -->
+<div id="stock-view-table" class="hidden flex-1 min-h-0 overflow-y-auto custom-scrollbar">
   <table class="w-full text-left border-collapse text-xs">
     <thead class="sticky top-0 z-20 bg-slate-100 border-b border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
       <tr>
@@ -107,31 +258,39 @@
   </table>
 </div>
 
-<!-- Pagination Footer -->
+<!-- Pagination Footer (Shared by both views) -->
 {% if paginator.num_pages > 1 %}
-<div class="py-2.5 px-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 flex-shrink-0">
+<div class="py-2.5 px-4 bg-slate-50 border-t border-slate-200/80 flex items-center justify-between text-xs text-slate-500 flex-shrink-0">
   <div>
-    Showing <span class="font-bold text-slate-700">{{ stocks.start_index|default:0 }}</span> to <span class="font-bold text-slate-700">{{ stocks.end_index|default:0 }}</span> of <span class="font-bold text-slate-700">{{ total_count|default:0 }}</span> items
+    Page <span class="font-bold text-slate-800">{{ stocks.number }}</span> of <span class="font-bold text-slate-800">{{ paginator.num_pages }}</span>
   </div>
 
   <div class="inline-flex space-x-1">
     {% if stocks.has_previous %}
       <button type="button" 
               onclick="refreshTable('#stock-table-container', {page: {{ stocks.previous_page_number }}})"
-              class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all">
-        <i class="fas fa-chevron-left mr-1"></i> Prev
+              class="px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 font-semibold text-slate-700 transition-colors">
+        <i class="fas fa-chevron-left text-[10px]"></i>
       </button>
     {% endif %}
 
-    <span class="px-2.5 py-1 text-xs font-bold text-slate-700">
-      Page {{ stocks.number }} of {{ paginator.num_pages }}
-    </span>
+    {% for p in paginator.page_range %}
+      {% if p == stocks.number %}
+        <span class="px-2.5 py-1 rounded-lg bg-blue-600 text-white font-bold">{{ p }}</span>
+      {% elif p >= stocks.number|add:"-2" and p <= stocks.number|add:"2" %}
+        <button type="button" 
+                onclick="refreshTable('#stock-table-container', {page: {{ p }}})"
+                class="px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 font-semibold text-slate-700 transition-colors">
+          {{ p }}
+        </button>
+      {% endif %}
+    {% endfor %}
 
     {% if stocks.has_next %}
       <button type="button" 
               onclick="refreshTable('#stock-table-container', {page: {{ stocks.next_page_number }}})"
-              class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all">
-        Next <i class="fas fa-chevron-right ml-1"></i>
+              class="px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 font-semibold text-slate-700 transition-colors">
+        <i class="fas fa-chevron-right text-[10px]"></i>
       </button>
     {% endif %}
   </div>

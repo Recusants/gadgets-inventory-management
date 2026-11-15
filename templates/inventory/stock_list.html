@@ -2,15 +2,15 @@
 {% load static %}
 {% load humanize %}
 
-{% block title %}Stock & Valuation{% endblock %}
+{% block title %}Stock & Valuation — Messages & Analytics{% endblock %}
 
 {% block content %}
 <div class="flex-1 flex flex-col min-h-0 overflow-hidden space-y-3">
 
   <!-- Header Card -->
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-1 flex-shrink-0">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-1 flex-shrink-0 gap-3">
     <div class="flex items-center space-x-3">
-      <div class="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-xl shadow-md shadow-blue-600/20">
+      <div class="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-xl shadow-md shadow-blue-600/20 flex-shrink-0">
         <i class="fas fa-cubes"></i>
       </div>
       <div>
@@ -19,21 +19,139 @@
       </div>
     </div>
 
-    <!-- Actions (Shades of blue & white text) -->
-    {% if request.user.is_supervisor_role %}
-    <div class="mt-3 sm:mt-0 flex items-center space-x-2.5 flex-shrink-0">
-      <a href="{% url 'inventory:batch_list' %}" 
-         class="inline-flex items-center px-4 py-2.5 bg-blue-800 hover:bg-blue-900 text-white text-xs font-bold rounded-xl shadow-md transition-all">
-        <i class="fas fa-layer-group mr-2 text-xs"></i> View Batches
-      </a>
+    <!-- Actions -->
+    <div class="flex items-center space-x-2 flex-wrap gap-y-2 flex-shrink-0">
+      <!-- Toggle Visual Chart Analytics Panel -->
       <button type="button" 
-              data-modal-url="{% url 'inventory:receive_invoice_modal' %}"
-              data-modal-size="max-w-6xl"
-              class="inline-flex items-center px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md shadow-blue-600/20 transition-all">
-        <i class="fas fa-file-invoice-dollar mr-2 text-xs"></i> Receive Stock / Invoice
+              id="toggle-stock-chart-btn"
+              onclick="toggleStockChart()" 
+              class="inline-flex items-center px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl border border-slate-200/90 shadow-xs transition-all">
+        <i class="fas fa-chart-pie mr-1.5 text-blue-600"></i>
+        <span>Analytics Chart</span>
+        <i id="stock-chart-chevron" class="fas fa-chevron-down ml-1.5 text-[9px] text-slate-400 transition-transform"></i>
+      </button>
+
+      {% if request.user.is_supervisor_role %}
+        <a href="{% url 'inventory:batch_list' %}" 
+           class="inline-flex items-center px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl shadow-xs transition-all">
+          <i class="fas fa-layer-group mr-1.5 text-xs text-slate-300"></i> View Batches
+        </a>
+        <button type="button" 
+                data-modal-url="{% url 'inventory:receive_invoice_modal' %}"
+                data-modal-size="max-w-6xl"
+                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all shadow-blue-600/20">
+          <i class="fas fa-file-invoice-dollar mr-1.5 text-xs"></i> Receive Stock
+        </button>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- KPI Stock & Valuation Metrics Cards -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 flex-shrink-0">
+    
+    <!-- 1. Total Valuation -->
+    <div class="app-card bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+      <div class="min-w-0">
+        <div class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Gross Stock Value</div>
+        <div class="text-base sm:text-lg font-black text-slate-900 font-mono mt-0.5 truncate">
+          {{ company_settings.currency_symbol|default:'$' }}{{ total_valuation|floatformat:2|intcomma }}
+        </div>
+        <div class="text-[10px] text-blue-600 font-semibold mt-0.5">Asset capital</div>
+      </div>
+      <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-sm flex-shrink-0">
+        <i class="fas fa-coins"></i>
+      </div>
+    </div>
+
+    <!-- 2. Physical Stock Units -->
+    <div class="app-card bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+      <div class="min-w-0">
+        <div class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Available Units</div>
+        <div class="text-base sm:text-lg font-black text-slate-900 font-mono mt-0.5 truncate">
+          {{ total_units|intcomma }} <span class="text-xs font-semibold text-slate-500">units</span>
+        </div>
+        <div class="text-[10px] text-blue-700 font-semibold mt-0.5">Active FIFO inventory</div>
+      </div>
+      <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center text-sm flex-shrink-0">
+        <i class="fas fa-boxes-stacked"></i>
+      </div>
+    </div>
+
+    <!-- 3. Stock Health Meter -->
+    <div class="app-card bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
+      <div class="flex items-center justify-between">
+        <div class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Stock Health</div>
+        <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded-full border border-emerald-200">
+          {{ in_stock_count }} Optimal
+        </span>
+      </div>
+      
+      <!-- Multi-segment visual health bar -->
+      <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden flex my-1.5" title="{{ in_stock_count }} Optimal, {{ low_stock_count }} Low Stock, {{ out_of_stock_count }} Out of Stock">
+        {% if total_count > 0 %}
+          <div class="bg-blue-600 h-full transition-all" style="width: {% widthratio in_stock_count total_count 100 %}%;"></div>
+          <div class="bg-sky-500 h-full transition-all" style="width: {% widthratio low_stock_count total_count 100 %}%;"></div>
+          <div class="bg-slate-300 h-full transition-all" style="width: {% widthratio out_of_stock_count total_count 100 %}%;"></div>
+        {% else %}
+          <div class="bg-slate-200 h-full w-full"></div>
+        {% endif %}
+      </div>
+
+      <div class="text-[10px] text-slate-500 truncate">
+        <span class="text-blue-600 font-bold">{{ in_stock_count }} ok</span> &bull; 
+        <span class="text-sky-600 font-bold">{{ low_stock_count }} low</span> &bull; 
+        <span class="text-slate-400 font-bold">{{ out_of_stock_count }} out</span>
+      </div>
+    </div>
+
+    <!-- 4. Total Catalog SKUs -->
+    <div class="app-card bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+      <div class="min-w-0">
+        <div class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Product Catalog</div>
+        <div class="text-base sm:text-lg font-black text-slate-900 font-mono mt-0.5 truncate">
+          {{ total_count|intcomma }} <span class="text-xs font-semibold text-slate-500">items</span>
+        </div>
+        <div class="text-[10px] text-slate-500 font-medium mt-0.5">{{ categories|length }} active categories</div>
+      </div>
+      <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center text-sm flex-shrink-0">
+        <i class="fas fa-tags"></i>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Collapsible Visual Chart Panel (Hidden by default, toggled via button) -->
+  <div id="stock-chart-panel" class="hidden app-card bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex-shrink-0 transition-all">
+    <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+      <div class="flex items-center space-x-2">
+        <i class="fas fa-chart-column text-blue-600 text-sm"></i>
+        <h3 class="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Inventory Distribution &amp; Category Valuation</h3>
+      </div>
+      <button type="button" onclick="toggleStockChart()" class="text-slate-400 hover:text-slate-600 p-1">
+        <i class="fas fa-times text-xs"></i>
       </button>
     </div>
-    {% endif %}
+
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+      <!-- Chart 1: Stock Units by Category Bar Chart -->
+      <div class="md:col-span-8 bg-slate-50/60 p-3.5 rounded-xl border border-slate-100 flex flex-col">
+        <div class="text-[11px] font-bold text-slate-700 mb-2 flex items-center justify-between">
+          <span>Available Stock Units by Category</span>
+          <span class="text-[10px] text-slate-400">Total: {{ total_units }} units</span>
+        </div>
+        <div class="relative h-48 w-full">
+          <canvas id="stockUnitsChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Chart 2: Category Valuation Share Doughnut Chart -->
+      <div class="md:col-span-4 bg-slate-50/60 p-3.5 rounded-xl border border-slate-100 flex flex-col">
+        <div class="text-[11px] font-bold text-slate-700 mb-2">Valuation Share (%)</div>
+        <div class="relative h-48 w-full flex items-center justify-center">
+          <canvas id="stockValuationChart"></canvas>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Filter & Search Toolbar Card -->
@@ -70,16 +188,16 @@
                 id="stock-status-select"
                 class="w-full px-3 py-1.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
           <option value="">All Stock Status</option>
-          <option value="In Stock">In Stock</option>
-          <option value="Low Stock">Low Stock</option>
-          <option value="Out of Stock">Out of Stock</option>
+          <option value="In Stock">In Stock (>5 units)</option>
+          <option value="Low Stock">Low Stock (1-5 units)</option>
+          <option value="Out of Stock">Out of Stock (0 units)</option>
         </select>
       </div>
 
     </form>
   </div>
 
-  <!-- Dynamic AJAX Table Container (Screen Height Locked) -->
+  <!-- Dynamic AJAX Stock Stream / Table Container (Screen Height Locked) -->
   <div id="stock-table-container" 
        data-table-url="{% url 'inventory:stock_table' %}"
        data-filter-form="#stock-filter-form"
@@ -92,7 +210,142 @@
 
 {% block extra_js %}
 <script>
+  // Chart Data injected safely from backend
+  const stockChartData = {
+    categories: {{ chart_categories_json|safe|default:"[]" }},
+    units: {{ chart_units_json|safe|default:"[]" }},
+    valuations: {{ chart_valuations_json|safe|default:"[]" }}
+  };
+
+  let stockBarChart = null;
+  let stockDonutChart = null;
+
+  // View Mode: 'feed' (messages/cards) vs 'table' (grid)
+  function getStockViewMode() {
+    return localStorage.getItem('stock_view_mode') || 'feed';
+  }
+
+  function setStockViewMode(mode) {
+    localStorage.setItem('stock_view_mode', mode);
+    applyStockViewMode(mode);
+  }
+
+  function applyStockViewMode(mode) {
+    const $feed = $('#stock-view-feed');
+    const $table = $('#stock-view-table');
+    const $btnFeed = $('#stock-btn-feed');
+    const $btnTable = $('#stock-btn-table');
+
+    if (mode === 'table') {
+      $feed.addClass('hidden');
+      $table.removeClass('hidden');
+
+      $btnTable.addClass('bg-white text-slate-900 shadow-xs').removeClass('text-slate-600 hover:text-slate-900');
+      $btnFeed.removeClass('bg-white text-slate-900 shadow-xs').addClass('text-slate-600 hover:text-slate-900');
+    } else {
+      $table.addClass('hidden');
+      $feed.removeClass('hidden');
+
+      $btnFeed.addClass('bg-white text-slate-900 shadow-xs').removeClass('text-slate-600 hover:text-slate-900');
+      $btnTable.removeClass('bg-white text-slate-900 shadow-xs').addClass('text-slate-600 hover:text-slate-900');
+    }
+  }
+
+  // Toggle Visual Analytics Chart Panel
+  function toggleStockChart() {
+    const $panel = $('#stock-chart-panel');
+    const $chevron = $('#stock-chart-chevron');
+    const isHidden = $panel.hasClass('hidden');
+
+    if (isHidden) {
+      $panel.removeClass('hidden');
+      $chevron.addClass('rotate-180');
+      renderStockCharts();
+    } else {
+      $panel.addClass('hidden');
+      $chevron.removeClass('rotate-180');
+    }
+  }
+
+  function renderStockCharts() {
+    if (stockBarChart && stockDonutChart) return;
+
+    const textColor = '#64748b';
+    const gridColor = '#f1f5f9';
+
+    // 1. Units Bar Chart
+    const barEl = document.getElementById('stockUnitsChart');
+    if (barEl && !stockBarChart) {
+      const ctx = barEl.getContext('2d');
+      stockBarChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: stockChartData.categories,
+          datasets: [{
+            label: 'Stock Units',
+            data: stockChartData.units,
+            backgroundColor: '#2563eb',
+            borderRadius: 6,
+            barPercentage: 0.6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: textColor, font: { family: '-apple-system, Inter, sans-serif', size: 10 } }
+            },
+            y: {
+              grid: { color: gridColor },
+              ticks: { color: textColor, font: { family: '-apple-system, Inter, sans-serif', size: 10 } }
+            }
+          }
+        }
+      });
+    }
+
+    // 2. Valuation Doughnut Chart
+    const donutEl = document.getElementById('stockValuationChart');
+    if (donutEl && !stockDonutChart) {
+      const ctx = donutEl.getContext('2d');
+      stockDonutChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: stockChartData.categories,
+          datasets: [{
+            data: stockChartData.valuations,
+            backgroundColor: [
+              '#0a192f', '#2563eb', '#38bdf8', '#10b981', '#f59e0b', '#8b5cf6', '#64748b'
+            ],
+            borderWidth: 2,
+            borderColor: '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: textColor, font: { family: '-apple-system, Inter, sans-serif', size: 9 }, boxWidth: 10 }
+            }
+          },
+          cutout: '70%'
+        }
+      });
+    }
+  }
+
   $(document).ready(function () {
+    // Apply saved or default view mode
+    applyStockViewMode(getStockViewMode());
+
+    // Live search debouncing
     let timer = null;
     $('#stock-search-input').on('keyup input', function () {
       clearTimeout(timer);
@@ -104,6 +357,15 @@
     $('#stock-category-select, #stock-status-select').on('change', function () {
       refreshTable('#stock-table-container');
     });
+
+    // When AJAX table content refreshes, re-apply view mode
+    const observer = new MutationObserver(function () {
+      applyStockViewMode(getStockViewMode());
+    });
+    const target = document.getElementById('stock-table-container');
+    if (target) {
+      observer.observe(target, { childList: true });
+    }
   });
 </script>
 {% endblock %}

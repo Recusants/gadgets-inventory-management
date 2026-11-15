@@ -616,17 +616,47 @@ def stock_price_update(request, pk):
 def stock_list_view(request):
     """
     Renders the dedicated Stock Page where selling prices can be edited directly.
-    Shows available quantities aggregated from active batches.
+    Shows available quantities aggregated from active batches with visual chart metrics.
     """
     categories = Category.objects.all().order_by('name')
     queryset = Stock.objects.select_related('product__category').all().order_by('product__name')
     paginator = Paginator(queryset, 10)
     stocks = paginator.page(1)
+
+    all_stocks = list(Stock.objects.select_related('product__category').all())
+    total_valuation = sum((s.selling_price or 0) * s.quantity_available for s in all_stocks)
+    total_units = sum(s.quantity_available for s in all_stocks)
+    in_stock_count = sum(1 for s in all_stocks if s.quantity_available > 5)
+    low_stock_count = sum(1 for s in all_stocks if 0 < s.quantity_available <= 5)
+    out_of_stock_count = sum(1 for s in all_stocks if s.quantity_available == 0)
+
+    # Category breakdown for charts
+    cat_map = {}
+    for s in all_stocks:
+        cat_name = s.product.category.name if (s.product and s.product.category) else 'Uncategorized'
+        if cat_name not in cat_map:
+            cat_map[cat_name] = {'units': 0, 'valuation': Decimal('0.00'), 'items': 0}
+        cat_map[cat_name]['units'] += s.quantity_available
+        cat_map[cat_name]['valuation'] += (s.selling_price or 0) * s.quantity_available
+        cat_map[cat_name]['items'] += 1
+
+    chart_categories = list(cat_map.keys())
+    chart_units = [cat_map[k]['units'] for k in chart_categories]
+    chart_valuations = [float(cat_map[k]['valuation']) for k in chart_categories]
+
     return render(request, 'inventory/stock_list.html', {
         'categories': categories,
         'stocks': stocks,
         'paginator': paginator,
         'total_count': paginator.count,
+        'total_valuation': total_valuation,
+        'total_units': total_units,
+        'in_stock_count': in_stock_count,
+        'low_stock_count': low_stock_count,
+        'out_of_stock_count': out_of_stock_count,
+        'chart_categories_json': json.dumps(chart_categories),
+        'chart_units_json': json.dumps(chart_units),
+        'chart_valuations_json': json.dumps(chart_valuations),
     })
 
 
