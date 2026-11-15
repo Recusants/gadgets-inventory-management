@@ -1111,6 +1111,9 @@ $(document).on('click', function (e) {
 $(document).on('keydown', function (e) {
   if (e.key === 'Escape') {
     closeSalePrintMenus();
+    if (typeof closeDatabaseRestoreModal === 'function') {
+      closeDatabaseRestoreModal();
+    }
   }
 });
 
@@ -1279,6 +1282,8 @@ function openDatabaseRestoreModal() {
   const m = document.getElementById('dbRestoreModal');
   if (m) {
     m.style.display = 'flex';
+    m.classList.remove('hidden');
+    m.classList.add('flex');
   }
   loadLocalBackups();
 }
@@ -1291,6 +1296,8 @@ function closeDatabaseRestoreModal() {
   const m = document.getElementById('dbRestoreModal');
   if (m) {
     m.style.display = 'none';
+    m.classList.remove('flex');
+    m.classList.add('hidden');
   }
 }
 window.closeDatabaseRestoreModal = closeDatabaseRestoreModal;
@@ -1372,8 +1379,6 @@ function handleDatabaseRestoreSubmit(e) {
         title: 'No Backup Selected',
         text: 'Please choose an existing server backup from the dropdown or select a file (.json, .json.gz, .sqlite3).',
         icon: 'warning',
-        background: '#0a192f',
-        color: '#f8fafc',
         confirmButtonColor: '#2563eb'
       });
     } else {
@@ -1399,21 +1404,19 @@ function handleDatabaseRestoreSubmit(e) {
     title: 'Confirm Database Restore',
     html: `
       <div style="text-align:left; font-size:.85rem; line-height:1.5;">
-        <p style="margin:0 0 8px; color:#cbd5e1;">Target Archive: <strong style="color:#38bdf8; word-break:break-all;">${filename}</strong></p>
-        <p style="margin:0 0 8px; color:#f87171;">Mode: <strong>${modeText}</strong></p>
-        <p style="margin:0; color:#94a3b8; font-size:.78rem;">
+        <p style="margin:0 0 8px; color:#475569;">Target Archive: <strong style="color:#0f172a; word-break:break-all;">${filename}</strong></p>
+        <p style="margin:0 0 8px; color:#e11d48;">Mode: <strong>${modeText}</strong></p>
+        <p style="margin:0; color:#64748b; font-size:.78rem;">
           ${mode === 'overwrite' ? 'All existing application data will be cleanly wiped and replaced with this backup archive without integrity errors.' : 'Records will be merged into the current database.'}
         </p>
       </div>
     `,
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#ef4444',
-    cancelButtonColor: '#334155',
+    confirmButtonColor: '#e11d48',
+    cancelButtonColor: '#64748b',
     confirmButtonText: '<i class="fas fa-rotate mr-1.5"></i> Yes, Restore & Replace',
-    cancelButtonText: 'Cancel',
-    background: '#0a192f',
-    color: '#f8fafc'
+    cancelButtonText: 'Cancel'
   }).then((res) => {
     if (res.isConfirmed) {
       submitRestoreFormData();

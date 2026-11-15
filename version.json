@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.60",
-  "build": "v2.4.60-dev",
-  "commit_count": 60,
+  "version": "v2.4.61",
+  "build": "v2.4.61-dev",
+  "commit_count": 61,
   "commit_hash": "pending",
   "branch": "main",
-  "commit_subject": "Remove top action button group from What's New page header",
-  "updated_at": "2026-11-15 22:18",
-  "last_pushed_at": "2026-11-15 22:18:00"
+  "commit_subject": "Redesign Database Restore modal with clean Apple-minimalist styling and scroll safety",
+  "updated_at": "2026-11-15 22:25",
+  "last_pushed_at": "2026-11-15 22:25:00"
 }
