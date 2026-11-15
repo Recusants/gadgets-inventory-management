@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.25",
-  "build": "v2.4.25-471477a",
-  "commit_count": 25,
-  "commit_hash": "471477a",
+  "version": "v2.4.26",
+  "build": "v2.4.26-e2ace65",
+  "commit_count": 26,
+  "commit_hash": "e2ace65",
   "branch": "main",
-  "commit_subject": "Fix UI layout collapse: restore robust viewport flexbox hierarchy, add topbar sidebar toggle, and fix collapsed sidebar controls",
-  "updated_at": "2026-11-15 16:41",
-  "last_pushed_at": "2026-11-15 16:54:12"
+  "commit_subject": "Declutter header and sidebar: remove duplicate toggle button, clean brand and store hierarchy, add Tailwind color classes, and fix Apple squircle contrast",
+  "updated_at": "2026-11-15 17:25",
+  "last_pushed_at": "2026-11-15 17:27:17"
 }

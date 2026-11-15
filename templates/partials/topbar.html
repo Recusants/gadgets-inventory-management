@@ -3,15 +3,24 @@
   
   <!-- Left Side: Sidebar Toggle (When Collapsed) & Clean Apple Breadcrumbs -->
   <div class="flex items-center space-x-2 text-xs text-slate-400 font-medium">
-    <button id="topbar-sidebar-toggle-btn" 
-            type="button" 
-            class="w-8 h-8 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-900 flex items-center justify-center transition-all focus:outline-none mr-1"
-            title="Toggle Sidebar">
-      <i class="fas fa-bars text-xs"></i>
-    </button>
-    <a href="{% url 'dashboard:index' %}" class="text-slate-400 hover:text-slate-700 transition-colors flex items-center" title="Dashboard Home">
-      <i class="fas fa-home text-xs"></i>
-    </a>
+    {% if 'checkout' in request.path or hide_sidebar %}
+      <a href="{% url 'dashboard:index' %}" 
+         class="px-3 py-1.5 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center space-x-1.5 transition-colors mr-1 shadow-xs"
+         title="Back to Dashboard">
+        <i class="fas fa-arrow-left text-[10px] text-slate-400"></i>
+        <span>Dashboard</span>
+      </a>
+    {% else %}
+      <button id="topbar-sidebar-toggle-btn" 
+              type="button" 
+              class="w-8 h-8 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-900 flex items-center justify-center transition-all focus:outline-none mr-1"
+              title="Toggle Sidebar">
+        <i class="fas fa-bars text-xs"></i>
+      </button>
+      <a href="{% url 'dashboard:index' %}" class="text-slate-400 hover:text-slate-700 transition-colors flex items-center" title="Dashboard Home">
+        <i class="fas fa-home text-xs"></i>
+      </a>
+    {% endif %}
     {% if request.resolver_match.app_name and request.resolver_match.app_name != 'dashboard' %}
       <span class="text-slate-300">/</span>
       <span class="text-slate-500 capitalize font-medium">
