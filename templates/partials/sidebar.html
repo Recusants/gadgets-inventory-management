@@ -317,21 +317,28 @@
           </span>
         {% endif %}
       </a>
+
+      <!-- What's New & Release Updates (In the scrolling at the bottom with soft glow) -->
+      <a href="{% url 'core:whats_new' %}" 
+         title="What's New & Release Updates"
+         data-keywords="whats new updates release notes changelog features improvements"
+         class="sidebar-link whats-new-link flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all group {% if 'whats-new' in request.path %}sidebar-link-active{% endif %}">
+        <div class="flex items-center min-w-0">
+          <div class="w-6 h-6 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-2.5 flex-shrink-0 whats-new-glow">
+            <i class="fas fa-wand-magic-sparkles text-xs text-blue-600"></i>
+          </div>
+          <span class="sidebar-label truncate font-bold text-slate-800 group-hover:text-blue-600">What's New</span>
+        </div>
+        <span class="sidebar-label px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-blue-600 text-white shadow-xs whats-new-badge-glow">
+          New
+        </span>
+      </a>
     </div>
 
   </nav>
 
-  <!-- Sidebar Footer: What's New Button & Software Version Display (Pinned at Bottom) -->
-  <div class="p-3 border-t border-slate-100 flex-shrink-0 space-y-2 bg-white">
-    <!-- What's New Button (At the bottom) -->
-    <a href="{% url 'core:whats_new' %}" 
-       title="What's New & Release Updates"
-       data-keywords="whats new updates release notes changelog features improvements"
-       class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if 'whats-new' in request.path %}sidebar-link-active{% endif %}">
-      <i class="fas fa-sparkles w-4 text-center mr-2.5 flex-shrink-0"></i>
-      <span class="sidebar-label truncate">What's New</span>
-    </a>
-
+  <!-- Sidebar Footer: Software Version Display (Pinned at Bottom) -->
+  <div class="p-3 border-t border-slate-100 flex-shrink-0 bg-white">
     <!-- Software Version Display -->
     <a href="{% url 'core:whats_new' %}" 
        title="Software Version: {{ system_version.version|default:'v2.4.24' }} (Build {{ system_version.commit_hash|default:'main' }})"
@@ -354,5 +361,34 @@
       </span>
     </a>
   </div>
+
+  <style>
+    .whats-new-glow {
+      box-shadow: 0 0 10px rgba(37, 99, 235, 0.45), 0 0 18px rgba(59, 130, 246, 0.25);
+      animation: pulseWhatsNew 2.2s infinite ease-in-out;
+    }
+    .whats-new-badge-glow {
+      box-shadow: 0 0 8px rgba(37, 99, 235, 0.5);
+      animation: pulseBadge 2.2s infinite ease-in-out;
+    }
+    @keyframes pulseWhatsNew {
+      0%, 100% {
+        box-shadow: 0 0 6px rgba(37, 99, 235, 0.35), 0 0 12px rgba(59, 130, 246, 0.15);
+        transform: scale(1);
+      }
+      50% {
+        box-shadow: 0 0 14px rgba(37, 99, 235, 0.7), 0 0 22px rgba(59, 130, 246, 0.4);
+        transform: scale(1.06);
+      }
+    }
+    @keyframes pulseBadge {
+      0%, 100% {
+        box-shadow: 0 0 6px rgba(37, 99, 235, 0.35);
+      }
+      50% {
+        box-shadow: 0 0 12px rgba(37, 99, 235, 0.75);
+      }
+    }
+  </style>
 
 </aside>

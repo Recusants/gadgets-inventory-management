@@ -781,3 +781,8 @@ div#mandatory-setup-modal {
 div#mandatory-setup-modal.hidden {
   display: none !important;
 }
+
+/* Font Awesome 6 Free fallback for fa-sparkles */
+.fa-sparkles:before {
+  content: "\e2ca" !important;
+}
