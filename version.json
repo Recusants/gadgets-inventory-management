@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.57",
-  "build": "v2.4.57-b7c2bc3",
-  "commit_count": 57,
-  "commit_hash": "b7c2bc3",
+  "version": "v2.4.59",
+  "build": "v2.4.59-dev",
+  "commit_count": 59,
+  "commit_hash": "pending",
   "branch": "main",
-  "commit_subject": "Sync version.json",
-  "updated_at": "2026-11-15 22:02",
-  "last_pushed_at": "2026-11-15 22:02:20"
+  "commit_subject": "Widen and balance details modals across products, sales, batches, and expenses",
+  "updated_at": "2026-11-15 22:15",
+  "last_pushed_at": "2026-11-15 22:15:00"
 }

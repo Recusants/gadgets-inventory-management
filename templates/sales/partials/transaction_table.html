@@ -20,7 +20,7 @@
           <td class="py-3 px-4">
             <button type="button" 
                     data-modal-url="{% url 'sales:sale_detail_modal' sale.id %}"
-                    data-modal-size="max-w-xl"
+                    data-modal-size="max-w-3xl"
                     title="View Receipt Details"
                     class="hover:underline font-mono font-black text-blue-700 text-xs focus:outline-none">
               {{ sale.invoice_number }}
@@ -147,7 +147,7 @@
               <!-- Detail Modal Button -->
               <button type="button" 
                       data-modal-url="{% url 'sales:sale_detail_modal' sale.id %}"
-                      data-modal-size="max-w-xl"
+                      data-modal-size="max-w-3xl"
                       title="View Full Receipt Details"
                       class="w-7 h-7 rounded-lg bg-blue-700 hover:bg-blue-800 text-white flex items-center justify-center text-xs shadow-sm transition-all">
                 <i class="fas fa-eye"></i>

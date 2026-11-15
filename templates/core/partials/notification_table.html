@@ -39,7 +39,7 @@
 
             <a href="javascript:void(0)" 
                data-modal-url="{% url 'core:notification_detail_modal' n.pk %}"
-               data-modal-size="max-w-lg"
+               data-modal-size="max-w-2xl"
                title="View Full Details"
                class="font-bold text-slate-900 hover:text-blue-600 transition-colors truncate">
               {{ n.title }}
@@ -74,7 +74,7 @@
             <!-- Details Modal -->
             <button type="button"
                     data-modal-url="{% url 'core:notification_detail_modal' n.pk %}"
-                    data-modal-size="max-w-lg"
+                    data-modal-size="max-w-2xl"
                     title="View Full Notification Details"
                     class="w-7 h-7 rounded-lg bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center text-xs shadow-sm transition-all">
               <i class="fas fa-eye"></i>

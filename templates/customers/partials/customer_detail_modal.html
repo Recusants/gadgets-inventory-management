@@ -1,5 +1,6 @@
 {% load humanize %}
-<div class="p-6">
+<!-- Customer Detail Modal Partial -->
+<div class="p-6" data-preferred-modal-size="max-w-2xl">
   <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700">
     <div class="flex items-center space-x-3">
       <div class="w-10 h-10 rounded-2xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center text-lg shadow-sm">
@@ -17,10 +18,19 @@
 
   <div class="py-4 space-y-4 text-xs">
     
-    <div class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-700 space-y-1">
-      <div class="text-gray-500">Email: <strong class="text-gray-900 dark:text-white">{{ customer.email|default:"Not provided" }}</strong></div>
-      <div class="text-gray-500">Customer since: <strong class="text-gray-900 dark:text-white">{{ customer.created_at|date:"d M Y" }}</strong></div>
-      <div class="text-gray-500">Total Purchases: <strong class="text-sky-600 dark:text-sky-400">{{ customer.sales.count|intcomma }} orders</strong></div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+      <div>
+        <span class="text-slate-400 text-[10px] uppercase font-bold block">Email</span>
+        <span class="font-bold text-slate-900 truncate block mt-0.5">{{ customer.email|default:"Not provided" }}</span>
+      </div>
+      <div>
+        <span class="text-slate-400 text-[10px] uppercase font-bold block">Customer Since</span>
+        <span class="font-bold text-slate-900 block mt-0.5">{{ customer.created_at|date:"d M Y" }}</span>
+      </div>
+      <div>
+        <span class="text-slate-400 text-[10px] uppercase font-bold block">Total Purchases</span>
+        <span class="font-bold text-blue-700 block mt-0.5">{{ customer.sales.count|intcomma }} orders</span>
+      </div>
     </div>
 
     <!-- Purchase History Table -->

@@ -202,6 +202,12 @@ const ModalManager = {
       headers: { 'X-Requested-With': 'XMLHttpRequest' },
       success: (html) => {
         this.container.html(html);
+        const preferredSize = this.container.find('[data-preferred-modal-size]').first().attr('data-preferred-modal-size') || 
+                              this.container.children().first().attr('data-preferred-modal-size');
+        if (preferredSize) {
+          const dialog = this.shell.find('.modal-dialog');
+          dialog.removeClass('max-w-xs max-w-sm max-w-md max-w-lg max-w-xl max-w-2xl max-w-3xl max-w-4xl max-w-5xl max-w-6xl max-w-7xl max-w-full').addClass(preferredSize);
+        }
       },
       error: (xhr) => {
         const res = xhr.responseJSON || {};

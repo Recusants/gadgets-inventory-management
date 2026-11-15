@@ -112,7 +112,7 @@
             {% if notif.product %}
               <div @click="open = false" 
                    data-modal-url="{% url 'inventory:product_detail_modal' notif.product.id %}"
-                   data-modal-size="max-w-3xl"
+                   data-modal-size="max-w-4xl"
                    class="block p-3 hover:bg-slate-50 cursor-pointer transition-colors">
             {% else %}
               <a href="{% if notif.link_url %}{{ notif.link_url }}{% else %}{% url 'core:notification_list' %}{% endif %}" 
