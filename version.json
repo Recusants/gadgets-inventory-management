@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.32",
-  "build": "v2.4.32-03af2b9",
-  "commit_count": 32,
-  "commit_hash": "03af2b9",
+  "version": "v2.4.33",
+  "build": "v2.4.33-63a51e6",
+  "commit_count": 33,
+  "commit_hash": "63a51e6",
   "branch": "main",
-  "commit_subject": "Add feature search in left sidebar and command palette matching Clarity Retail LAN",
-  "updated_at": "2026-11-15 18:06",
-  "last_pushed_at": "2026-11-15 18:06:45"
+  "commit_subject": "Enforce strict role-based access control (RBAC) on UI buttons, search features, and view endpoints",
+  "updated_at": "2026-11-15 18:37",
+  "last_pushed_at": "2026-11-15 18:37:43"
 }

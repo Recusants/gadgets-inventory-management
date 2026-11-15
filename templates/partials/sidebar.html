@@ -288,14 +288,16 @@
       </a>
       {% endif %}
 
-      <!-- What's New -->
-      <a href="{% url 'core:whats_new' %}" 
-         title="What's New"
-         data-keywords="whats new updates release notes changelog features improvements"
-         class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if 'whats-new' in request.path %}sidebar-link-active{% endif %}">
-        <i class="fas fa-sparkles w-4 text-center mr-2.5 flex-shrink-0"></i>
-        <span class="sidebar-label truncate">What's New</span>
+      {% if request.user.is_admin_role or request.user.is_superuser %}
+      <!-- Users -->
+      <a href="{% url 'accounts:user_list' %}" 
+         title="User Management"
+         data-keywords="users accounts staff passwords roles cashiers managers permissions access"
+         class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if 'accounts/users' in request.path %}sidebar-link-active{% endif %}">
+        <i class="fas fa-user-shield w-4 text-center mr-2.5 flex-shrink-0"></i>
+        <span class="sidebar-label truncate">Users</span>
       </a>
+      {% endif %}
 
       <!-- Notifications (Part of Scrolling Menu) -->
       <a href="{% url 'core:notification_list' %}" 
@@ -312,25 +314,24 @@
           </span>
         {% endif %}
       </a>
-
-      {% if request.user.is_admin_role or request.user.is_superuser %}
-      <!-- Users -->
-      <a href="{% url 'accounts:user_list' %}" 
-         title="User Management"
-         data-keywords="users accounts staff passwords roles cashiers managers permissions access"
-         class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if 'accounts/users' in request.path %}sidebar-link-active{% endif %}">
-        <i class="fas fa-user-shield w-4 text-center mr-2.5 flex-shrink-0"></i>
-        <span class="sidebar-label truncate">Users</span>
-      </a>
-      {% endif %}
     </div>
 
   </nav>
 
-  <!-- Sidebar Footer: Software Version Only -->
-  <div class="p-3 border-t border-slate-100 flex-shrink-0 bg-white">
+  <!-- Sidebar Footer: What's New Button & Software Version Display (Pinned at Bottom) -->
+  <div class="p-3 border-t border-slate-100 flex-shrink-0 space-y-2 bg-white">
+    <!-- What's New Button (At the bottom) -->
     <a href="{% url 'core:whats_new' %}" 
-       title="Software Version: {{ system_version.version|default:'v2.4.24' }}"
+       title="What's New & Release Updates"
+       data-keywords="whats new updates release notes changelog features improvements"
+       class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if 'whats-new' in request.path %}sidebar-link-active{% endif %}">
+      <i class="fas fa-sparkles w-4 text-center mr-2.5 flex-shrink-0"></i>
+      <span class="sidebar-label truncate">What's New</span>
+    </a>
+
+    <!-- Software Version Display -->
+    <a href="{% url 'core:whats_new' %}" 
+       title="Software Version: {{ system_version.version|default:'v2.4.24' }} (Build {{ system_version.commit_hash|default:'main' }})"
        class="sidebar-footer-card p-2.5 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-100 flex items-center justify-between transition-colors group">
       <div class="flex items-center space-x-2.5 min-w-0">
         <div class="w-7 h-7 rounded-xl bg-slate-200/70 text-slate-600 text-xs flex items-center justify-center flex-shrink-0 group-hover:text-blue-600 transition-colors">

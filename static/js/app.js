@@ -644,7 +644,7 @@ function filterSidebarLinks() {
     }
   }
 
-  const links = document.querySelectorAll('#app-sidebar nav .sidebar-link');
+  const links = document.querySelectorAll('#app-sidebar .sidebar-link');
   const groups = document.querySelectorAll('#app-sidebar nav > div:not(#sidebar-filter-empty)');
   const posBtn = document.getElementById('sidebar-pos-terminal-btn');
 
