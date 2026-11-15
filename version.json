@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.54",
-  "build": "v2.4.54-23376e1",
-  "commit_count": 54,
-  "commit_hash": "23376e1",
+  "version": "v2.4.56",
+  "build": "v2.4.56-dev",
+  "commit_count": 56,
+  "commit_hash": "pending",
   "branch": "main",
-  "commit_subject": "Move POS button inside scrollable nav, style with navy blue text and icon, and align collapsed sidebar items",
-  "updated_at": "2026-11-15 21:57",
-  "last_pushed_at": "2026-11-15 21:57:37"
+  "commit_subject": "Format sidebar brand header with darker trade name and grayed branch name below",
+  "updated_at": "2026-11-15 22:02",
+  "last_pushed_at": "2026-11-15 22:02:00"
 }

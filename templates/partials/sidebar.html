@@ -8,17 +8,20 @@
       <div id="sidebar-brand-logo" 
            class="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-sm shadow-xs flex-shrink-0 overflow-hidden" 
            style="background-color: #0a192f; color: #ffffff;"
-           title="{{ company_settings.company_name|default:'Gadget Store' }} — {{ company_settings.branch_name|default:'Main Branch' }}">
+           title="{{ company_settings.company_name|default:'AVAIL TECHNOLOGIES' }} — {{ company_settings.branch_name|default:'Main Branch' }}">
         {% if company_settings.logo %}
           <img src="{{ company_settings.logo.url }}" alt="Logo" class="w-full h-full object-contain p-1">
         {% else %}
           <i class="fas fa-store text-blue-400 text-xs"></i>
         {% endif %}
       </div>
-      <div class="truncate sidebar-label min-w-0 flex-1 block text-left" 
-           title="{{ company_settings.company_name|default:'Gadget Store' }} — {{ company_settings.branch_name|default:'Main Branch' }}">
-        <div class="text-xs font-bold text-slate-900 truncate leading-tight group-hover:text-blue-600 transition-colors">
-          {{ company_settings.company_name|default:"Gadget Store" }} • {{ company_settings.branch_name|default:"Main Branch" }}
+      <div class="sidebar-label min-w-0 flex-1 flex flex-col justify-center text-left" 
+           title="{{ company_settings.company_name|default:'AVAIL TECHNOLOGIES' }} — {{ company_settings.branch_name|default:'Main Branch' }}">
+        <div class="text-xs font-bold text-slate-900 truncate leading-tight tracking-tight">
+          {{ company_settings.company_name|default:"AVAIL TECHNOLOGIES" }}
+        </div>
+        <div class="text-[10px] font-semibold text-slate-500 truncate leading-tight tracking-wider uppercase mt-0.5">
+          {{ company_settings.branch_name|default:"Main Branch" }}
         </div>
       </div>
     </div>
