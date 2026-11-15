@@ -2,11 +2,11 @@
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
   "version": "v2.4.50",
-  "build": "v2.4.50-f15ad56",
+  "build": "v2.4.50-1ef821b",
   "commit_count": 50,
-  "commit_hash": "f15ad56",
+  "commit_hash": "1ef821b",
   "branch": "main",
   "commit_subject": "Make sidebar brand header clickable to toggle collapse/expand and remove page link",
   "updated_at": "2026-11-15 21:29",
-  "last_pushed_at": "2026-11-15 21:29:00"
+  "last_pushed_at": "2026-11-15 21:30:03"
 }
