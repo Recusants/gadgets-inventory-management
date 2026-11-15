@@ -32,16 +32,18 @@ else
     echo "[OK] Same image as last boot — skipping migrations and collectstatic."
 fi
 
-echo "Running database migrations..."
-python manage.py migrate --noinput --settings=config.settings.docker_prod
+SETTINGS="${DJANGO_SETTINGS_MODULE:-config.settings.docker_prod}"
+
+echo "Running database migrations ($SETTINGS)..."
+python manage.py migrate --noinput --settings="$SETTINGS"
 echo "[OK] Migrations up to date!"
 
 if [ "$NEEDS_SETUP" = true ]; then
     if [ "$DEBUG" = "True" ] || [ "$DEBUG" = "true" ] || [ "$DEBUG" = "1" ]; then
         echo "Dev mode: skipping collectstatic for instant startup"
     else
-        echo "Collecting static files..."
-        python manage.py collectstatic --noinput --no-post-process --settings=config.settings.docker_prod --ignore "*.ts" --ignore "*.scss" --ignore "*.less" --ignore "*.md"
+        echo "Collecting static files ($SETTINGS)..."
+        python manage.py collectstatic --noinput --no-post-process --settings="$SETTINGS" --ignore "*.ts" --ignore "*.scss" --ignore "*.less" --ignore "*.md"
         echo "[OK] Static files collected!"
     fi
 

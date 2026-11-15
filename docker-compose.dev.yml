@@ -1,47 +1,58 @@
+# docker-compose.dev.yml — Gadget Store System
+# Dev Environment: Live Reload with PostgreSQL (matching Clarity Retail LAN)
+# Web Port: 8001 | DB Port: 5433
 
 services:
+
   db:
     image: postgres:16-alpine
-    container_name: twentyone_void_dev_db
+    container_name: dev-gadget-store-postgres
     environment:
-      POSTGRES_DB: twentyone_void_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgrespassword
-    volumes:
-      - postgres_dev_data:/var/lib/postgresql/data
+      POSTGRES_DB: ${DEV_DB_NAME:-${DB_NAME:-gadget_store_dev_db}}
+      POSTGRES_USER: ${DEV_DB_USER:-${DB_USER:-gadget_dev_user}}
+      POSTGRES_PASSWORD: ${DEV_DB_PASSWORD:-${DB_PASSWORD:-dev_password}}
     ports:
-      - "5433:5432"
+      - "${DEV_DB_PORT:-5433}:5432"
+    volumes:
+      - dev_gadget_store_postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d twentyone_void_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${DEV_DB_USER:-${DB_USER:-gadget_dev_user}} -d ${DEV_DB_NAME:-${DB_NAME:-gadget_store_dev_db}}"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
 
   web:
     build:
       context: .
-      dockerfile: Dockerfile.dev
-    container_name: twentyone_void_dev_web
-    command: >
-      sh -c "python manage.py wait_for_db --settings=config.settings.docker_dev 2>/dev/null || sleep 3 &&
-             python manage.py migrate --settings=config.settings.docker_dev &&
-             python manage.py runserver 0.0.0.0:8000 --settings=config.settings.docker_dev"
+      dockerfile: Dockerfile
+    container_name: dev-gadget-store-app
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "${DEV_HTTP_PORT:-8001}:8000"
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.docker_dev
+      DEBUG: "True"
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-gadget-store-docker-12345}
+      DB_NAME: ${DEV_DB_NAME:-${DB_NAME:-gadget_store_dev_db}}
+      DB_USER: ${DEV_DB_USER:-${DB_USER:-gadget_dev_user}}
+      DB_PASSWORD: ${DEV_DB_PASSWORD:-${DB_PASSWORD:-dev_password}}
+      DB_HOST: db
+      DB_PORT: "5432"
+      POSTGRES_DB: ${DEV_DB_NAME:-${DB_NAME:-gadget_store_dev_db}}
+      POSTGRES_USER: ${DEV_DB_USER:-${DB_USER:-gadget_dev_user}}
+      POSTGRES_PASSWORD: ${DEV_DB_PASSWORD:-${DB_PASSWORD:-dev_password}}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
     volumes:
       - .:/app
-    ports:
-      - "8000:8000"
-    environment:
-      - DJANGO_SETTINGS_MODULE=config.settings.docker_dev
-      - DJANGO_SECRET_KEY=docker-dev-secret-key-21void-technologies-live
-      - POSTGRES_DB=twentyone_void_db
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgrespassword
-      - POSTGRES_HOST=db
-      - POSTGRES_PORT=5432
-      - SENTRY_DSN=${SENTRY_DSN:-}
+      - /app/__pycache__
     depends_on:
       db:
         condition: service_healthy
+    restart: unless-stopped
+    command: python manage.py runserver 0.0.0.0:8000
 
 volumes:
-  postgres_dev_data:
+  dev_gadget_store_postgres_data:

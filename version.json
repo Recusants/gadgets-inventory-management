@@ -2,11 +2,11 @@
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
   "version": "v2.4.17",
-  "build": "v2.4.17-5b6180f",
-  "commit_count": 18,
-  "commit_hash": "5b6180f",
+  "build": "v2.4.17-4d2fbdc",
+  "commit_count": 19,
+  "commit_hash": "4d2fbdc",
   "branch": "main",
-  "commit_subject": "Improved pipeline",
-  "updated_at": "2026-11-15 14:24",
-  "last_pushed_at": "2026-11-15 14:24:42"
+  "commit_subject": "Add ZIMRA fiscalisation module, What's New changelog, and email login backend",
+  "updated_at": "2026-11-15 14:39",
+  "last_pushed_at": "2026-11-15 14:39:08"
 }
