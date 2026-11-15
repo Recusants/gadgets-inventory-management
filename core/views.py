@@ -688,6 +688,15 @@ def load_all_search_features(request):
                 'badge': None,
             },
             {
+                'name': 'Business Analytics & Performance Graphs',
+                'description': 'Visual comprehension graphs: sales trends, category shares, payment mix and stock health',
+                'link': safe_reverse('reports:business_graphs', '/reports/graphs/'),
+                'icon': 'fas fa-chart-line',
+                'category': 'Reports',
+                'keywords': ['business graphs', 'graphics', 'visual', 'charts', 'revenue trends', 'profit velocity', 'analytics', 'statistics'],
+                'badge': 'Visual',
+            },
+            {
                 'name': 'Export Sales to Excel',
                 'description': 'Download comprehensive sales ledger spreadsheet in .xlsx format',
                 'link': safe_reverse('reports:export_sales_excel', '/reports/export/sales/excel/'),

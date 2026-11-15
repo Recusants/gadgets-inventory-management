@@ -220,10 +220,19 @@
       <!-- Reports -->
       <a href="/reports/" 
          title="Reports & Analytics"
-         data-keywords="reports analytics profit excel pdf sales audit performance charts margin"
-         class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if request.resolver_match.app_name == 'reports' %}sidebar-link-active{% endif %}">
+         data-keywords="reports analytics profit excel pdf sales audit performance ledger margin"
+         class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if request.resolver_match.app_name == 'reports' and not 'graphs' in request.path %}sidebar-link-active{% endif %}">
         <i class="fas fa-chart-pie w-4 text-center mr-2.5 flex-shrink-0"></i>
         <span class="sidebar-label truncate">Reports</span>
+      </a>
+
+      <!-- Business Graphs -->
+      <a href="{% url 'reports:business_graphs' %}" 
+         title="Business Graphics & Visualizations"
+         data-keywords="business graphics charts graphs visual trends revenue profit performance velocity analytics"
+         class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if 'graphs' in request.path %}sidebar-link-active{% endif %}">
+        <i class="fas fa-chart-line w-4 text-center mr-2.5 flex-shrink-0"></i>
+        <span class="sidebar-label truncate">Business Graphs</span>
       </a>
       {% endif %}
 

@@ -7,7 +7,7 @@ from decimal import Decimal
 import io
 from datetime import datetime, timedelta
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.db.models import Sum, Count, Q, F
 from django.utils import timezone
 
@@ -533,3 +533,142 @@ def export_inventory_pdf(request):
     response = HttpResponse(buffer.getvalue(), content_type='application/pdf')
     response['Content-Disposition'] = f'inline; filename="{filename}"'
     return response
+
+
+# ==============================================================================
+# BUSINESS VISUALIZATION & PERFORMANCE GRAPHS
+# ==============================================================================
+
+@supervisor_or_above_required
+def business_graphs_view(request):
+    """
+    Renders the Business Analytics & Graphs visualization hub.
+    Displays interactive Chart.js charts: Daily Revenue Trend, Category Share,
+    Payment Methods Mix, and Inventory Health Distribution.
+    """
+    company_settings = CompanySetting.get_settings()
+    return render(request, 'reports/business_graphs_page.html', {
+        'company_settings': company_settings,
+        'page_title': 'Business Analytics & Graphs',
+    })
+
+
+@supervisor_or_above_required
+def ajax_reports_chart_data(request):
+    """
+    Returns aggregated JSON data for business comprehension graphs:
+    1. Daily Sales & Profit Trend (Revenue vs FIFO Profit)
+    2. Revenue by Product Category (Top 6)
+    3. Payment Methods Breakdown
+    4. Inventory Health & Valuation
+    """
+    days_param = request.GET.get('days', '30')
+    try:
+        num_days = max(1, min(365, int(days_param)))
+    except (ValueError, TypeError):
+        num_days = 30
+
+    today = timezone.now().date()
+    start_date = today - timedelta(days=(num_days - 1))
+
+    # 1. Daily Sales & Profit Trend
+    sales_qs = Sale.objects.filter(date_sold__gte=start_date, date_sold__lte=today)
+    daily_sales = (
+        sales_qs.values('date_sold')
+        .annotate(
+            total_rev=Sum('total_amount'),
+            total_prof=Sum('total_profit'),
+            sales_count=Count('id')
+        )
+        .order_by('date_sold')
+    )
+    rev_map = {item['date_sold'].strftime('%d %b'): float(item['total_rev'] or 0) for item in daily_sales}
+    prof_map = {item['date_sold'].strftime('%d %b'): float(item['total_prof'] or 0) for item in daily_sales}
+
+    labels_trend = []
+    revenue_trend = []
+    profit_trend = []
+    for i in range(num_days):
+        day = start_date + timedelta(days=i)
+        lbl = day.strftime('%d %b')
+        labels_trend.append(lbl)
+        revenue_trend.append(rev_map.get(lbl, 0.0))
+        profit_trend.append(prof_map.get(lbl, 0.0))
+
+    total_revenue_period = sum(revenue_trend)
+    total_profit_period = sum(profit_trend)
+    avg_daily_revenue = (total_revenue_period / num_days) if num_days > 0 else 0
+
+    # Total expenses in period
+    exp_qs = Expense.objects.filter(date__gte=start_date, date__lte=today)
+    total_expenses_period = float(exp_qs.aggregate(tot=Sum('amount'))['tot'] or 0)
+    net_operating_profit = total_profit_period - total_expenses_period
+
+    # 2. Revenue by Category (Top 6)
+    cat_sales = (
+        SaleItem.objects.filter(sale__date_sold__gte=start_date, sale__date_sold__lte=today)
+        .values('product__category__name')
+        .annotate(total=Sum('total_price'))
+        .order_by('-total')[:6]
+    )
+    cat_labels = [(c['product__category__name'] or 'General') for c in cat_sales if c.get('total')]
+    cat_data = [float(c['total'] or 0) for c in cat_sales if c.get('total')]
+    if not cat_labels:
+        cat_labels = ['No Sales Yet']
+        cat_data = [0]
+
+    # 3. Payment Methods Breakdown
+    pm_sales = (
+        sales_qs.values('payment_method')
+        .annotate(total=Sum('total_amount'), count=Count('id'))
+        .order_by('-total')
+    )
+    pm_labels = [p['payment_method'] for p in pm_sales if p.get('total')]
+    pm_data = [float(p['total'] or 0) for p in pm_sales if p.get('total')]
+    if not pm_labels:
+        pm_labels = ['Cash']
+        pm_data = [0]
+
+    # 4. Stock Health Distribution
+    stocks = Stock.objects.select_related('product').all()
+    in_stock = stocks.filter(quantity_available__gt=5).count()
+    low_stock = stocks.filter(quantity_available__gt=0, quantity_available__lte=5).count()
+    out_stock = stocks.filter(quantity_available__lte=0).count()
+
+    total_units_in_stock = sum(s.quantity_available for s in stocks)
+    total_inventory_retail_value = float(sum(s.quantity_available * s.selling_price for s in stocks))
+
+    return JsonResponse({
+        'status': 'success',
+        'summary': {
+            'total_revenue': total_revenue_period,
+            'total_profit': total_profit_period,
+            'total_expenses': total_expenses_period,
+            'net_profit': net_operating_profit,
+            'avg_daily': avg_daily_revenue,
+            'top_category': cat_labels[0] if cat_labels and cat_labels[0] != 'No Sales Yet' else 'N/A',
+            'low_stock_count': low_stock,
+            'out_of_stock_count': out_stock,
+            'in_stock_count': in_stock,
+            'total_units_stock': total_units_in_stock,
+            'inventory_retail_value': total_inventory_retail_value,
+            'days': num_days
+        },
+        'trend': {
+            'labels': labels_trend,
+            'revenue': revenue_trend,
+            'profit': profit_trend,
+        },
+        'categories': {
+            'labels': cat_labels,
+            'data': cat_data,
+        },
+        'payments': {
+            'labels': pm_labels,
+            'data': pm_data,
+        },
+        'stock_health': {
+            'labels': ['Healthy Stock (>5)', 'Low Stock (1-5)', 'Depleted (0)'],
+            'data': [in_stock, low_stock, out_stock],
+        }
+    })

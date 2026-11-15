@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.36",
-  "build": "v2.4.36-2990f46",
-  "commit_count": 36,
-  "commit_hash": "2990f46",
+  "version": "v2.4.37",
+  "build": "v2.4.37-88ac7f9",
+  "commit_count": 37,
+  "commit_hash": "88ac7f9",
   "branch": "main",
-  "commit_subject": "Add print dropdown with POS, A5, A4, and Share PDF options to transactions table",
-  "updated_at": "2026-11-15 19:00",
-  "last_pushed_at": "2026-11-15 19:00:36"
+  "commit_subject": "Streamline notifications center table and add details modal",
+  "updated_at": "2026-11-15 19:09",
+  "last_pushed_at": "2026-11-15 19:09:06"
 }
