@@ -117,6 +117,7 @@ def expense_table_partial(request):
     })
 
 
+@supervisor_or_above_required
 def expense_add_modal(request):
     """Return Record Expense modal HTML partial."""
     categories = ExpenseCategory.objects.all().order_by('name')
@@ -127,6 +128,7 @@ def expense_add_modal(request):
 
 
 @require_POST
+@supervisor_or_above_required
 def expense_create(request):
     """Records a new business expense."""
     title = request.POST.get('title', '').strip()
@@ -180,6 +182,7 @@ def expense_create(request):
     )
 
 
+@supervisor_or_above_required
 def expense_edit_modal(request, pk):
     """Return Edit Expense modal HTML partial."""
     expense = get_object_or_404(Expense.objects.select_related('category'), pk=pk)
@@ -191,6 +194,7 @@ def expense_edit_modal(request, pk):
 
 
 @require_POST
+@supervisor_or_above_required
 def expense_update(request, pk):
     """Updates an existing business expense."""
     expense = get_object_or_404(Expense, pk=pk)
@@ -233,6 +237,7 @@ def expense_update(request, pk):
 
 
 @require_POST
+@manager_or_admin_required
 def expense_delete(request, pk):
     """Deletes an expense record."""
     expense = get_object_or_404(Expense, pk=pk)
@@ -289,12 +294,14 @@ def expense_category_table_partial(request):
     })
 
 
+@supervisor_or_above_required
 def expense_category_add_modal(request):
     """Return Add Expense Category modal partial."""
     return render(request, 'expenses/categories/category_add_modal.html')
 
 
 @require_POST
+@supervisor_or_above_required
 def expense_category_create(request):
     """Creates a new expense category."""
     name = request.POST.get('name', '').strip()
@@ -324,6 +331,7 @@ def expense_category_create(request):
     )
 
 
+@supervisor_or_above_required
 def expense_category_edit_modal(request, pk):
     """Return Edit Expense Category modal partial."""
     cat = get_object_or_404(ExpenseCategory, pk=pk)
@@ -331,6 +339,7 @@ def expense_category_edit_modal(request, pk):
 
 
 @require_POST
+@supervisor_or_above_required
 def expense_category_update(request, pk):
     """Updates an expense category."""
     cat = get_object_or_404(ExpenseCategory, pk=pk)
@@ -360,6 +369,7 @@ def expense_category_update(request, pk):
 
 
 @require_POST
+@manager_or_admin_required
 def expense_category_delete(request, pk):
     """Deletes an expense category."""
     cat = get_object_or_404(ExpenseCategory, pk=pk)

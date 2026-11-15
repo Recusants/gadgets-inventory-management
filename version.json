@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.31",
-  "build": "v2.4.31-cc7aff0",
-  "commit_count": 31,
-  "commit_hash": "cc7aff0",
+  "version": "v2.4.32",
+  "build": "v2.4.32-03af2b9",
+  "commit_count": 32,
+  "commit_hash": "03af2b9",
   "branch": "main",
-  "commit_subject": "Highlight active sidebar link prominently and feature outstanding POS button",
-  "updated_at": "2026-11-15 17:50",
-  "last_pushed_at": "2026-11-15 17:50:44"
+  "commit_subject": "Add feature search in left sidebar and command palette matching Clarity Retail LAN",
+  "updated_at": "2026-11-15 18:06",
+  "last_pushed_at": "2026-11-15 18:06:45"
 }

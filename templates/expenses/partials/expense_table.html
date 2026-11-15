@@ -51,6 +51,7 @@
                     class="w-7 h-7 rounded-lg bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center text-xs shadow-sm transition-all">
               <i class="fas fa-eye"></i>
             </button>
+            {% if request.user.is_supervisor_role %}
             <button type="button"
                     data-modal-url="{% url 'expenses:expense_edit_modal' exp.pk %}"
                     data-modal-size="max-w-lg"
@@ -58,6 +59,8 @@
                     class="w-7 h-7 rounded-lg bg-blue-700 hover:bg-blue-800 text-white flex items-center justify-center text-xs shadow-sm transition-all">
               <i class="fas fa-pen"></i>
             </button>
+            {% endif %}
+            {% if request.user.is_manager_role %}
             <button type="button"
                     data-action-url="{% url 'expenses:expense_delete' exp.pk %}"
                     data-confirm-title="Delete Expense?"
@@ -67,6 +70,7 @@
                     class="btn-delete-confirm w-7 h-7 rounded-lg bg-blue-900 hover:bg-[#0a192f] text-white flex items-center justify-center text-xs shadow-sm transition-all">
               <i class="fas fa-trash-alt"></i>
             </button>
+            {% endif %}
           </div>
         </td>
       </tr>

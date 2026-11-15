@@ -48,6 +48,7 @@
               <span class="font-black text-slate-900 font-mono text-sm">
                 {{ company_settings.currency_symbol|default:'$' }}{{ stock.selling_price|floatformat:2|intcomma }}
               </span>
+              {% if request.user.is_supervisor_role %}
               <button type="button" 
                       data-modal-url="{% url 'inventory:stock_price_modal' stock.id %}"
                       data-modal-size="max-w-md"
@@ -56,6 +57,7 @@
                 <i class="fas fa-pen text-[9px]"></i>
                 <span>Edit</span>
               </button>
+              {% endif %}
             </div>
           </td>
 

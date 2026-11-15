@@ -134,6 +134,7 @@ def report_index_view(request):
 # EXCEL EXPORT (openpyxl)
 # ==============================================================================
 
+@supervisor_or_above_required
 def export_sales_excel(request):
     """Export filtered sales report to stylized Excel (.xlsx)."""
     filter_type = request.GET.get('period', 'month')
@@ -254,6 +255,7 @@ def export_sales_excel(request):
     return response
 
 
+@supervisor_or_above_required
 def export_inventory_excel(request):
     """Export complete current inventory valuation to Excel (.xlsx)."""
     products = Product.objects.select_related('category', 'stock').all().order_by('category__name', 'name')
@@ -355,6 +357,7 @@ def export_inventory_excel(request):
 # PDF REPORTS (ReportLab Offline Engine)
 # ==============================================================================
 
+@supervisor_or_above_required
 def export_sales_pdf(request):
     """Generate executive sales summary PDF."""
     filter_type = request.GET.get('period', 'month')
@@ -450,6 +453,7 @@ def export_sales_pdf(request):
     return response
 
 
+@supervisor_or_above_required
 def export_inventory_pdf(request):
     """Generate executive inventory valuation PDF."""
     products = Product.objects.select_related('category', 'stock').all().order_by('category__name', 'name')

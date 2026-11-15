@@ -540,6 +540,10 @@ def load_all_search_features(request):
             return fallback
 
     user = request.user
+    is_supervisor = user.is_superuser or (callable(getattr(user, 'is_supervisor_role', None)) and user.is_supervisor_role())
+    is_manager = user.is_superuser or (callable(getattr(user, 'is_manager_role', None)) and user.is_manager_role())
+    is_admin = user.is_superuser or (callable(getattr(user, 'is_admin_role', None)) and user.is_admin_role())
+
     features = [
         # DASHBOARD & POS
         {
@@ -591,7 +595,7 @@ def load_all_search_features(request):
         'badge': None,
     })
 
-    if getattr(user, 'is_supervisor_role', False) or user.is_superuser:
+    if is_supervisor:
         features.extend([
             {
                 'name': 'Stock & Pricing',
@@ -703,7 +707,7 @@ def load_all_search_features(request):
             },
         ])
 
-    if getattr(user, 'is_manager_role', False) or user.is_superuser:
+    if is_manager:
         features.extend([
             {
                 'name': 'ZIMRA Fiscalisation Dashboard',
@@ -774,7 +778,7 @@ def load_all_search_features(request):
         },
     ])
 
-    if getattr(user, 'is_admin_role', False) or user.is_superuser:
+    if is_admin:
         features.append({
             'name': 'User Management & Permissions',
             'description': 'Manage staff user accounts, cashier permissions, roles, and password resets',

@@ -71,6 +71,7 @@
                 <i class="fas fa-eye"></i>
               </button>
 
+              {% if request.user.is_manager_role %}
               <!-- Delete / Void -->
               <button type="button" 
                       data-delete-url="{% url 'sales:sale_delete' sale.id %}"
@@ -80,6 +81,7 @@
                       class="w-7 h-7 rounded-lg bg-blue-900 hover:bg-[#0a192f] text-white flex items-center justify-center text-xs shadow-sm transition-all">
                 <i class="fas fa-trash-alt"></i>
               </button>
+              {% endif %}
             </div>
           </td>
 

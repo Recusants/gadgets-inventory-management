@@ -31,6 +31,7 @@
           </td>
           <td class="py-3 px-4 whitespace-nowrap text-center">
             <div class="inline-flex items-center justify-center space-x-1.5">
+              {% if request.user.is_supervisor_role %}
               <button type="button" 
                       data-modal-url="{% url 'inventory:category_edit_modal' cat.id %}"
                       data-modal-size="max-w-md"
@@ -38,6 +39,8 @@
                       title="Edit Category">
                 <i class="fas fa-pen"></i>
               </button>
+              {% endif %}
+              {% if request.user.is_manager_role %}
               <button type="button" 
                       data-action-url="{% url 'inventory:category_delete' cat.id %}"
                       data-confirm-title="Delete Category?"
@@ -47,6 +50,7 @@
                       title="Delete Category">
                 <i class="fas fa-trash-alt"></i>
               </button>
+              {% endif %}
             </div>
           </td>
         </tr>

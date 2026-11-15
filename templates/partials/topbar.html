@@ -185,6 +185,7 @@
         <a href="{% url 'inventory:product_list' %}" class="flex items-center px-3.5 py-2 text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-medium">
           <i class="fas fa-boxes w-4 mr-2 text-slate-400"></i> Product Catalog
         </a>
+        {% if request.user.is_manager_role %}
         <a href="{% url 'core:settings' %}" class="flex items-center px-3.5 py-2 text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-medium">
           <i class="fas fa-sliders-h w-4 mr-2 text-slate-400"></i> Settings
         </a>
@@ -192,6 +193,7 @@
         <a href="{% url 'core:system' %}" class="flex items-center px-3.5 py-2 text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-medium">
           <i class="fas fa-server w-4 mr-2 text-slate-400"></i> System Status
         </a>
+        {% endif %}
         {% if request.user.is_authenticated %}
           <div class="border-t border-slate-100 my-1"></div>
           <form action="{% url 'accounts:logout' %}" method="POST" class="m-0 p-0">

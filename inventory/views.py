@@ -490,11 +490,13 @@ def category_table_partial(request):
     })
 
 
+@supervisor_or_above_required
 def category_add_modal(request):
     """Return Add Category modal HTML partial."""
     return render(request, 'inventory/categories/category_add_modal.html')
 
 
+@supervisor_or_above_required
 def category_edit_modal(request, pk):
     """Return Edit Category modal HTML partial."""
     category = get_object_or_404(Category, pk=pk)
@@ -505,6 +507,7 @@ def category_edit_modal(request, pk):
 
 
 @require_POST
+@supervisor_or_above_required
 def category_create(request):
     """Creates a new category from raw POST data."""
     is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
@@ -533,6 +536,7 @@ def category_create(request):
 
 
 @require_POST
+@supervisor_or_above_required
 def category_update(request, pk):
     """Updates an existing category."""
     category = get_object_or_404(Category, pk=pk)
@@ -671,6 +675,7 @@ def batch_detail_modal(request, pk):
     return render(request, 'inventory/partials/batch_detail_modal.html', {'batch': batch})
 
 
+@supervisor_or_above_required
 def batch_quantity_edit_modal(request, pk):
     """Returns modal to edit/adjust batch quantities."""
     batch = get_object_or_404(StockBatch.objects.select_related('product'), pk=pk)
@@ -678,6 +683,7 @@ def batch_quantity_edit_modal(request, pk):
 
 
 @require_POST
+@supervisor_or_above_required
 def batch_quantity_update(request, pk):
     """
     Updates quantities for a specific batch and recalculates available stock.
@@ -868,12 +874,14 @@ def supplier_table_partial(request):
     })
 
 
+@supervisor_or_above_required
 def supplier_add_modal(request):
     """Return Add Supplier modal partial."""
     return render(request, 'inventory/suppliers/supplier_add_modal.html')
 
 
 @require_POST
+@supervisor_or_above_required
 def supplier_create(request):
     """Creates a new supplier."""
     errors = validate_supplier(request.POST)
@@ -895,6 +903,7 @@ def supplier_create(request):
     )
 
 
+@supervisor_or_above_required
 def supplier_edit_modal(request, pk):
     """Return Edit Supplier modal partial."""
     supplier = get_object_or_404(Supplier, pk=pk)
@@ -902,6 +911,7 @@ def supplier_edit_modal(request, pk):
 
 
 @require_POST
+@supervisor_or_above_required
 def supplier_update(request, pk):
     """Updates an existing supplier."""
     supplier = get_object_or_404(Supplier, pk=pk)
@@ -925,6 +935,7 @@ def supplier_update(request, pk):
 
 
 @require_POST
+@manager_or_admin_required
 def supplier_delete(request, pk):
     """Deletes a supplier."""
     supplier = get_object_or_404(Supplier, pk=pk)

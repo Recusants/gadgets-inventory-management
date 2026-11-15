@@ -19,6 +19,7 @@
       </div>
     </div>
 
+    {% if request.user.is_supervisor_role %}
     <div class="mt-3 sm:mt-0 flex items-center space-x-2.5 flex-shrink-0">
       <button type="button" 
               data-modal-url="{% url 'inventory:receive_invoice_modal' %}"
@@ -27,6 +28,7 @@
         <i class="fas fa-file-invoice-dollar mr-2 text-xs"></i> Receive Stock / Invoice
       </button>
     </div>
+    {% endif %}
   </div>
 
   <!-- Batches Table Card -->
@@ -129,6 +131,7 @@
                           class="w-7 h-7 rounded-lg bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center text-xs shadow-sm transition-all">
                     <i class="fas fa-eye"></i>
                   </button>
+                  {% if request.user.is_supervisor_role %}
                   <button type="button" 
                           data-modal-url="{% url 'inventory:batch_quantity_edit_modal' b.id %}"
                           data-modal-size="max-w-md"
@@ -136,6 +139,7 @@
                           class="w-7 h-7 rounded-lg bg-blue-800 hover:bg-blue-900 text-white flex items-center justify-center text-xs shadow-sm transition-all">
                     <i class="fas fa-boxes-stacked"></i>
                   </button>
+                  {% endif %}
                 </div>
               </td>
             </tr>

@@ -44,6 +44,7 @@
                       title="Edit Customer">
                 <i class="far fa-edit text-sm"></i>
               </button>
+              {% if request.user.is_manager_role %}
               <button type="button" 
                       data-delete-url="{% url 'sales:customer_delete' cust.id %}"
                       data-item-title="{{ cust.name }}"
@@ -52,6 +53,7 @@
                       title="Delete Customer">
                 <i class="far fa-trash-alt text-sm"></i>
               </button>
+              {% endif %}
             </div>
           </td>
         </tr>

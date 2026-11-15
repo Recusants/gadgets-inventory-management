@@ -22,6 +22,7 @@
     </div>
 
     <!-- Export Buttons (Shades of blue & white text) -->
+    {% if request.user.is_supervisor_role %}
     <div class="mt-3 sm:mt-0 flex items-center space-x-2 flex-shrink-0" x-data="{ exportMenu: false }">
       <div class="relative">
         <button @click="exportMenu = !exportMenu" 
@@ -59,6 +60,7 @@
         </div>
       </div>
     </div>
+    {% endif %}
   </div>
 
   <!-- Filter Period Presets & Custom Date Range Toolbar -->
