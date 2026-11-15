@@ -60,19 +60,7 @@
     </button>
   </div>
 
-  <!-- POS Terminal Action (Styled as other sidebar items with navy blue text) -->
-  <div class="sidebar-pos-container px-3 pt-1 pb-1 flex-shrink-0">
-    <a href="/sales/checkout/" 
-       id="sidebar-pos-terminal-btn"
-       title="POS Terminal / Instant Checkout"
-       data-keywords="pos point of sale checkout cash register terminal sell invoice slip"
-       class="sidebar-link sidebar-pos-link flex items-center px-3 py-2 rounded-xl text-xs font-bold transition-all {% if 'checkout' in request.path %}sidebar-link-active{% endif %}">
-      <i class="fas fa-cash-register w-4 text-center mr-2.5 flex-shrink-0"></i>
-      <span class="sidebar-label truncate font-bold text-[#0a192f]">POS Terminal</span>
-    </a>
-  </div>
-
-  <!-- Navigation Links -->
+  <!-- Navigation Links (Scrollable) -->
   <nav class="flex-1 px-3 py-2 space-y-4 overflow-y-auto custom-scrollbar">
     
     <!-- No matching menu items alert -->
@@ -95,6 +83,16 @@
       <div class="sidebar-label px-3 pt-1 pb-1 text-[10px] font-semibold text-slate-400 tracking-wider uppercase">
         Daily Operation
       </div>
+
+      <!-- POS Terminal Checkout -->
+      <a href="/sales/checkout/" 
+         id="sidebar-pos-terminal-btn"
+         title="POS Terminal / Instant Checkout"
+         data-keywords="pos point of sale checkout cash register terminal sell invoice slip"
+         class="sidebar-link sidebar-pos-link flex items-center px-3 py-2 rounded-xl text-xs font-bold transition-all {% if 'checkout' in request.path %}sidebar-link-active{% endif %}">
+        <i class="fas fa-cash-register w-4 text-center mr-2.5 flex-shrink-0"></i>
+        <span class="sidebar-label truncate font-bold text-[#0a192f]">POS Terminal</span>
+      </a>
 
       <!-- Dashboard -->
       <a href="{% url 'dashboard:index' %}" 

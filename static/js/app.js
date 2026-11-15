@@ -643,12 +643,10 @@ function filterSidebarLinks() {
 
   const links = document.querySelectorAll('#app-sidebar .sidebar-link');
   const groups = document.querySelectorAll('#app-sidebar nav > div:not(#sidebar-filter-empty)');
-  const posBtn = document.getElementById('sidebar-pos-terminal-btn');
 
   if (!query) {
     links.forEach(el => el.style.display = '');
     groups.forEach(g => g.style.display = '');
-    if (posBtn) posBtn.style.display = '';
     if (emptyNotice) emptyNotice.classList.add('hidden');
     return;
   }
@@ -664,15 +662,6 @@ function filterSidebarLinks() {
     link.style.display = matches ? 'flex' : 'none';
     if (matches) totalVisible++;
   });
-
-  // Filter POS button
-  if (posBtn) {
-    const posText = (posBtn.textContent || '').toLowerCase();
-    const posKeywords = 'pos point of sale checkout cashier till terminal instant checkout receipt register f2';
-    const posMatches = posText.includes(query) || posKeywords.includes(query);
-    posBtn.style.display = posMatches ? 'flex' : 'none';
-    if (posMatches) totalVisible++;
-  }
 
   // Filter group headers
   groups.forEach(group => {

@@ -206,17 +206,32 @@ html.sidebar-is-collapsed #app-sidebar #sidebar-toggle-btn:hover,
 }
 
 html.sidebar-is-collapsed #app-sidebar nav,
-#app-sidebar.collapsed #app-sidebar nav {
+#app-sidebar.collapsed nav {
   padding-left: 0 !important;
   padding-right: 0 !important;
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
 }
 html.sidebar-is-collapsed #app-sidebar nav::-webkit-scrollbar,
-#app-sidebar.collapsed #app-sidebar nav::-webkit-scrollbar {
+#app-sidebar.collapsed nav::-webkit-scrollbar,
+html.sidebar-is-collapsed #app-sidebar nav.custom-scrollbar::-webkit-scrollbar,
+#app-sidebar.collapsed nav.custom-scrollbar::-webkit-scrollbar,
+html.sidebar-is-collapsed #app-sidebar .custom-scrollbar::-webkit-scrollbar,
+#app-sidebar.collapsed .custom-scrollbar::-webkit-scrollbar {
   display: none !important;
   width: 0 !important;
   height: 0 !important;
+}
+
+html.sidebar-is-collapsed #app-sidebar #sidebar-search-collapsed-btn,
+#app-sidebar.collapsed #sidebar-search-collapsed-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 12px !important;
+  margin: 0 auto !important;
 }
 
 html.sidebar-is-collapsed #app-sidebar .sidebar-link,
@@ -348,14 +363,6 @@ a.sidebar-pos-link.sidebar-link-active i {
 }
 
 /* Collapsed Sidebar POS Button */
-html.sidebar-is-collapsed #app-sidebar .sidebar-pos-container,
-#app-sidebar.collapsed .sidebar-pos-container {
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-  display: flex !important;
-  justify-content: center !important;
-}
-
 html.sidebar-is-collapsed #app-sidebar .sidebar-pos-link,
 #app-sidebar.collapsed .sidebar-pos-link {
   width: 38px !important;
