@@ -1,0 +1,388 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Receipt #{{ sale.invoice_number }} — {{ company_settings.company_name|default:"Gadget Store" }}</title>
+  
+  <link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f5f6f8;
+      color: #0f172a;
+      line-height: 1.5;
+      font-size: 13px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .no-print-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .toolbar-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 16px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border: 1px solid transparent;
+      text-decoration: none;
+    }
+    .toolbar-btn-primary {
+      background: #0f172a;
+      color: #ffffff;
+    }
+    .toolbar-btn-primary:hover {
+      background: #1e293b;
+    }
+    .toolbar-btn-secondary {
+      background: #ffffff;
+      color: #334155;
+      border-color: #cbd5e1;
+    }
+    .toolbar-btn-secondary:hover {
+      background: #f8fafc;
+      color: #0f172a;
+    }
+
+    .invoice-wrapper {
+      max-width: 800px;
+      margin: 32px auto;
+      background: #ffffff;
+      border-radius: 20px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 20px -2px rgba(0,0,0,0.05);
+      padding: 48px;
+    }
+
+    /* Header */
+    .invoice-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 24px;
+      margin-bottom: 24px;
+    }
+
+    .brand-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+    }
+    .brand-meta {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    .doc-badge {
+      text-align: right;
+    }
+    .doc-type {
+      font-size: 18px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.3px;
+    }
+    .doc-number {
+      font-family: monospace;
+      font-size: 14px;
+      font-weight: 700;
+      color: #0284c7;
+      margin-top: 2px;
+    }
+
+    /* Info Grid */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+    .info-card {
+      background: #f8fafc;
+      border: 1px solid #f1f5f9;
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .info-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 700;
+      color: #94a3b8;
+      margin-bottom: 6px;
+    }
+    .info-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1e293b;
+    }
+    .info-sub {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    /* Table */
+    .invoice-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+    }
+    .invoice-table th {
+      background: #f8fafc;
+      padding: 10px 14px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 700;
+      color: #64748b;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .invoice-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 12.5px;
+      color: #1e293b;
+    }
+    .invoice-table tr:last-child td {
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    /* Summary Section */
+    .summary-section {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 32px;
+    }
+    .summary-box {
+      width: 300px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 16px 20px;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      padding: 4px 0;
+      color: #475569;
+    }
+    .summary-row.total-row {
+      border-top: 2px solid #0f172a;
+      margin-top: 8px;
+      padding-top: 10px;
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    /* Footer */
+    .invoice-footer {
+      border-top: 1px solid #f1f5f9;
+      padding-top: 20px;
+      text-align: center;
+      color: #94a3b8;
+      font-size: 11px;
+    }
+
+    /* Print Media Rules */
+    @media print {
+      body {
+        background: #ffffff !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .invoice-wrapper {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 24px 28px !important;
+        margin: 0 auto !important;
+        max-width: 100% !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Non-Printing Top Controls Toolbar -->
+  <div class="no-print no-print-toolbar">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span style="font-size:13px; font-weight:700; color:#0f172a;">A4 Invoice Preview</span>
+      <span style="font-size:11px; color:#64748b; font-family:monospace;">#{{ sale.invoice_number }}</span>
+    </div>
+
+    <div style="display:flex; align-items:center; gap:8px;">
+      <button type="button" onclick="window.print()" class="toolbar-btn toolbar-btn-primary">
+        <i class="fas fa-print"></i>
+        <span>Print Document</span>
+      </button>
+
+      <a href="{% url 'sales:receipt_pdf' sale.id %}" target="_blank" class="toolbar-btn toolbar-btn-secondary">
+        <i class="fas fa-file-pdf text-rose-500"></i>
+        <span>Download PDF</span>
+      </a>
+
+      <button type="button" onclick="window.close()" class="toolbar-btn toolbar-btn-secondary">
+        <i class="fas fa-times"></i>
+        <span>Close</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- A4 Printable Invoice Sheet -->
+  <div class="invoice-wrapper">
+    
+    <!-- Header -->
+    <div class="invoice-header">
+      <div>
+        {% if company_settings.logo %}
+          <div style="margin-bottom: 10px;">
+            <img src="{{ company_settings.logo.url }}" alt="Store Logo" style="max-height: 48px; max-width: 180px; object-fit: contain;">
+          </div>
+        {% endif %}
+        <div class="brand-title">{{ company_settings.company_name|default:"Gadget Store System" }}</div>
+        <div class="brand-meta">
+          {% if company_settings.address %}{{ company_settings.address }}<br>{% endif %}
+          {% if company_settings.phone %}Tel: {{ company_settings.phone }}{% endif %}
+          {% if company_settings.email %} &bull; Email: {{ company_settings.email }}{% endif %}
+        </div>
+      </div>
+
+      <div class="doc-badge">
+        <div class="doc-type">TAX INVOICE</div>
+        <div class="doc-number">#{{ sale.invoice_number }}</div>
+        <div style="font-size:11px; color:#64748b; margin-top:4px;">Date: {{ sale.date_sold|date:"d M Y" }}</div>
+      </div>
+    </div>
+
+    <!-- Metadata Grid -->
+    <div class="info-grid">
+      <!-- Billed To -->
+      <div class="info-card">
+        <div class="info-label">Customer Details</div>
+        <div class="info-value">{{ sale.customer.name|default:"Walk-in Customer" }}</div>
+        {% if sale.customer.phone %}
+          <div class="info-sub"><i class="fas fa-phone mr-1 text-slate-400"></i>{{ sale.customer.phone }}</div>
+        {% endif %}
+        {% if sale.customer.email %}
+          <div class="info-sub"><i class="fas fa-envelope mr-1 text-slate-400"></i>{{ sale.customer.email }}</div>
+        {% endif %}
+      </div>
+
+      <!-- Transaction Info -->
+      <div class="info-card">
+        <div class="info-label">Payment &amp; Cashier</div>
+        <div class="info-value">Method: {{ sale.payment_method|default:"Cash" }}</div>
+        <div class="info-sub">Served By: {{ sale.user.get_full_name|default:sale.user.username }}</div>
+        <div class="info-sub">Status: <span style="color:#059669; font-weight:700;">PAID IN FULL</span></div>
+      </div>
+    </div>
+
+    <!-- Itemized Table -->
+    <table class="invoice-table">
+      <thead>
+        <tr>
+          <th style="text-align:left; width:50%;">Description / Item</th>
+          <th style="text-align:center; width:15%;">Quantity</th>
+          <th style="text-align:right; width:15%;">Unit Price</th>
+          <th style="text-align:right; width:20%;">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in sale.items.all %}
+          <tr>
+            <td>
+              <div style="font-weight:700; color:#0f172a;">{{ item.product.name }}</div>
+              {% if item.serial_number %}
+                <div style="font-family:monospace; font-size:10px; color:#0284c7; margin-top:2px;">
+                  S/N: {{ item.serial_number }}
+                </div>
+              {% endif %}
+            </td>
+            <td style="text-align:center; font-weight:600;">{{ item.quantity|intcomma }}</td>
+            <td style="text-align:right; font-family:monospace;">{{ company_settings.currency_symbol|default:'$' }}{{ item.unit_price|floatformat:2|intcomma }}</td>
+            <td style="text-align:right; font-family:monospace; font-weight:700; color:#0f172a;">
+              {{ company_settings.currency_symbol|default:'$' }}{{ item.subtotal|floatformat:2|intcomma }}
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td>{{ sale.product.name }}</td>
+            <td style="text-align:center;">1</td>
+            <td style="text-align:right;">{{ company_settings.currency_symbol|default:'$' }}{{ sale.amount_sold|floatformat:2|intcomma }}</td>
+            <td style="text-align:right; font-weight:700;">{{ company_settings.currency_symbol|default:'$' }}{{ sale.amount_sold|floatformat:2|intcomma }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Totals Summary -->
+    <div class="summary-section">
+      <div class="summary-box">
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span style="font-family:monospace; font-weight:600;">{{ company_settings.currency_symbol|default:'$' }}{{ sale.total_amount|floatformat:2|intcomma }}</span>
+        </div>
+        <div class="summary-row">
+          <span>Tax / VAT</span>
+          <span style="font-family:monospace; font-weight:600;">{{ company_settings.currency_symbol|default:'$' }}0.00</span>
+        </div>
+        <div class="summary-row total-row">
+          <span>Total Paid</span>
+          <span style="font-family:monospace;">{{ company_settings.currency_symbol|default:'$' }}{{ sale.total_amount|floatformat:2|intcomma }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Note -->
+    <div class="invoice-footer">
+      <p style="font-weight:600; color:#475569;">Thank you for your business!</p>
+      <p style="margin-top:4px;">{{ company_settings.tagline|default:"Computer Hardware & Electronic Gadgets Sales" }}</p>
+    </div>
+
+  </div>
+
+  {% if auto_print %}
+  <script>
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        window.print();
+      }, 350);
+    });
+  </script>
+  {% endif %}
+
+</body>
+</html>

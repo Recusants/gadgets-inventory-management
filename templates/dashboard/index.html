@@ -221,7 +221,7 @@
                 POS Terminal
               </td>
               <td class="py-3.5 px-4 font-mono text-[11px] text-slate-500">
-                {{ s.date_sold|date:"d/m/Y H:i" }}
+                {{ s.date_sold|date:"d/m/Y" }}
               </td>
               <td class="py-3.5 px-4 text-right font-semibold text-slate-900 font-sans">
                 {{ company_settings.currency_symbol|default:'$' }}{{ s.total_amount|floatformat:2|intcomma }}

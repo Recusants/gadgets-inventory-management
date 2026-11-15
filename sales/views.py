@@ -295,7 +295,9 @@ def sale_create(request):
             data={
                 "sale_id": sale.pk,
                 "invoice_number": sale.invoice_number,
-                "receipt_url": f"/sales/{sale.pk}/receipt/"
+                "receipt_url": f"/sales/{sale.pk}/receipt/",
+                "a4_url": f"/sales/{sale.pk}/a4/",
+                "thermal_url": f"/sales/{sale.pk}/thermal-print/",
             }
         )
     return redirect('sales:sale_list')
@@ -629,6 +631,27 @@ def sale_thermal_print_view(request, pk):
             message=result.get("message", "Print server rejected job. Ensure Windows Print Server is running on port 9101."),
             status=500
         )
+
+
+def sale_a4_print_view(request, pk):
+    """
+    Renders an Apple minimalist printable A4 / A5 / Thermal invoice for a sale.
+    Suitable for browser print dialog (Ctrl+P / window.print()).
+    """
+    sale = get_object_or_404(
+        Sale.objects.select_related('customer', 'user').prefetch_related('items__product', 'items__batch'),
+        pk=pk
+    )
+    company_settings = CompanySetting.get_settings()
+    auto_print = request.GET.get('auto_print') == '1'
+    paper_size = request.GET.get('size', 'a4').lower()
+
+    return render(request, 'sales/receipt_a4.html', {
+        'sale': sale,
+        'company_settings': company_settings,
+        'auto_print': auto_print,
+        'paper_size': paper_size,
+    })
 
 
 # ==============================================================================

@@ -12,10 +12,11 @@ urlpatterns = [
     path('create/', views.sale_create, name='sale_create'),
     path('<int:pk>/delete/', views.sale_delete, name='sale_delete'),
 
-    # POS Checkout & PDF Receipt & Thermal Hardware Printing
+    # POS Checkout & PDF Receipt & Thermal Hardware Printing & A4 Invoice
     path('checkout/', views.pos_checkout_view, name='checkout'),
     path('<int:pk>/receipt/', views.receipt_pdf_view, name='receipt_pdf'),
     path('<int:pk>/thermal-print/', views.sale_thermal_print_view, name='thermal_print'),
+    path('<int:pk>/a4/', views.sale_a4_print_view, name='receipt_a4'),
 
     # Customer management routes
     path('customers/', views.customer_list_view, name='customer_list'),

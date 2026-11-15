@@ -86,3 +86,19 @@ class PrinterModelTests(TestCase):
         self.assertEqual(def_res.status_code, 200)
         p.refresh_from_db()
         self.assertTrue(p.is_default)
+
+    def test_sale_a4_print_view(self):
+        from sales.models import Sale, PaymentMethod, Customer
+        cust = Customer.objects.create(name="Test Customer", phone="0771234567")
+        sale = Sale.objects.create(
+            user=self.user,
+            customer=cust,
+            payment_method=PaymentMethod.CASH,
+            total_amount=120.00
+        )
+        self.client.force_login(self.user)
+        res = self.client.get(f'/sales/{sale.id}/a4/?auto_print=1')
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, sale.invoice_number)
+        self.assertContains(res, "TAX INVOICE")
+        self.assertContains(res, "window.print()")

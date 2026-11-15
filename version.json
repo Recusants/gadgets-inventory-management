@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.22",
-  "build": "v2.4.22-996d585",
-  "commit_count": 22,
-  "commit_hash": "996d585",
+  "version": "v2.4.23",
+  "build": "v2.4.23-48a3192",
+  "commit_count": 23,
+  "commit_hash": "48a3192",
   "branch": "main",
-  "commit_subject": "Apply strict navy blue, light blue, and white UI theme across all templates and styles",
-  "updated_at": "2026-11-15 15:54",
-  "last_pushed_at": "2026-11-15 16:11:03"
+  "commit_subject": "Remove splash screen and apply Apple minimalist design system inspired by Fixoria dashboard",
+  "updated_at": "2026-11-15 16:13",
+  "last_pushed_at": "2026-11-15 16:21:17"
 }

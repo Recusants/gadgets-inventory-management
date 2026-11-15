@@ -255,13 +255,23 @@
           </div>
         </div>
 
+        <!-- Checkout & Print Preference Bar -->
+        <div class="px-3 py-1.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 flex-shrink-0">
+          <span class="flex items-center">
+            <i class="fas fa-print text-slate-400 mr-1.5 text-[10px]"></i>
+            <span>Default Print:</span>
+            <b id="pos-last-print-label" class="ml-1 text-slate-800 font-semibold">POS Print (80mm)</b>
+          </span>
+          <span class="text-[10px] text-slate-400">4 options on checkout</span>
+        </div>
+
         <!-- Checkout Button (Pinned at the Very Bottom in Sleek Apple Dark) -->
         <div class="p-3 bg-slate-50 border-t border-slate-100 flex-shrink-0">
           <button type="button" 
                   id="btn-complete-sale" 
                   class="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-black active:scale-[0.98] text-white text-xs font-semibold shadow-xs transition-all flex items-center justify-center space-x-2 cursor-pointer">
             <i class="fas fa-check-circle text-emerald-400 text-sm"></i>
-            <span>Check Out &amp; Print Receipt</span>
+            <span>Check Out</span>
           </button>
         </div>
 
@@ -1154,51 +1164,166 @@
         data: payload,
         headers: { 'X-Requested-With': 'XMLHttpRequest' },
         success: function (res) {
-          $btn.prop('disabled', false).html('<i class="fas fa-shopping-cart text-base mr-2"></i><span>Check Out &amp; Print Receipt</span>');
+          $btn.prop('disabled', false).html('<i class="fas fa-check-circle text-emerald-400 mr-2"></i><span>Check Out</span>');
           if (res.icon === 'success' || res.status === 'success') {
             clearPosState(); // Immediately purge session storage on successful transaction
             const saleId = res.data ? res.data.sale_id : null;
-            const receiptUrl = res.data ? res.data.receipt_url : null;
+            const receiptUrl = res.data ? res.data.receipt_url : (`/sales/${saleId}/receipt/`);
+            const a4Url = res.data ? res.data.a4_url : (`/sales/${saleId}/a4/`);
+            const thermalUrl = res.data ? res.data.thermal_url : (`/sales/${saleId}/thermal-print/`);
             const inv = res.data ? res.data.invoice_number : '';
+
+            // Retrieve last used print option (Default: 'pos')
+            const lastPrintOption = localStorage.getItem('pos_last_print_option') || 'pos';
+
+            function getConfirmBtnLabel(opt) {
+              if (opt === 'pos') return '<i class="fas fa-receipt mr-1.5"></i> Print POS Slip';
+              if (opt === 'pdf') return '<i class="fas fa-file-pdf mr-1.5"></i> Open PDF';
+              if (opt === 'a4') return '<i class="fas fa-print mr-1.5"></i> Print A4 Invoice';
+              return '<i class="fas fa-check mr-1.5"></i> Done (Next Sale)';
+            }
 
             Swal.fire({
               title: 'Sale Completed!',
               html: `
-                <div class="space-y-3 text-left">
-                  <p class="text-xs text-slate-600">Transaction recorded successfully with FIFO batch deduction.<br>Invoice: <b class="text-blue-600 font-mono text-sm">${inv}</b></p>
-                  <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs flex items-center justify-between">
-                    <span class="text-slate-700 font-semibold"><i class="fas fa-print text-cyan-600 mr-1.5"></i>Thermal Slip Hardware</span>
-                    <button type="button" id="btn-swal-thermal-print" class="px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs shadow transition-colors">
-                      <i class="fas fa-receipt mr-1"></i> Print Slip
-                    </button>
+                <div class="text-left space-y-4">
+                  <div class="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+                    <div>
+                      <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Transaction Confirmed</div>
+                      <div class="text-sm font-mono font-bold text-slate-900 mt-0.5">Invoice #${inv}</div>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                      Paid &amp; Recorded
+                    </span>
+                  </div>
+
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-2">Select Print Output Format:</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5" id="pos-print-options-group">
+                      
+                      <!-- 1. POS Print -->
+                      <label class="pos-print-card relative p-3 rounded-2xl border cursor-pointer transition-all flex items-start space-x-3 ${lastPrintOption === 'pos' ? 'border-slate-900 bg-slate-50/80 shadow-xs ring-1 ring-slate-900' : 'border-slate-200 hover:border-slate-300 bg-white'}">
+                        <input type="radio" name="pos_print_choice" value="pos" class="mt-1 text-slate-900 focus:ring-0" ${lastPrintOption === 'pos' ? 'checked' : ''}>
+                        <div class="min-w-0 flex-1">
+                          <div class="flex items-center space-x-1.5">
+                            <i class="fas fa-receipt text-emerald-600 text-xs"></i>
+                            <span class="text-xs font-bold text-slate-900">POS Print</span>
+                          </div>
+                          <p class="text-[11px] text-slate-400 mt-0.5 leading-tight">80mm Hardware Slip</p>
+                        </div>
+                      </label>
+
+                      <!-- 2. PDF Receipt -->
+                      <label class="pos-print-card relative p-3 rounded-2xl border cursor-pointer transition-all flex items-start space-x-3 ${lastPrintOption === 'pdf' ? 'border-slate-900 bg-slate-50/80 shadow-xs ring-1 ring-slate-900' : 'border-slate-200 hover:border-slate-300 bg-white'}">
+                        <input type="radio" name="pos_print_choice" value="pdf" class="mt-1 text-slate-900 focus:ring-0" ${lastPrintOption === 'pdf' ? 'checked' : ''}>
+                        <div class="min-w-0 flex-1">
+                          <div class="flex items-center space-x-1.5">
+                            <i class="fas fa-file-pdf text-rose-500 text-xs"></i>
+                            <span class="text-xs font-bold text-slate-900">PDF</span>
+                          </div>
+                          <p class="text-[11px] text-slate-400 mt-0.5 leading-tight">Download PDF Slip</p>
+                        </div>
+                      </label>
+
+                      <!-- 3. A4 Invoice -->
+                      <label class="pos-print-card relative p-3 rounded-2xl border cursor-pointer transition-all flex items-start space-x-3 ${lastPrintOption === 'a4' ? 'border-slate-900 bg-slate-50/80 shadow-xs ring-1 ring-slate-900' : 'border-slate-200 hover:border-slate-300 bg-white'}">
+                        <input type="radio" name="pos_print_choice" value="a4" class="mt-1 text-slate-900 focus:ring-0" ${lastPrintOption === 'a4' ? 'checked' : ''}>
+                        <div class="min-w-0 flex-1">
+                          <div class="flex items-center space-x-1.5">
+                            <i class="fas fa-print text-sky-500 text-xs"></i>
+                            <span class="text-xs font-bold text-slate-900">A4</span>
+                          </div>
+                          <p class="text-[11px] text-slate-400 mt-0.5 leading-tight">Full-Page Office Invoice</p>
+                        </div>
+                      </label>
+
+                      <!-- 4. No Print -->
+                      <label class="pos-print-card relative p-3 rounded-2xl border cursor-pointer transition-all flex items-start space-x-3 ${lastPrintOption === 'none' ? 'border-slate-900 bg-slate-50/80 shadow-xs ring-1 ring-slate-900' : 'border-slate-200 hover:border-slate-300 bg-white'}">
+                        <input type="radio" name="pos_print_choice" value="none" class="mt-1 text-slate-900 focus:ring-0" ${lastPrintOption === 'none' ? 'checked' : ''}>
+                        <div class="min-w-0 flex-1">
+                          <div class="flex items-center space-x-1.5">
+                            <i class="fas fa-ban text-slate-400 text-xs"></i>
+                            <span class="text-xs font-bold text-slate-900">No Print</span>
+                          </div>
+                          <p class="text-[11px] text-slate-400 mt-0.5 leading-tight">Proceed to Next Sale</p>
+                        </div>
+                      </label>
+
+                    </div>
                   </div>
                 </div>
               `,
-              icon: 'success',
               showCancelButton: true,
-              confirmButtonColor: '#2563eb',
-              cancelButtonColor: '#64748b',
-              confirmButtonText: '<i class="fas fa-file-pdf mr-1.5"></i> PDF Receipt',
-              cancelButtonText: 'Next Sale &rarr;',
+              confirmButtonColor: '#0f172a',
+              cancelButtonColor: '#94a3b8',
+              confirmButtonText: getConfirmBtnLabel(lastPrintOption),
+              cancelButtonText: 'Skip',
               background: '#ffffff',
               color: '#0f172a',
-              customClass: { popup: 'rounded-2xl shadow-2xl border border-slate-200' },
+              customClass: {
+                popup: 'rounded-[24px] shadow-2xl border border-slate-100 max-w-lg w-full',
+                confirmButton: 'rounded-xl px-5 py-2.5 font-semibold text-xs',
+                cancelButton: 'rounded-xl px-4 py-2.5 font-medium text-xs'
+              },
               didOpen: () => {
-                $('#btn-swal-thermal-print').on('click', function() {
-                  const $pbtn = $(this);
-                  $pbtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Printing...');
-                  $.get(`/sales/${saleId}/thermal-print/`, function(pres) {
-                    $pbtn.html('<i class="fas fa-check mr-1"></i> Printed!').addClass('bg-[#0a192f] text-white').removeClass('bg-sky-600');
-                  }).fail(function(pxhr) {
-                    const msg = pxhr.responseJSON ? pxhr.responseJSON.message : 'Print failed. Ensure Windows Print Server is running on port 9101.';
-                    alert(msg);
-                    $pbtn.prop('disabled', false).html('<i class="fas fa-receipt mr-1"></i> Retry Print');
-                  });
+                const $popup = $(Swal.getPopup());
+                $popup.find('.pos-print-card').on('click', function() {
+                  const $card = $(this);
+                  const $radio = $card.find('input[type="radio"]');
+                  $radio.prop('checked', true);
+
+                  $popup.find('.pos-print-card')
+                    .removeClass('border-slate-900 bg-slate-50/80 shadow-xs ring-1 ring-slate-900')
+                    .addClass('border-slate-200 bg-white');
+
+                  $card
+                    .removeClass('border-slate-200 bg-white')
+                    .addClass('border-slate-900 bg-slate-50/80 shadow-xs ring-1 ring-slate-900');
+
+                  const chosen = $radio.val();
+                  Swal.getConfirmButton().innerHTML = getConfirmBtnLabel(chosen);
                 });
               }
             }).then((result) => {
-              if (result.isConfirmed && receiptUrl) {
-                window.open(receiptUrl, '_blank');
+              const selectedOption = $('input[name="pos_print_choice"]:checked').val() || lastPrintOption;
+              localStorage.setItem('pos_last_print_option', selectedOption);
+
+              if (result.isConfirmed) {
+                if (selectedOption === 'pos') {
+                  // Trigger thermal slip hardware print
+                  $.get(thermalUrl, function(pres) {
+                    Swal.fire({
+                      title: 'Receipt Printed',
+                      text: pres.message || 'Slip sent to thermal printer successfully.',
+                      icon: 'success',
+                      timer: 1500,
+                      showConfirmButton: false
+                    }).then(() => {
+                      window.location.reload();
+                    });
+                  }).fail(function(pxhr) {
+                    const msg = pxhr.responseJSON ? pxhr.responseJSON.message : 'Print failed. Ensure Windows Print Server is running on port 9101.';
+                    Swal.fire({
+                      title: 'POS Print Notice',
+                      text: msg + ' Would you like to open PDF receipt instead?',
+                      icon: 'warning',
+                      showCancelButton: true,
+                      confirmButtonColor: '#0f172a',
+                      confirmButtonText: 'Open PDF',
+                      cancelButtonText: 'Next Sale'
+                    }).then((r) => {
+                      if (r.isConfirmed && receiptUrl) {
+                        window.open(receiptUrl, '_blank');
+                      }
+                      window.location.reload();
+                    });
+                  });
+                  return;
+                } else if (selectedOption === 'pdf' && receiptUrl) {
+                  window.open(receiptUrl, '_blank');
+                } else if (selectedOption === 'a4' && a4Url) {
+                  window.open(a4Url + '?auto_print=1', '_blank');
+                }
               }
               window.location.reload();
             });
@@ -1207,7 +1332,7 @@
           }
         },
         error: function (xhr) {
-          $btn.prop('disabled', false).html('<i class="fas fa-shopping-cart text-base mr-2"></i><span>Check Out &amp; Print Receipt</span>');
+          $btn.prop('disabled', false).html('<i class="fas fa-check-circle text-emerald-400 mr-2"></i><span>Check Out</span>');
           let errTitle = 'Transaction Error';
           let errMsg = 'Failed to process sale. Please verify stock.';
           try {
@@ -1230,6 +1355,19 @@
         }
       });
     });
+
+    // Function to keep the print preference label synced with localStorage
+    function updatePrintPrefBadge() {
+      const pref = localStorage.getItem('pos_last_print_option') || 'pos';
+      const labels = {
+        'pos': 'POS Print (80mm)',
+        'pdf': 'PDF Slip',
+        'a4': 'A4 Invoice',
+        'none': 'No Print'
+      };
+      $('#pos-last-print-label').text(labels[pref] || 'POS Print (80mm)');
+    }
+    updatePrintPrefBadge();
 
     // Restore persisted cart state safely on page load
     loadPosState();
