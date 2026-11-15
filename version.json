@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.48",
-  "build": "v2.4.48-76e9bfc",
-  "commit_count": 48,
-  "commit_hash": "76e9bfc",
+  "version": "v2.4.49",
+  "build": "v2.4.49-067a536",
+  "commit_count": 49,
+  "commit_hash": "067a536",
   "branch": "main",
-  "commit_subject": "Add complete data backup and restore mechanism compatible with Clarity Retail LAN",
-  "updated_at": "2026-11-15 21:15",
-  "last_pushed_at": "2026-11-15 21:15:00"
+  "commit_subject": "Redesign What's New view into clean editorial document layout with natural bullet points",
+  "updated_at": "2026-11-15 21:23",
+  "last_pushed_at": "2026-11-15 21:23:00"
 }

@@ -4,167 +4,193 @@
 {% block title %}What's New & Release Changelog — Clarity Retail{% endblock %}
 
 {% block content %}
-<div class="h-full flex flex-col overflow-y-auto custom-scrollbar p-2 sm:p-4 bg-white">
-  <div class="max-w-5xl mx-auto w-full space-y-6 pb-20">
+<div class="h-full flex flex-col overflow-y-auto custom-scrollbar p-3 sm:p-6 bg-slate-50">
+  <div class="max-w-4xl mx-auto w-full space-y-6 pb-24">
     
-    <!-- Header with Breadcrumbs & Action Buttons -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b-2 border-black gap-4">
-      <div class="space-y-1">
-        <div class="flex items-center space-x-2 text-xs font-black text-black uppercase tracking-wider">
-          <i class="fas fa-bullhorn text-cyan-500"></i>
-          <span>Release Telemetry & Feature Updates</span>
+    <!-- Top Header & Breadcrumbs -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-slate-200 gap-4">
+      <div>
+        <div class="flex items-center space-x-2 text-[11px] font-bold text-blue-600 uppercase tracking-wider mb-1">
+          <i class="fas fa-sparkles text-xs"></i>
+          <span>Release Notes &amp; Updates</span>
         </div>
-        <h1 class="text-3xl font-black tracking-tight text-black flex items-center">
+        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
           What's New in Clarity Retail
         </h1>
-        <p class="text-xs font-bold text-slate-800">
-          Changelog, system optimizations, and feature rollouts recorded in lockstep with every production release.
+        <p class="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">
+          Detailed feature release notes, system optimizations, and stability improvements.
         </p>
       </div>
 
-      <div class="flex items-center space-x-3 flex-shrink-0">
+      <div class="flex items-center space-x-2.5 flex-shrink-0">
         <button type="button" 
                 onclick="toggleRawUpdatesModal()" 
-                class="inline-flex items-center px-3.5 py-2 rounded-xl text-xs font-black bg-white text-black border-2 border-black hover:bg-slate-100 transition-all shadow-sm">
-          <i class="fas fa-file-alt mr-2 text-cyan-600"></i> View FEATURE_UPDATES.txt
+                class="inline-flex items-center px-3.5 py-2 rounded-xl text-xs font-semibold bg-white text-slate-700 border border-slate-300 hover:bg-slate-100 transition-colors shadow-sm cursor-pointer">
+          <i class="fas fa-file-lines mr-1.5 text-slate-500"></i> View Raw Log
         </button>
-        <a href="{% url 'core:system' %}" class="inline-flex items-center px-3.5 py-2 rounded-xl text-xs font-black bg-black text-white border-2 border-black hover:bg-slate-800 transition-all shadow-sm">
-          <i class="fas fa-server mr-2"></i> System Info
+        <a href="{% url 'core:system' %}" 
+           class="inline-flex items-center px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#0a192f] text-white hover:bg-blue-900 transition-colors shadow-sm">
+          <i class="fas fa-server mr-1.5 text-blue-300"></i> System Info
         </a>
       </div>
     </div>
 
-    <!-- Active Release Banner -->
-    <div class="p-5 rounded-2xl bg-black text-white border-2 border-black shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-      <div class="flex items-center space-x-4">
-        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center font-mono font-black text-xl text-white shadow-md flex-shrink-0">
-          <i class="fas fa-wand-magic-sparkles"></i>
+    <!-- Active Release Status Banner (Apple / Document style) -->
+    <div class="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div class="flex items-center space-x-3.5">
+        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center font-bold text-lg flex-shrink-0">
+          <i class="fas fa-code-branch"></i>
         </div>
         <div>
           <div class="flex items-center space-x-2 flex-wrap gap-y-1">
-            <span class="text-xs font-black uppercase text-slate-300 tracking-wider">Active System Track:</span>
-            <span class="px-2.5 py-0.5 rounded bg-blue-600 text-white text-xs font-mono font-black">{{ system_version.version }}</span>
-            <span class="text-xs font-bold text-cyan-400 font-mono">{{ system_version.build }}</span>
+            <span class="text-xs font-bold text-slate-500">Active Build:</span>
+            <span class="px-2 py-0.5 rounded-md bg-blue-600 text-white text-xs font-mono font-bold">{{ system_version.version }}</span>
+            <span class="text-xs font-mono text-slate-500">({{ system_version.build }})</span>
           </div>
-          <p class="text-xs text-slate-300 font-medium mt-1">
-            Engineered for high-throughput retail counters, offline resiliency, and real-time inventory tracking.
+          <p class="text-xs text-slate-500 mt-0.5">
+            Single-tenant retail branch instance • Branch: <code class="font-mono text-slate-700 font-semibold">{{ system_version.branch|default:'main' }}</code>
           </p>
         </div>
       </div>
-      <div class="flex items-center space-x-2">
-        <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-black bg-blue-950 text-sky-300 border border-sky-400">
-          <span class="w-2 h-2 rounded-full bg-sky-400 animate-ping mr-2"></span>
+      <div class="flex items-center space-x-2 self-start sm:self-auto">
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-2"></span>
           Up to date
         </span>
       </div>
     </div>
 
-    <!-- Monthly Changelog Timeline -->
-    <div class="space-y-6">
+    <!-- Real-time Text Filter Search Bar -->
+    <div class="relative">
+      <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+      <input type="text" 
+             id="changelog-search-input" 
+             oninput="filterChangelogText(this.value)"
+             placeholder="Search release notes by feature, keyword, or module..." 
+             class="w-full pl-9 pr-24 py-2.5 rounded-xl border border-slate-200 bg-white text-xs sm:text-sm text-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-sm">
+      <span id="changelog-filter-count" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-[11px] font-mono font-semibold text-slate-400 hidden">
+        0 matches
+      </span>
+    </div>
+
+    <!-- Main Editorial Text Changelog (Single-Column Natural Flow) -->
+    <div id="changelog-entries-container" class="space-y-8">
       {% for m in feature_updates %}
-      <div class="bg-slate-50 border-2 border-black rounded-2xl p-6 shadow-sm space-y-4">
+      <article class="changelog-release-block bg-white rounded-2xl border border-slate-200 p-5 sm:p-7 shadow-sm transition-all" data-month="{{ m.month|lower }}" data-version="{{ m.version|lower }}">
         
-        <!-- Month and Version Header -->
-        <div class="flex items-center justify-between pb-3 border-b-2 border-slate-300 flex-wrap gap-2">
-          <div class="flex items-center space-x-3">
-            <div class="w-9 h-9 rounded-lg bg-black text-white flex items-center justify-center text-sm font-black shadow-sm">
-              <i class="fas fa-calendar-check text-cyan-400"></i>
-            </div>
-            <div>
-              <h2 class="text-lg font-black text-black leading-tight">{{ m.month }}</h2>
-              {% if m.version %}
-              <span class="text-[11px] font-mono font-bold text-slate-600">Release Tag: {{ m.version }}</span>
-              {% endif %}
-            </div>
+        <!-- Release Month & Version Header -->
+        <header class="flex items-center justify-between pb-3.5 border-b border-slate-100 flex-wrap gap-2">
+          <div class="flex items-center space-x-2.5">
+            <span class="text-base sm:text-lg font-bold text-slate-900 tracking-tight">{{ m.month }}</span>
+            {% if m.version %}
+            <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-xs font-mono font-bold border border-slate-200">
+              {{ m.version }}
+            </span>
+            {% endif %}
           </div>
 
           <div>
             {% if m.is_latest %}
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-black bg-[#0a192f] text-white border border-sky-400 shadow-sm">
-              <i class="fas fa-check-circle mr-1.5 text-xs text-sky-300"></i> Latest Production Release
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <i class="fas fa-circle-check mr-1 text-[10px]"></i> Latest Release
             </span>
             {% else %}
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-slate-200 text-slate-700 border border-slate-300">
-              Archived Release
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium text-slate-500 bg-slate-100 border border-slate-200">
+              Archived
             </span>
             {% endif %}
           </div>
-        </div>
+        </header>
 
-        <!-- Sections & Bullet Points -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Sections & Point-Form Bullet Items -->
+        <div class="pt-4 space-y-6">
           {% for sec in m.sections %}
-          <div class="bg-white border-2 border-slate-200 rounded-xl p-4.5 space-y-2.5 shadow-sm">
-            <h3 class="text-xs font-black uppercase text-blue-700 tracking-wider flex items-center">
-              <i class="fas fa-chevron-right text-[10px] mr-1.5 text-cyan-500"></i> {{ sec.title }}
+          <div class="changelog-section space-y-2.5">
+            
+            <!-- Section Subheading -->
+            <h3 class="text-xs sm:text-sm font-bold text-blue-900 flex items-center space-x-2">
+              <i class="fas fa-layer-group text-blue-500 text-xs"></i>
+              <span>{{ sec.title }}</span>
             </h3>
-            <ul class="space-y-2 text-xs text-slate-800">
+
+            <!-- Genuine Bullet Points with Natural Prose Line-Height -->
+            <ul class="list-disc pl-5 sm:pl-6 space-y-2 text-xs sm:text-sm text-slate-700 leading-relaxed">
               {% for item in sec.items %}
-              <li class="flex items-start space-x-2">
-                <span class="w-1.5 h-1.5 rounded-full bg-cyan-600 mt-1.5 flex-shrink-0"></span>
-                <span class="leading-relaxed">
-                  {% if item.title %}
-                  <strong class="font-black text-black">{{ item.title }}:</strong> {{ item.desc }}
-                  {% else %}
-                  {{ item }}
-                  {% endif %}
-                </span>
+              <li class="changelog-item pl-1">
+                {% if item.title %}
+                <strong class="font-bold text-slate-900">{{ item.title }}:</strong> {{ item.desc }}
+                {% else %}
+                <span>{{ item }}</span>
+                {% endif %}
               </li>
               {% endfor %}
             </ul>
+
           </div>
           {% endfor %}
         </div>
 
-      </div>
+      </article>
       {% empty %}
-      <div class="text-center py-12 bg-slate-50 border-2 border-black rounded-2xl p-6 text-slate-600">
-        <i class="fas fa-info-circle text-3xl mb-3 text-slate-400 block"></i>
-        <p class="text-sm font-bold">No release update records found.</p>
+      <div class="text-center py-12 bg-white border border-slate-200 rounded-2xl p-6 text-slate-500">
+        <i class="fas fa-circle-info text-3xl mb-3 text-slate-300 block"></i>
+        <p class="text-sm font-semibold">No release update records found.</p>
       </div>
       {% endfor %}
+    </div>
+
+    <!-- Empty search result state -->
+    <div id="changelog-empty-search" class="hidden text-center py-12 bg-white border border-slate-200 rounded-2xl p-6 text-slate-500">
+      <i class="fas fa-magnifying-glass text-3xl mb-3 text-slate-300 block"></i>
+      <p class="text-sm font-bold text-slate-800">No matching updates found</p>
+      <p class="text-xs text-slate-500 mt-1">Try another keyword or clear the search field.</p>
     </div>
 
   </div>
 </div>
 
 <!-- Raw FEATURE_UPDATES.txt Modal -->
-<div id="raw-updates-modal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-  <div class="bg-slate-900 border-2 border-cyan-500 rounded-3xl max-w-4xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+<div id="raw-updates-modal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="bg-white border border-slate-200 rounded-2xl max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
     
     <!-- Modal Header -->
-    <div class="p-5 border-b border-slate-800 flex items-center justify-between bg-black flex-shrink-0">
-      <div class="flex items-center space-x-3">
-        <i class="fas fa-file-code text-cyan-400 text-lg"></i>
-        <h3 class="text-base font-black text-white">FEATURE_UPDATES.txt</h3>
+    <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50 flex-shrink-0">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-sm font-bold">
+          <i class="fas fa-file-code"></i>
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-slate-900">FEATURE_UPDATES.txt</h3>
+          <p class="text-[10px] text-slate-500">Raw text changelog stored in project root</p>
+        </div>
       </div>
       <button type="button" 
               onclick="toggleRawUpdatesModal()" 
-              class="w-8 h-8 rounded-full bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 flex items-center justify-center transition-colors">
-        <i class="fas fa-times"></i>
+              class="w-7 h-7 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 flex items-center justify-center transition-colors">
+        <i class="fas fa-times text-xs"></i>
       </button>
     </div>
 
     <!-- Modal Body -->
-    <div class="p-5 flex-1 min-h-0 flex flex-col space-y-3">
-      <div class="flex items-center justify-between text-xs text-slate-400 flex-shrink-0">
-        <span>Project Root Changelog File</span>
+    <div class="p-4 flex-1 min-h-0 flex flex-col space-y-3">
+      <div class="flex items-center justify-between text-xs text-slate-500 flex-shrink-0">
+        <span>Raw Markdown / Plain-text File</span>
         <button type="button" 
                 onclick="copyChangelogText()" 
                 id="btn-copy-changelog" 
-                class="px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs flex items-center space-x-1.5 transition-colors">
+                class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center space-x-1.5 transition-colors cursor-pointer">
           <i class="fas fa-copy"></i>
           <span>Copy All</span>
         </button>
       </div>
-      <pre id="raw-changelog-content" class="flex-1 min-h-0 overflow-y-auto p-4 rounded-xl bg-black border border-slate-800 text-xs font-mono text-cyan-300 leading-relaxed whitespace-pre-wrap select-all custom-scrollbar">{{ raw_updates_txt }}</pre>
+      <pre id="raw-changelog-content" class="flex-1 min-h-0 overflow-y-auto p-4 rounded-xl bg-slate-900 text-slate-100 text-xs font-mono leading-relaxed whitespace-pre-wrap select-all custom-scrollbar border border-slate-800">{{ raw_updates_txt }}</pre>
     </div>
 
     <!-- Modal Footer -->
-    <div class="p-4 border-t border-slate-800 bg-slate-950 flex justify-end flex-shrink-0">
+    <div class="px-5 py-3 border-t border-slate-100 bg-slate-50 flex justify-end flex-shrink-0">
       <button type="button" 
               onclick="toggleRawUpdatesModal()" 
-              class="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition-colors">
+              class="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold transition-colors cursor-pointer">
         Close
       </button>
     </div>
@@ -187,6 +213,82 @@ function copyChangelogText() {
       btn.innerHTML = '<i class="fas fa-copy"></i> <span>Copy All</span>';
     }, 2000);
   });
+}
+
+function filterChangelogText(query) {
+  const q = (query || '').toLowerCase().trim();
+  const blocks = document.querySelectorAll('.changelog-release-block');
+  const countEl = document.getElementById('changelog-filter-count');
+  const emptyEl = document.getElementById('changelog-empty-search');
+  
+  if (!q) {
+    blocks.forEach(b => {
+      b.style.display = '';
+      b.querySelectorAll('.changelog-section').forEach(s => s.style.display = '');
+      b.querySelectorAll('.changelog-item').forEach(i => i.style.display = '');
+    });
+    if (countEl) countEl.classList.add('hidden');
+    if (emptyEl) emptyEl.classList.add('hidden');
+    return;
+  }
+
+  let totalMatches = 0;
+  let visibleBlocks = 0;
+
+  blocks.forEach(block => {
+    let blockMatches = 0;
+    const sections = block.querySelectorAll('.changelog-section');
+
+    sections.forEach(sec => {
+      let secMatches = 0;
+      const items = sec.querySelectorAll('.changelog-item');
+
+      items.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        if (text.includes(q)) {
+          item.style.display = '';
+          secMatches++;
+          totalMatches++;
+        } else {
+          item.style.display = 'none';
+        }
+      });
+
+      const secTitle = sec.querySelector('h3')?.textContent.toLowerCase() || '';
+      if (secTitle.includes(q)) {
+        // If the section title matched, show all items in this section
+        items.forEach(i => i.style.display = '');
+        secMatches += items.length;
+      }
+
+      if (secMatches > 0) {
+        sec.style.display = '';
+        blockMatches += secMatches;
+      } else {
+        sec.style.display = 'none';
+      }
+    });
+
+    if (blockMatches > 0) {
+      block.style.display = '';
+      visibleBlocks++;
+    } else {
+      block.style.display = 'none';
+    }
+  });
+
+  if (countEl) {
+    countEl.textContent = `${totalMatches} match${totalMatches === 1 ? '' : 'es'}`;
+    countEl.classList.remove('hidden');
+  }
+
+  if (emptyEl) {
+    if (visibleBlocks === 0) {
+      emptyEl.classList.remove('hidden');
+    } else {
+      emptyEl.classList.add('hidden');
+    }
+  }
 }
 </script>
 {% endblock %}

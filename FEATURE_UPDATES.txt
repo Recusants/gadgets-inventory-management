@@ -6,6 +6,26 @@ Version Track: 2026.x Release Series
 Last Updated: October 2026
 
 ================================================================================
+[NOVEMBER 2026] - v2.4.48
+================================================================================
+
+* Enterprise Database Backup & Portability Engine
+  - One-Click Compressed Snapshot (.json.gz): Full system table export using natural primary and foreign keys, automatically gzipped and archived to BASE_DIR/backups/ for instant disaster recovery.
+  - Universal Constraint-Safe Database Restoration: Full loaddata support with PostgreSQL session replication role handling, sequence auto-increment resets, and SQLite PRAGMA checks to eliminate integrity errors.
+  - Interactive Restore Wizard Modal: Multi-source restore dialog allowing users to pick directly from server-side archives or upload backup files, with Clean Overwrite and Merge modes.
+  - Quick Actions in Topbar & Command Palette: Added direct "Backup Data" and "Restore Database" shortcuts into the user profile avatar dropdown, Settings page, and Ctrl+K command palette.
+
+* Streamlined Data Tables & Modal Inspector
+  - Horizontal Scroll Elimination: Redesigned all primary data tables (Stock, Products, Sales Ledger, Transactions, Expenses, Users) to fit within standard viewport bounds without horizontal scrolling.
+  - Comprehensive Details Modals: Replaced clipped or overflowing columns with interactive, rich Quick Details modals across all data tables for deep inspection.
+  - Responsive Typography & Padding: Adjusted table cells to clean monospace codes, high-contrast badges, and formatted currency.
+
+* Sidebar Navigation & Topbar Interface Refinements
+  - Header & Corner Alignment: Fixed duplicate toggle buttons in desktop view, cleanly centering the sidebar toggle and standardizing all collapsed icons on a strict 36px axis.
+  - Circular User Profile Dropdown: Replaced topbar user button with an elegant circular avatar menu with live online badge and direct access to Store Settings, System Info, Analytics, and Backups.
+  - Business Analytics Graphics Suite: Added dedicated interactive charting section under Reports for monthly revenue trends, expense breakdowns, and payment method volume.
+
+================================================================================
 [NOVEMBER 2026] - v2.4.175
 ================================================================================
 
