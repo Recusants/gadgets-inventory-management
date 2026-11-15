@@ -588,7 +588,10 @@ function initSidebar() {
   }, 50);
 
   function toggleSidebar(e) {
-    if (e) e.preventDefault();
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     const willCollapse = !$('#app-sidebar').hasClass('collapsed');
     if (willCollapse) {
       $('html').addClass('sidebar-is-collapsed');
@@ -600,17 +603,11 @@ function initSidebar() {
     updateSidebarToggleIcon(willCollapse);
     localStorage.setItem('21void_sidebar_collapsed', willCollapse ? 'true' : 'false');
   }
+  window.toggleSidebar = toggleSidebar;
 
-  $(document).off('click', '#sidebar-toggle-btn, #topbar-sidebar-toggle-btn, .btn-toggle-sidebar')
-    .on('click', '#sidebar-toggle-btn, #topbar-sidebar-toggle-btn, .btn-toggle-sidebar', toggleSidebar);
-
-  // Clicking brand logo when sidebar is collapsed expands it
-  $(document).off('click', '#sidebar-brand-logo')
-    .on('click', '#sidebar-brand-logo', function (e) {
-      if ($('#app-sidebar').hasClass('collapsed')) {
-        toggleSidebar(e);
-      }
-    });
+  // Clicking brand header, toggle button, or mobile toggle expands or collapses the sidebar
+  $(document).off('click', '.sidebar-brand-header, #sidebar-toggle-btn, #topbar-sidebar-toggle-btn, .btn-toggle-sidebar')
+    .on('click', '.sidebar-brand-header, #sidebar-toggle-btn, #topbar-sidebar-toggle-btn, .btn-toggle-sidebar', toggleSidebar);
 }
 
 

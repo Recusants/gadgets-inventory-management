@@ -159,6 +159,14 @@ html.sidebar-is-collapsed #app-sidebar .sidebar-tagline,
   display: none !important;
 }
 
+.sidebar-brand-header {
+  cursor: pointer !important;
+  user-select: none !important;
+}
+.sidebar-brand-header:hover {
+  background-color: rgba(248, 250, 252, 0.8) !important;
+}
+
 html.sidebar-is-collapsed #app-sidebar .sidebar-brand-header,
 #app-sidebar.collapsed .sidebar-brand-header {
   padding-left: 0 !important;

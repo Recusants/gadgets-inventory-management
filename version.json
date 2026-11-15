@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.49",
-  "build": "v2.4.49-067a536",
-  "commit_count": 49,
-  "commit_hash": "067a536",
+  "version": "v2.4.50",
+  "build": "v2.4.50-f15ad56",
+  "commit_count": 50,
+  "commit_hash": "f15ad56",
   "branch": "main",
-  "commit_subject": "Redesign What's New view into clean editorial document layout with natural bullet points",
-  "updated_at": "2026-11-15 21:23",
-  "last_pushed_at": "2026-11-15 21:23:00"
+  "commit_subject": "Make sidebar brand header clickable to toggle collapse/expand and remove page link",
+  "updated_at": "2026-11-15 21:29",
+  "last_pushed_at": "2026-11-15 21:29:00"
 }

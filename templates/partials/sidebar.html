@@ -1,27 +1,26 @@
 {% load static %}
 <aside id="app-sidebar" class="flex flex-col h-screen select-none border-r border-slate-100 bg-white flex-shrink-0 text-slate-800 transition-all duration-200">
   
-  <!-- Single Unified Brand & Store Header (Company Name, Branch Name & Collapse/Expand Arrow) -->
-  <div class="h-14 px-3 flex items-center justify-between border-b border-slate-100 flex-shrink-0 sidebar-brand-header">
+  <!-- Single Unified Brand & Store Header (Company Name, Branch Name & Collapse/Expand Toggle) -->
+  <div class="h-14 px-3 flex items-center justify-between border-b border-slate-100 flex-shrink-0 sidebar-brand-header cursor-pointer select-none hover:bg-slate-50/80 transition-colors"
+       title="Toggle Sidebar (Collapse / Expand)">
     <div class="sidebar-brand-content flex items-center space-x-2.5 min-w-0 flex-1">
-      <a href="/" 
-         id="sidebar-brand-logo" 
-         class="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-sm shadow-xs flex-shrink-0 overflow-hidden cursor-pointer" 
-         style="background-color: #0a192f; color: #ffffff;"
-         title="{{ company_settings.company_name|default:'Gadget Store' }} — {{ company_settings.branch_name|default:'Main Branch' }}">
+      <div id="sidebar-brand-logo" 
+           class="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-sm shadow-xs flex-shrink-0 overflow-hidden" 
+           style="background-color: #0a192f; color: #ffffff;"
+           title="{{ company_settings.company_name|default:'Gadget Store' }} — {{ company_settings.branch_name|default:'Main Branch' }}">
         {% if company_settings.logo %}
           <img src="{{ company_settings.logo.url }}" alt="Logo" class="w-full h-full object-contain p-1">
         {% else %}
           <i class="fas fa-store text-blue-400 text-xs"></i>
         {% endif %}
-      </a>
-      <a href="/" 
-         class="truncate sidebar-label min-w-0 flex-1 block group text-left" 
-         title="{{ company_settings.company_name|default:'Gadget Store' }} — {{ company_settings.branch_name|default:'Main Branch' }}">
+      </div>
+      <div class="truncate sidebar-label min-w-0 flex-1 block text-left" 
+           title="{{ company_settings.company_name|default:'Gadget Store' }} — {{ company_settings.branch_name|default:'Main Branch' }}">
         <div class="text-xs font-bold text-slate-900 truncate leading-tight group-hover:text-blue-600 transition-colors">
           {{ company_settings.company_name|default:"Gadget Store" }} • {{ company_settings.branch_name|default:"Main Branch" }}
         </div>
-      </a>
+      </div>
     </div>
     
     <button id="sidebar-toggle-btn" 
