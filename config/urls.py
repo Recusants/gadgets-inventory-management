@@ -17,6 +17,8 @@ urlpatterns = [
     path('sales/', include('sales.urls')),
     path('reports/', include('reports.urls')),
     path('core/', include('core.urls')),
+    path('api/search-features/', core_views.load_all_search_features, name='load_all_search_features'),
+    path('load_all_search_features/', core_views.load_all_search_features),
     path('notifications/', core_views.notification_list_view, name='notifications_direct'),
     path('settings/', core_views.settings_view, name='settings_direct'),
     path('system/', core_views.system_view, name='system_direct'),

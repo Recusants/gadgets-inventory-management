@@ -318,6 +318,140 @@ html.sidebar-is-collapsed #app-sidebar .sidebar-footer-card,
   padding: 8px !important;
 }
 
+/* Sidebar Search Box (Like in Clarity Retail LAN) */
+.sidebar-search-box {
+  transition: all 0.15s ease-in-out;
+}
+.sidebar-search-box input {
+  transition: all 0.15s ease-in-out;
+}
+.sidebar-search-box input:focus {
+  background-color: #ffffff !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12) !important;
+}
+
+/* Collapsed Sidebar Search */
+html.sidebar-is-collapsed #app-sidebar .sidebar-search-box,
+#app-sidebar.collapsed .sidebar-search-box {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+html.sidebar-is-collapsed #app-sidebar .sidebar-search-box .relative,
+#app-sidebar.collapsed .sidebar-search-box .relative {
+  display: none !important;
+}
+html.sidebar-is-collapsed #app-sidebar #sidebar-search-collapsed-btn,
+#app-sidebar.collapsed #sidebar-search-collapsed-btn {
+  display: flex !important;
+  margin: 0 auto !important;
+}
+
+/* ==========================================================================
+   Global Feature Search Command Palette Modal (Apple Minimalist)
+   ========================================================================== */
+@keyframes popModal {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+.animate-pop {
+  animation: popModal 0.16s ease-out forwards;
+}
+
+.search-cat-chip {
+  padding: 4px 11px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  transition: all 0.15s ease-in-out;
+  white-space: nowrap;
+  cursor: pointer;
+  outline: none;
+}
+.search-cat-chip:hover {
+  background-color: #f1f5f9;
+  color: #0a192f;
+  border-color: #cbd5e1;
+}
+.search-cat-chip.active {
+  background-color: #0a192f !important;
+  color: #ffffff !important;
+  border-color: #0a192f !important;
+  box-shadow: 0 2px 6px rgba(10, 25, 47, 0.15);
+}
+
+.search-feature-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 16px;
+  text-decoration: none;
+  transition: all 0.12s ease-in-out;
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-left: 4px solid transparent;
+}
+.search-feature-item:hover,
+.search-feature-item.active {
+  background-color: #eff6ff !important;
+  border-color: #bfdbfe !important;
+  border-left: 4px solid #2563eb !important;
+}
+.search-feature-item .feature-icon-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  margin-right: 12px;
+  flex-shrink: 0;
+  transition: all 0.12s ease-in-out;
+}
+.search-feature-item:hover .feature-icon-box,
+.search-feature-item.active .feature-icon-box {
+  background-color: #ffffff;
+  border-color: #93c5fd;
+  color: #2563eb;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.12);
+}
+.search-feature-item .feature-item-title {
+  color: #0a192f;
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1.25;
+}
+.search-feature-item .feature-item-desc {
+  color: #64748b;
+  font-size: 11px;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.search-feature-item mark {
+  background-color: #dbeafe;
+  color: #1e3a8a;
+  border-radius: 3px;
+  padding: 0 2px;
+  font-weight: 700;
+}
+
 /* Right Side: Main Application Column */
 #app-main-wrapper {
   flex: 1 1 0%;

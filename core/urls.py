@@ -14,6 +14,10 @@ urlpatterns = [
 
 
 
+    # Feature Search API
+    path('api/search-features/', views.load_all_search_features, name='load_all_search_features'),
+    path('load_all_search_features/', views.load_all_search_features, name='legacy_load_all_search_features'),
+
     # Notifications routes
     path('notifications/', views.notification_list_view, name='notification_list'),
     path('notifications/table/', views.notification_table_partial, name='notification_table'),

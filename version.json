@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.30",
-  "build": "v2.4.30-91a8a54",
-  "commit_count": 30,
-  "commit_hash": "91a8a54",
+  "version": "v2.4.31",
+  "build": "v2.4.31-cc7aff0",
+  "commit_count": 31,
+  "commit_hash": "cc7aff0",
   "branch": "main",
-  "commit_subject": "Consolidate sidebar header into single clean row with company name, branch, and correct chevron toggle arrow",
-  "updated_at": "2026-11-15 17:41",
-  "last_pushed_at": "2026-11-15 17:49:21"
+  "commit_subject": "Highlight active sidebar link prominently and feature outstanding POS button",
+  "updated_at": "2026-11-15 17:50",
+  "last_pushed_at": "2026-11-15 17:50:44"
 }

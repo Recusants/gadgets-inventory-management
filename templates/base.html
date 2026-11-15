@@ -17,7 +17,7 @@
 
 
   <!-- Core App & Vendor CSS (100% Offline Local Assets with cache-buster) -->
-  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=20261115.6">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=20261115.7">
 
 
   <script>
@@ -92,6 +92,9 @@
 
   <!-- Reusable Modal Shell (Add / Edit / Detail) -->
   {% include 'partials/modal_shell.html' %}
+
+  <!-- Global Feature Search Command Palette Modal -->
+  {% include 'partials/feature_search_modal.html' %}
 
   {% if needs_mandatory_setup %}
     {% include 'core/partials/mandatory_setup_modal.html' %}

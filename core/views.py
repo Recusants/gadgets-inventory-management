@@ -523,3 +523,267 @@ def db_backup_restore(request):
             message="Please upload a .json backup file (Universal) or a .sqlite3 database file."
         )
 
+
+@login_required
+def load_all_search_features(request):
+    """
+    Load all searchable features and pages for client-side command palette / global search,
+    matching the Clarity Retail search capability with role-based filtering.
+    """
+    from django.http import JsonResponse
+    from django.urls import reverse
+
+    def safe_reverse(view_name, fallback='/'):
+        try:
+            return reverse(view_name)
+        except Exception:
+            return fallback
+
+    user = request.user
+    features = [
+        # DASHBOARD & POS
+        {
+            'name': 'Dashboard Overview',
+            'description': 'Main sales analytics, KPI charts & live store summary',
+            'link': safe_reverse('dashboard:index'),
+            'icon': 'fas fa-th-large',
+            'category': 'Dashboard',
+            'keywords': ['dashboard', 'home', 'overview', 'analytics', 'kpi', 'revenue', 'summary', 'performance'],
+            'badge': None,
+        },
+        {
+            'name': 'POS Terminal / Instant Checkout',
+            'description': 'Point of Sale fast checkout and instant thermal receipt printing',
+            'link': safe_reverse('sales:checkout', '/sales/checkout/'),
+            'icon': 'fas fa-cash-register',
+            'category': 'Point of Sale',
+            'keywords': ['pos', 'point of sale', 'checkout', 'cashier', 'till', 'instant checkout', 'sell', 'terminal', 'receipt', 'register', 'f2'],
+            'badge': 'POS',
+        },
+        {
+            'name': 'Sales Records & History',
+            'description': 'Comprehensive log of all completed customer sales and receipts',
+            'link': safe_reverse('sales:sale_list', '/sales/'),
+            'icon': 'fas fa-shopping-bag',
+            'category': 'Sales',
+            'keywords': ['sales', 'receipts', 'orders', 'sold items', 'revenue', 'turnover', 'history', 'records'],
+            'badge': None,
+        },
+        {
+            'name': 'Customer Directory',
+            'description': 'View and manage customer accounts, loyalty, phone and TIN numbers',
+            'link': safe_reverse('sales:customer_list', '/sales/customers/'),
+            'icon': 'fas fa-user-friends',
+            'category': 'Sales',
+            'keywords': ['customers', 'clients', 'debtors', 'contacts', 'directory', 'phone', 'tin', 'address'],
+            'badge': None,
+        },
+    ]
+
+    # INVENTORY & STOCK
+    features.append({
+        'name': 'Products Catalog',
+        'description': 'Manage gadget catalog, barcodes, models and retail prices',
+        'link': safe_reverse('inventory:product_list', '/inventory/products/'),
+        'icon': 'fas fa-boxes',
+        'category': 'Inventory',
+        'keywords': ['products', 'items', 'catalog', 'gadgets', 'phones', 'accessories', 'skus', 'barcode'],
+        'badge': None,
+    })
+
+    if getattr(user, 'is_supervisor_role', False) or user.is_superuser:
+        features.extend([
+            {
+                'name': 'Stock & Pricing',
+                'description': 'Live stock quantities on hand, cost prices and markup margins',
+                'link': safe_reverse('inventory:stock_list', '/inventory/stock/'),
+                'icon': 'fas fa-cubes',
+                'category': 'Inventory',
+                'keywords': ['stock', 'inventory', 'quantity', 'levels', 'available', 'pricing', 'markup', 'margin'],
+                'badge': None,
+            },
+            {
+                'name': 'Stock Batches & Lots',
+                'description': 'Manage product batches, FIFO costing, and inventory lots',
+                'link': safe_reverse('inventory:batch_list', '/inventory/batches/'),
+                'icon': 'fas fa-layer-group',
+                'category': 'Inventory',
+                'keywords': ['batches', 'lots', 'batch numbers', 'fifo', 'cost price', 'adjust quantity'],
+                'badge': None,
+            },
+            {
+                'name': 'Receiving Invoices (GRN)',
+                'description': 'Record supplier deliveries, GRNs and purchase stock-in invoices',
+                'link': safe_reverse('inventory:invoice_list', '/inventory/invoices/'),
+                'icon': 'fas fa-receipt',
+                'category': 'Inventory',
+                'keywords': ['invoices', 'grn', 'goods received', 'deliveries', 'supplier delivery', 'purchase invoice'],
+                'badge': None,
+            },
+            {
+                'name': 'Suppliers Directory',
+                'description': 'Manage authorized distributors, vendors and contact information',
+                'link': safe_reverse('inventory:supplier_list', '/inventory/suppliers/'),
+                'icon': 'fas fa-truck',
+                'category': 'Inventory',
+                'keywords': ['suppliers', 'vendors', 'distributors', 'creditors', 'purchasing'],
+                'badge': None,
+            },
+            {
+                'name': 'Product Categories',
+                'description': 'Classify gadgets and accessories into store categories',
+                'link': safe_reverse('inventory:category_list', '/inventory/categories/'),
+                'icon': 'fas fa-tag',
+                'category': 'Inventory',
+                'keywords': ['categories', 'classification', 'product groups', 'gadget types', 'tags'],
+                'badge': None,
+            },
+            {
+                'name': 'Expense Tracking',
+                'description': 'Record and monitor operating expenses and store overheads',
+                'link': safe_reverse('expenses:expense_list', '/expenses/'),
+                'icon': 'fas fa-wallet',
+                'category': 'Accounting',
+                'keywords': ['expenses', 'costs', 'petty cash', 'spending', 'overheads', 'outflow', 'payments'],
+                'badge': None,
+            },
+            {
+                'name': 'Expense Categories',
+                'description': 'Manage expense classifications and cost allocation types',
+                'link': safe_reverse('expenses:category_list', '/expenses/categories/'),
+                'icon': 'fas fa-tags',
+                'category': 'Accounting',
+                'keywords': ['expense categories', 'cost centers', 'budget types'],
+                'badge': None,
+            },
+            {
+                'name': 'Reports & Analytics',
+                'description': 'Interactive revenue charts, profit summaries and audit metrics',
+                'link': safe_reverse('reports:index', '/reports/'),
+                'icon': 'fas fa-chart-pie',
+                'category': 'Reports',
+                'keywords': ['reports', 'analytics', 'profit', 'sales report', 'performance', 'charts', 'summary'],
+                'badge': None,
+            },
+            {
+                'name': 'Export Sales to Excel',
+                'description': 'Download comprehensive sales ledger spreadsheet in .xlsx format',
+                'link': safe_reverse('reports:export_sales_excel', '/reports/export/sales/excel/'),
+                'icon': 'fas fa-file-excel',
+                'category': 'Reports',
+                'keywords': ['export sales', 'excel', 'spreadsheet', 'download sales', 'xlsx'],
+                'badge': 'Export',
+            },
+            {
+                'name': 'Export Sales to PDF',
+                'description': 'Generate printable PDF sales audit report',
+                'link': safe_reverse('reports:export_sales_pdf', '/reports/export/sales/pdf/'),
+                'icon': 'fas fa-file-pdf',
+                'category': 'Reports',
+                'keywords': ['export sales pdf', 'sales pdf', 'print report', 'pdf download'],
+                'badge': 'PDF',
+            },
+            {
+                'name': 'Export Inventory to Excel',
+                'description': 'Download complete current stock valuation spreadsheet in .xlsx',
+                'link': safe_reverse('reports:export_inventory_excel', '/reports/export/inventory/excel/'),
+                'icon': 'fas fa-file-excel',
+                'category': 'Reports',
+                'keywords': ['export inventory', 'stock excel', 'stock spreadsheet', 'valuation'],
+                'badge': 'Export',
+            },
+            {
+                'name': 'Export Inventory to PDF',
+                'description': 'Generate printable PDF stock inventory catalog',
+                'link': safe_reverse('reports:export_inventory_pdf', '/reports/export/inventory/pdf/'),
+                'icon': 'fas fa-file-pdf',
+                'category': 'Reports',
+                'keywords': ['export inventory pdf', 'stock pdf', 'inventory report'],
+                'badge': 'PDF',
+            },
+        ])
+
+    if getattr(user, 'is_manager_role', False) or user.is_superuser:
+        features.extend([
+            {
+                'name': 'ZIMRA Fiscalisation Dashboard',
+                'description': 'Monitor ZIMRA fiscal status, registered fiscal devices, and sync queue',
+                'link': safe_reverse('fiscalisation:dashboard', '/fiscalisation/'),
+                'icon': 'fas fa-file-invoice',
+                'category': 'Compliance',
+                'keywords': ['zimra', 'fiscalisation', 'tax', 'fda', 'vat', 'fiscal receipts', 'compliance', 'qr code'],
+                'badge': 'ZIMRA',
+            },
+            {
+                'name': 'Thermal Receipt Printers',
+                'description': 'Configure USB, LAN network and Bluetooth thermal receipt printers',
+                'link': safe_reverse('print_out:printers_page', '/printers/'),
+                'icon': 'fas fa-print',
+                'category': 'Hardware',
+                'keywords': ['printers', 'thermal', 'receipt printer', 'esc pos', '80mm', '58mm', 'usb', 'lan printer'],
+                'badge': 'Hardware',
+            },
+            {
+                'name': 'Store Settings',
+                'description': 'Customize company name, branch location, currency symbol, and logo',
+                'link': safe_reverse('core:settings', '/settings/'),
+                'icon': 'fas fa-sliders-h',
+                'category': 'Settings',
+                'keywords': ['settings', 'company', 'store name', 'branch', 'currency', 'tax rate', 'logo', 'receipt footer'],
+                'badge': None,
+            },
+            {
+                'name': 'System Information & Support',
+                'description': 'Inspect database health, server hardware, and Avail Technologies support',
+                'link': safe_reverse('core:system', '/system/'),
+                'icon': 'fas fa-server',
+                'category': 'Settings',
+                'keywords': ['system', 'diagnostics', 'database', 'postgres', 'sqlite', 'server info', 'avail support', 'specs'],
+                'badge': None,
+            },
+            {
+                'name': 'Database Backup Download',
+                'description': 'Create and download immediate SQL database backup archive',
+                'link': safe_reverse('core:backup_download', '/core/backup/download/'),
+                'icon': 'fas fa-download',
+                'category': 'Settings',
+                'keywords': ['backup', 'database backup', 'sql backup', 'download db', 'data export', 'safeguard'],
+                'badge': 'Backup',
+            },
+        ])
+
+    # GENERAL SYSTEM FEATURES
+    features.extend([
+        {
+            'name': 'What\'s New & Release Updates',
+            'description': 'Explore new features, software improvements and system update logs',
+            'link': safe_reverse('core:whats_new', '/whats-new/'),
+            'icon': 'fas fa-sparkles',
+            'category': 'Settings',
+            'keywords': ['whats new', 'updates', 'changelog', 'release notes', 'features', 'version'],
+            'badge': None,
+        },
+        {
+            'name': 'Notifications & System Alerts',
+            'description': 'View low stock notices, system announcements, and operational warnings',
+            'link': safe_reverse('core:notification_list', '/notifications/'),
+            'icon': 'fas fa-bell',
+            'category': 'Settings',
+            'keywords': ['notifications', 'alerts', 'warnings', 'system messages', 'unread', 'bell'],
+            'badge': None,
+        },
+    ])
+
+    if getattr(user, 'is_admin_role', False) or user.is_superuser:
+        features.append({
+            'name': 'User Management & Permissions',
+            'description': 'Manage staff user accounts, cashier permissions, roles, and password resets',
+            'link': safe_reverse('accounts:user_list', '/accounts/users/'),
+            'icon': 'fas fa-user-shield',
+            'category': 'Settings',
+            'keywords': ['users', 'accounts', 'passwords', 'roles', 'cashiers', 'managers', 'permissions', 'staff'],
+            'badge': 'Admin',
+        })
+
+    return JsonResponse({'features': features, 'count': len(features)})
+

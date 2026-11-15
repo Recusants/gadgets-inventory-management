@@ -620,5 +620,454 @@ $(document).ready(function () {
   initAjaxForms();
   initDeleteActions();
   initSidebar();
+  initFeatureSearch();
   console.log('21 Void Technologies Core JS initialized successfully.');
 });
+
+// ==========================================================================
+// Sidebar Feature Filter & Search (Like in Clarity Retail LAN)
+// ==========================================================================
+
+function filterSidebarLinks() {
+  const input = document.getElementById('sidebar-filter-input');
+  if (!input) return;
+  const rawQuery = (input.value || '').trim();
+  const query = rawQuery.toLowerCase();
+  const clearBtn = document.getElementById('sidebar-filter-clear');
+  const emptyNotice = document.getElementById('sidebar-filter-empty');
+
+  if (clearBtn) {
+    if (rawQuery.length > 0) {
+      clearBtn.classList.remove('hidden');
+    } else {
+      clearBtn.classList.add('hidden');
+    }
+  }
+
+  const links = document.querySelectorAll('#app-sidebar nav .sidebar-link');
+  const groups = document.querySelectorAll('#app-sidebar nav > div:not(#sidebar-filter-empty)');
+  const posBtn = document.getElementById('sidebar-pos-terminal-btn');
+
+  if (!query) {
+    links.forEach(el => el.style.display = '');
+    groups.forEach(g => g.style.display = '');
+    if (posBtn) posBtn.style.display = '';
+    if (emptyNotice) emptyNotice.classList.add('hidden');
+    return;
+  }
+
+  let totalVisible = 0;
+
+  // Filter links
+  links.forEach(link => {
+    const text = (link.textContent || '').toLowerCase();
+    const title = (link.getAttribute('title') || '').toLowerCase();
+    const keywords = (link.getAttribute('data-keywords') || '').toLowerCase();
+    const matches = text.includes(query) || title.includes(query) || keywords.includes(query);
+    link.style.display = matches ? 'flex' : 'none';
+    if (matches) totalVisible++;
+  });
+
+  // Filter POS button
+  if (posBtn) {
+    const posText = (posBtn.textContent || '').toLowerCase();
+    const posKeywords = 'pos point of sale checkout cashier till terminal instant checkout receipt register f2';
+    const posMatches = posText.includes(query) || posKeywords.includes(query);
+    posBtn.style.display = posMatches ? 'flex' : 'none';
+    if (posMatches) totalVisible++;
+  }
+
+  // Filter group headers
+  groups.forEach(group => {
+    const visibleLinks = group.querySelectorAll('.sidebar-link:not([style*="display: none"])');
+    group.style.display = visibleLinks.length > 0 ? '' : 'none';
+  });
+
+  if (emptyNotice) {
+    if (totalVisible === 0) {
+      emptyNotice.classList.remove('hidden');
+    } else {
+      emptyNotice.classList.add('hidden');
+    }
+  }
+}
+window.filterSidebarLinks = filterSidebarLinks;
+
+function clearSidebarFilter() {
+  const input = document.getElementById('sidebar-filter-input');
+  if (input) {
+    input.value = '';
+    filterSidebarLinks();
+    input.focus();
+  }
+}
+window.clearSidebarFilter = clearSidebarFilter;
+
+function handleCollapsedSearchClick() {
+  openFeatureSearchModal();
+}
+window.handleCollapsedSearchClick = handleCollapsedSearchClick;
+
+function openFeatureSearchModalFromSidebar() {
+  const input = document.getElementById('sidebar-filter-input');
+  const q = input ? input.value : '';
+  openFeatureSearchModal(q);
+}
+window.openFeatureSearchModalFromSidebar = openFeatureSearchModalFromSidebar;
+
+// ==========================================================================
+// Global Feature Search Command Palette Modal (Apple Minimalist)
+// ==========================================================================
+
+let globalFeaturesCache = null;
+let filteredSearchResults = [];
+let activeFeatureSearchIndex = -1;
+let currentFeatureCategory = 'ALL';
+let featureSearchDebounce = null;
+let isFeaturesLoading = false;
+
+const FEATURE_CACHE_KEY = 'gadget_features_catalog';
+const FEATURE_CACHE_TIME_KEY = 'gadget_features_catalog_time';
+const FEATURE_CACHE_TTL = 3600000; // 1 hour
+
+async function loadAllSystemFeatures() {
+  if (globalFeaturesCache && globalFeaturesCache.length > 0) {
+    return globalFeaturesCache;
+  }
+
+  try {
+    const cached = localStorage.getItem(FEATURE_CACHE_KEY);
+    const time = localStorage.getItem(FEATURE_CACHE_TIME_KEY);
+    if (cached && time && (Date.now() - parseInt(time) < FEATURE_CACHE_TTL)) {
+      globalFeaturesCache = JSON.parse(cached);
+      updateTotalFeaturesCount(globalFeaturesCache.length);
+      return globalFeaturesCache;
+    }
+  } catch (err) {}
+
+  if (isFeaturesLoading) {
+    return new Promise(resolve => {
+      const check = setInterval(() => {
+        if (!isFeaturesLoading && globalFeaturesCache) {
+          clearInterval(check);
+          resolve(globalFeaturesCache);
+        }
+      }, 80);
+    });
+  }
+
+  isFeaturesLoading = true;
+  try {
+    const resp = await fetch('/api/search-features/');
+    const data = await resp.json();
+    if (data && data.features) {
+      globalFeaturesCache = data.features;
+      try {
+        localStorage.setItem(FEATURE_CACHE_KEY, JSON.stringify(globalFeaturesCache));
+        localStorage.setItem(FEATURE_CACHE_TIME_KEY, Date.now().toString());
+      } catch (e) {}
+      updateTotalFeaturesCount(globalFeaturesCache.length);
+      isFeaturesLoading = false;
+      return globalFeaturesCache;
+    }
+  } catch (err) {
+    console.error('Failed to load system features:', err);
+  }
+  isFeaturesLoading = false;
+  return [];
+}
+
+function updateTotalFeaturesCount(count) {
+  const counter = document.getElementById('featuresTotalCounter');
+  if (counter) counter.textContent = `${count} features indexed`;
+}
+
+function openFeatureSearchModal(initialQuery = '') {
+  const modal = document.getElementById('featureSearchModal');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+
+  const input = document.getElementById('globalFeatureSearchInput');
+  if (input) {
+    input.value = initialQuery;
+    setTimeout(() => {
+      input.focus();
+      input.select();
+    }, 80);
+  }
+
+  currentFeatureCategory = 'ALL';
+  updateCategoryChipButtons('ALL');
+  activeFeatureSearchIndex = -1;
+
+  loadAllSystemFeatures().then(() => {
+    performFeatureSearch(initialQuery);
+  });
+}
+window.openFeatureSearchModal = openFeatureSearchModal;
+
+function closeFeatureSearchModal() {
+  const modal = document.getElementById('featureSearchModal');
+  if (!modal) return;
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+window.closeFeatureSearchModal = closeFeatureSearchModal;
+
+function handleSearchOverlayClick(e) {
+  if (e.target.id === 'featureSearchModal') {
+    closeFeatureSearchModal();
+  }
+}
+window.handleSearchOverlayClick = handleSearchOverlayClick;
+
+function filterFeaturesByCategory(cat) {
+  currentFeatureCategory = cat;
+  updateCategoryChipButtons(cat);
+  const input = document.getElementById('globalFeatureSearchInput');
+  performFeatureSearch(input ? input.value : '');
+}
+window.filterFeaturesByCategory = filterFeaturesByCategory;
+
+function updateCategoryChipButtons(cat) {
+  document.querySelectorAll('#featureCategoryChips .search-cat-chip').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-cat') === cat);
+  });
+}
+
+function performFeatureSearch(rawQuery) {
+  const container = document.getElementById('featureSearchResults');
+  if (!container) return;
+
+  if (!globalFeaturesCache || globalFeaturesCache.length === 0) {
+    container.innerHTML = `
+      <div class="py-12 text-center text-slate-400 text-xs">
+        <i class="fas fa-circle-notch fa-spin text-lg text-blue-600 mb-2"></i>
+        <div>Loading system features...</div>
+      </div>`;
+    return;
+  }
+
+  const query = (rawQuery || '').trim().toLowerCase();
+  let candidates = globalFeaturesCache;
+
+  if (currentFeatureCategory !== 'ALL') {
+    candidates = candidates.filter(f => f.category === currentFeatureCategory);
+  }
+
+  if (!query) {
+    filteredSearchResults = candidates;
+    activeFeatureSearchIndex = 0;
+    renderFeatureSearchResults(filteredSearchResults, '');
+    return;
+  }
+
+  const searchTerms = query.split(/\s+/).filter(Boolean);
+  const scored = [];
+
+  for (const f of candidates) {
+    let score = 0;
+    let matchCount = 0;
+    const nameLower = (f.name || '').toLowerCase();
+    const descLower = (f.description || '').toLowerCase();
+    const keywords = (f.keywords || []).map(k => k.toLowerCase());
+    const fullHaystack = [nameLower, descLower, ...keywords].join(' ');
+
+    if (fullHaystack.includes(query)) score += 5;
+    if (nameLower.startsWith(query)) score += 6;
+
+    for (const term of searchTerms) {
+      let termMatched = false;
+      if (nameLower.includes(term)) {
+        score += 4;
+        termMatched = true;
+      }
+      if (keywords.some(k => k.includes(term))) {
+        score += 3;
+        termMatched = true;
+      }
+      if (descLower.includes(term)) {
+        score += 1.5;
+        termMatched = true;
+      }
+      if (termMatched) matchCount++;
+    }
+
+    if (matchCount > 0 || score > 0) {
+      scored.push({ feature: f, score: score + matchCount * 2 });
+    }
+  }
+
+  scored.sort((a, b) => b.score - a.score);
+  filteredSearchResults = scored.map(s => s.feature);
+  activeFeatureSearchIndex = filteredSearchResults.length > 0 ? 0 : -1;
+  renderFeatureSearchResults(filteredSearchResults, query);
+}
+
+function highlightSearchMatch(text, query) {
+  if (!text || !query) return text || '';
+  const terms = query.split(/\s+/).filter(Boolean);
+  if (terms.length === 0) return text;
+  const pattern = new RegExp(`(${terms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'gi');
+  return text.replace(pattern, '<mark>$1</mark>');
+}
+
+function renderFeatureSearchResults(results, query) {
+  const container = document.getElementById('featureSearchResults');
+  if (!container) return;
+
+  if (!results || results.length === 0) {
+    container.innerHTML = `
+      <div class="py-12 text-center text-slate-400 text-xs">
+        <i class="fas fa-search-minus text-2xl text-slate-300 mb-2"></i>
+        <div class="font-semibold text-slate-700">No matching features found</div>
+        <div class="text-[11px] text-slate-400 mt-0.5">Try searching with a different keyword or category</div>
+      </div>`;
+    return;
+  }
+
+  let html = '';
+  results.forEach((item, idx) => {
+    const isActive = idx === activeFeatureSearchIndex ? 'active' : '';
+    const hlName = highlightSearchMatch(item.name, query);
+    const hlDesc = highlightSearchMatch(item.description, query);
+    const badgeHtml = item.badge 
+      ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 ml-2 flex-shrink-0">${item.badge}</span>` 
+      : '';
+
+    html += `
+      <a href="${item.link}" 
+         class="search-feature-item ${isActive}" 
+         data-index="${idx}" 
+         onclick="handleFeatureSelect(event, '${item.link}')">
+        <div class="feature-icon-box">
+          <i class="${item.icon}"></i>
+        </div>
+        <div class="flex-1 min-w-0 pr-2">
+          <div class="feature-item-title truncate">${hlName}</div>
+          ${item.description ? `<div class="feature-item-desc">${hlDesc}</div>` : ''}
+        </div>
+        ${badgeHtml}
+      </a>`;
+  });
+
+  container.innerHTML = html;
+
+  const activeEl = container.querySelector('.search-feature-item.active');
+  if (activeEl) {
+    activeEl.scrollIntoView({ block: 'nearest' });
+  }
+}
+
+function handleFeatureSelect(e, link) {
+  if (e) e.preventDefault();
+  closeFeatureSearchModal();
+  if (link.startsWith('javascript:')) {
+    const code = link.replace('javascript:', '');
+    try {
+      (new Function(code))();
+    } catch (err) {
+      console.error('Feature execution error:', err);
+    }
+  } else if (link.startsWith('http') || link.startsWith('//')) {
+    window.open(link, '_blank');
+  } else {
+    window.location.href = link;
+  }
+}
+window.handleFeatureSelect = handleFeatureSelect;
+
+function updateActiveSearchItemIndex(newIndex) {
+  if (filteredSearchResults.length === 0) return;
+  activeFeatureSearchIndex = Math.max(0, Math.min(newIndex, filteredSearchResults.length - 1));
+  const items = document.querySelectorAll('#featureSearchResults .search-feature-item');
+  items.forEach(el => {
+    const idx = parseInt(el.getAttribute('data-index'), 10);
+    el.classList.toggle('active', idx === activeFeatureSearchIndex);
+    if (idx === activeFeatureSearchIndex) {
+      el.scrollIntoView({ block: 'nearest' });
+    }
+  });
+}
+
+function initFeatureSearch() {
+  const sidebarInput = document.getElementById('sidebar-filter-input');
+  if (sidebarInput) {
+    sidebarInput.addEventListener('input', filterSidebarLinks);
+    sidebarInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const visibleLinks = document.querySelectorAll('#app-sidebar nav .sidebar-link:not([style*="display: none"])');
+        if (visibleLinks.length === 1) {
+          visibleLinks[0].click();
+        } else {
+          openFeatureSearchModal(this.value);
+        }
+      } else if (e.key === 'Escape') {
+        clearSidebarFilter();
+        this.blur();
+      }
+    });
+  }
+
+  const modalInput = document.getElementById('globalFeatureSearchInput');
+  if (modalInput) {
+    modalInput.addEventListener('input', function () {
+      clearTimeout(featureSearchDebounce);
+      const q = this.value;
+      featureSearchDebounce = setTimeout(() => {
+        performFeatureSearch(q);
+      }, 100);
+    });
+
+    modalInput.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        updateActiveSearchItemIndex(activeFeatureSearchIndex + 1);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        updateActiveSearchItemIndex(activeFeatureSearchIndex - 1);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (activeFeatureSearchIndex >= 0 && filteredSearchResults[activeFeatureSearchIndex]) {
+          const sel = filteredSearchResults[activeFeatureSearchIndex];
+          handleFeatureSelect(null, sel.link);
+        }
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        closeFeatureSearchModal();
+      }
+    });
+  }
+
+  // Global Shortcuts: Ctrl+/ (Focus Sidebar search) & Ctrl+K (Open Command Palette)
+  document.addEventListener('keydown', function (e) {
+    // Ctrl + / or Cmd + / -> focus sidebar search
+    if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+      const sbInput = document.getElementById('sidebar-filter-input');
+      if (sbInput) {
+        e.preventDefault();
+        // If sidebar is collapsed, expand it
+        if ($('#app-sidebar').hasClass('collapsed')) {
+          $('#sidebar-toggle-btn').click();
+        }
+        sbInput.focus();
+        sbInput.select();
+      }
+    }
+    // Ctrl + K or Cmd + K -> open Command Palette
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+      e.preventDefault();
+      const modal = document.getElementById('featureSearchModal');
+      if (modal && !modal.classList.contains('hidden')) {
+        closeFeatureSearchModal();
+      } else {
+        openFeatureSearchModal();
+      }
+    }
+  });
+
+  // Pre-fetch catalog in background when browser is idle
+  setTimeout(loadAllSystemFeatures, 1500);
+}

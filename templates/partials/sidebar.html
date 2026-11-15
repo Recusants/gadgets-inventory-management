@@ -34,8 +34,37 @@
     </button>
   </div>
 
+  <!-- Search for Features in Sidebar (Like in Clarity Retail LAN) -->
+  <div class="sidebar-search-box px-3 pt-2.5 pb-1 flex-shrink-0">
+    <div class="relative flex items-center">
+      <i class="fas fa-search absolute left-3 text-slate-400 text-xs pointer-events-none"></i>
+      <input type="text" 
+             id="sidebar-filter-input" 
+             placeholder="Search features... (Ctrl+/)"
+             autocomplete="off" 
+             spellcheck="false"
+             class="w-full bg-slate-50 border border-slate-200/90 text-slate-900 text-xs rounded-xl pl-8 pr-7 py-2 outline-none transition-all focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 placeholder-slate-400 font-medium"
+             title="Search menu & features (Ctrl+/)">
+      <button type="button" 
+              id="sidebar-filter-clear" 
+              onclick="clearSidebarFilter()"
+              class="hidden absolute right-2 text-slate-400 hover:text-slate-700 text-xs p-1 focus:outline-none"
+              title="Clear search">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <!-- Collapsed Search Button (Shown when sidebar is collapsed) -->
+    <button type="button" 
+            id="sidebar-search-collapsed-btn" 
+            onclick="handleCollapsedSearchClick()"
+            class="hidden w-11 h-10 mx-auto rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 text-slate-600 hover:text-blue-600 items-center justify-center transition-all focus:outline-none"
+            title="Search features (Ctrl+K)">
+      <i class="fas fa-search text-xs"></i>
+    </button>
+  </div>
+
   <!-- Outstanding POS Terminal Action (Easy to Find, Prominent Callout) -->
-  <div class="px-3 pt-3 pb-1 flex-shrink-0">
+  <div class="px-3 pt-1 pb-1 flex-shrink-0">
     <a href="/sales/checkout/" 
        id="sidebar-pos-terminal-btn"
        title="POS Terminal / Instant Checkout"
@@ -59,6 +88,21 @@
   <!-- Navigation Links -->
   <nav class="flex-1 px-3 py-2 space-y-4 overflow-y-auto custom-scrollbar">
     
+    <!-- No matching menu items alert -->
+    <div id="sidebar-filter-empty" class="hidden p-4 text-center text-xs text-slate-400 rounded-2xl bg-slate-50 border border-dashed border-slate-200">
+      <div class="w-8 h-8 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-2">
+        <i class="fas fa-search text-xs"></i>
+      </div>
+      <div class="font-semibold text-slate-700">No direct menu match</div>
+      <div class="text-[10px] text-slate-400 mt-0.5">Press Enter to search all system features</div>
+      <button type="button" 
+              onclick="openFeatureSearchModalFromSidebar()" 
+              class="mt-2.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-600 font-semibold text-[11px] transition-colors border border-blue-200/60 inline-flex items-center space-x-1.5">
+        <i class="fas fa-bolt text-[10px]"></i>
+        <span>Search all features (Ctrl+K)</span>
+      </button>
+    </div>
+
     <!-- Group: Daily Operation -->
     <div class="space-y-0.5">
       <div class="sidebar-label px-3 pt-1 pb-1 text-[10px] font-semibold text-slate-400 tracking-wider uppercase">
@@ -68,6 +112,7 @@
       <!-- Dashboard -->
       <a href="{% url 'dashboard:index' %}" 
          title="Dashboard"
+         data-keywords="dashboard home overview charts analytics kpi revenue live summary"
          class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if request.resolver_match.app_name == 'dashboard' %}sidebar-link-active{% endif %}">
         <i class="fas fa-th-large w-4 text-center mr-2.5 flex-shrink-0"></i>
         <span class="sidebar-label truncate">Dashboard</span>
@@ -76,6 +121,7 @@
       <!-- Sales -->
       <a href="/sales/" 
          title="Sales Records"
+         data-keywords="sales records orders receipts transactions history sold items revenue turnover"
          class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if request.resolver_match.app_name == 'sales' and not 'checkout' in request.path and not 'customer' in request.path %}sidebar-link-active{% endif %}">
         <i class="fas fa-shopping-bag w-4 text-center mr-2.5 flex-shrink-0"></i>
         <span class="sidebar-label truncate">Sales</span>
@@ -84,6 +130,7 @@
       <!-- Customers -->
       <a href="/sales/customers/" 
          title="Customers"
+         data-keywords="customers clients debtors directory phone loyalty tin address"
          class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if 'customer' in request.path %}sidebar-link-active{% endif %}">
         <i class="fas fa-user-friends w-4 text-center mr-2.5 flex-shrink-0"></i>
         <span class="sidebar-label truncate">Customers</span>
@@ -99,6 +146,7 @@
       <!-- Products (Catalog) -->
       <a href="/inventory/products/" 
          title="Products"
+         data-keywords="products catalog items gadgets phones accessories barcode skus price"
          class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if '/inventory/products/' in request.path %}sidebar-link-active{% endif %}">
         <i class="fas fa-boxes w-4 text-center mr-2.5 flex-shrink-0"></i>
         <span class="sidebar-label truncate">Products</span>
@@ -108,6 +156,7 @@
       <!-- Stock & Pricing -->
       <a href="/inventory/stock/" 
          title="Stock & Pricing"
+         data-keywords="stock pricing levels quantities markup margin cost valuation on hand"
          class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if '/inventory/stock/' in request.path %}sidebar-link-active{% endif %}">
         <i class="fas fa-cubes w-4 text-center mr-2.5 flex-shrink-0"></i>
         <span class="sidebar-label truncate">Stock &amp; Pricing</span>
@@ -116,6 +165,7 @@
       <!-- Stock Batches -->
       <a href="/inventory/batches/" 
          title="Stock Batches"
+         data-keywords="batches lots expiry fifo cost price adjust quantity variance"
          class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if '/inventory/batches/' in request.path %}sidebar-link-active{% endif %}">
         <i class="fas fa-layer-group w-4 text-center mr-2.5 flex-shrink-0"></i>
         <span class="sidebar-label truncate">Batches</span>
@@ -124,6 +174,7 @@
       <!-- Invoices -->
       <a href="/inventory/invoices/" 
          title="Received Invoices"
+         data-keywords="invoices grn receiving supplier delivery stock-in purchase invoice"
          class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if '/inventory/invoices/' in request.path %}sidebar-link-active{% endif %}">
         <i class="fas fa-receipt w-4 text-center mr-2.5 flex-shrink-0"></i>
         <span class="sidebar-label truncate">Invoices</span>
@@ -132,6 +183,7 @@
       <!-- Suppliers -->
       <a href="/inventory/suppliers/" 
          title="Suppliers"
+         data-keywords="suppliers vendors distributors creditors purchasing contacts"
          class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if '/inventory/suppliers/' in request.path %}sidebar-link-active{% endif %}">
         <i class="fas fa-truck w-4 text-center mr-2.5 flex-shrink-0"></i>
         <span class="sidebar-label truncate">Suppliers</span>
@@ -140,6 +192,7 @@
       <!-- Categories -->
       <a href="/inventory/categories/" 
          title="Categories"
+         data-keywords="categories classification gadget types tags product groups"
          class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if '/inventory/categories/' in request.path %}sidebar-link-active{% endif %}">
         <i class="fas fa-tag w-4 text-center mr-2.5 flex-shrink-0"></i>
         <span class="sidebar-label truncate">Categories</span>
@@ -157,6 +210,7 @@
       <!-- Expenses -->
       <a href="/expenses/" 
          title="Expenses Tracking"
+         data-keywords="expenses costs petty cash overheads spending outflow payments"
          class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if request.resolver_match.app_name == 'expenses' %}sidebar-link-active{% endif %}">
         <i class="fas fa-wallet w-4 text-center mr-2.5 flex-shrink-0"></i>
         <span class="sidebar-label truncate">Expenses</span>
@@ -165,6 +219,7 @@
       <!-- Reports -->
       <a href="/reports/" 
          title="Reports & Analytics"
+         data-keywords="reports analytics profit excel pdf sales audit performance charts margin"
          class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if request.resolver_match.app_name == 'reports' %}sidebar-link-active{% endif %}">
         <i class="fas fa-chart-pie w-4 text-center mr-2.5 flex-shrink-0"></i>
         <span class="sidebar-label truncate">Reports</span>
@@ -175,6 +230,7 @@
       <!-- ZIMRA Fiscalisation -->
       <a href="{% url 'fiscalisation:dashboard' %}" 
          title="ZIMRA Fiscalisation"
+         data-keywords="zimra fiscalisation tax vat fda receipts compliance qr code device cert"
          class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if 'fiscalisation' in request.path %}sidebar-link-active{% endif %}">
         <i class="fas fa-file-invoice w-4 text-center mr-2.5 flex-shrink-0"></i>
         <span class="sidebar-label truncate">Fiscalisation</span>
@@ -183,6 +239,7 @@
       <!-- Thermal Printers -->
       <a href="{% url 'print_out:printers_page' %}" 
          title="Printers"
+         data-keywords="printers thermal receipt 80mm 58mm escpos usb network bluetooth hardware"
          class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if 'printers' in request.path %}sidebar-link-active{% endif %}">
         <i class="fas fa-print w-4 text-center mr-2.5 flex-shrink-0"></i>
         <span class="sidebar-label truncate">Printers</span>
@@ -200,6 +257,7 @@
       <!-- Settings -->
       <a href="{% url 'core:settings' %}" 
          title="Store Settings"
+         data-keywords="settings company store name branch currency logo tax rate address contact"
          class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if 'settings' in request.path %}sidebar-link-active{% endif %}">
         <i class="fas fa-sliders-h w-4 text-center mr-2.5 flex-shrink-0"></i>
         <span class="sidebar-label truncate">Settings</span>
@@ -208,6 +266,7 @@
       <!-- System Info -->
       <a href="{% url 'core:system' %}" 
          title="System Info"
+         data-keywords="system info diagnostics database postgres sqlite backup download avail support"
          class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if 'system' in request.path %}sidebar-link-active{% endif %}">
         <i class="fas fa-server w-4 text-center mr-2.5 flex-shrink-0"></i>
         <span class="sidebar-label truncate">System</span>
@@ -217,6 +276,7 @@
       <!-- What's New -->
       <a href="{% url 'core:whats_new' %}" 
          title="What's New"
+         data-keywords="whats new updates release notes changelog features improvements"
          class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if 'whats-new' in request.path %}sidebar-link-active{% endif %}">
         <i class="fas fa-sparkles w-4 text-center mr-2.5 flex-shrink-0"></i>
         <span class="sidebar-label truncate">What's New</span>
@@ -225,6 +285,7 @@
       <!-- Notifications (Part of Scrolling Menu) -->
       <a href="{% url 'core:notification_list' %}" 
          title="Notifications"
+         data-keywords="notifications alerts warnings notices bell unread messages"
          class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all {% if 'notification' in request.path %}sidebar-link-active{% endif %}">
         <div class="flex items-center min-w-0">
           <i class="fas fa-bell w-4 text-center mr-2.5 flex-shrink-0"></i>
@@ -241,6 +302,7 @@
       <!-- Users -->
       <a href="{% url 'accounts:user_list' %}" 
          title="User Management"
+         data-keywords="users accounts staff passwords roles cashiers managers permissions access"
          class="sidebar-link flex items-center px-3 py-2 rounded-xl text-xs font-medium transition-all {% if 'accounts/users' in request.path %}sidebar-link-active{% endif %}">
         <i class="fas fa-user-shield w-4 text-center mr-2.5 flex-shrink-0"></i>
         <span class="sidebar-label truncate">Users</span>
