@@ -306,28 +306,45 @@ html.sidebar-is-collapsed #app-sidebar .sidebar-link-active i,
   color: #2563eb !important;
 }
 
-/* Outstanding POS Terminal Featured Card (Apple Navy Squircle with Light Blue Glow) */
-.sidebar-pos-btn {
-  background-color: #0a192f !important; /* Deep navy blue */
-  color: #ffffff !important;
-  border: 1px solid #1e3a8a !important; /* Navy-blue border */
-  border-radius: 16px !important;
-  box-shadow: 0 4px 14px 0 rgba(10, 25, 47, 0.22) !important;
+/* POS Terminal Button in Sidebar (As other sidebar items, with Navy Blue text & icon) */
+.sidebar-pos-link {
+  color: #0a192f !important; /* Navy blue */
+  font-weight: 700 !important;
+  background-color: transparent !important;
+  border: 1px solid transparent !important;
+  border-left: 4px solid transparent !important;
+  box-shadow: none !important;
   transition: all 0.15s ease-in-out !important;
 }
-.sidebar-pos-btn:hover {
-  background-color: #020617 !important;
-  border-color: #3b82f6 !important; /* Bright blue highlight on hover */
-  box-shadow: 0 6px 20px 0 rgba(10, 25, 47, 0.32) !important;
-  transform: translateY(-1px);
+.sidebar-pos-link i {
+  color: #0a192f !important; /* Navy blue */
+  transition: color 0.15s ease-in-out !important;
 }
-.sidebar-pos-btn:active {
-  transform: scale(0.98);
+.sidebar-pos-link:hover {
+  background-color: #f1f5f9 !important;
+  color: #0a192f !important;
 }
-.sidebar-pos-btn.active,
-.sidebar-pos-btn.sidebar-pos-active {
-  border-color: #60a5fa !important;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.35) !important;
+.sidebar-pos-link:hover i {
+  color: #0a192f !important;
+}
+
+/* When POS Terminal is Active */
+.sidebar-pos-link.sidebar-link-active,
+.sidebar-pos-link.active,
+a.sidebar-pos-link.sidebar-link-active {
+  background-color: #eff6ff !important;
+  color: #0a192f !important;
+  font-weight: 700 !important;
+  border-left: 4px solid #2563eb !important;
+  border-top: 1px solid #bfdbfe !important;
+  border-right: 1px solid #bfdbfe !important;
+  border-bottom: 1px solid #bfdbfe !important;
+  box-shadow: 0 1px 3px 0 rgba(37, 99, 235, 0.10) !important;
+}
+.sidebar-pos-link.sidebar-link-active i,
+.sidebar-pos-link.active i,
+a.sidebar-pos-link.sidebar-link-active i {
+  color: #2563eb !important;
 }
 
 /* Collapsed Sidebar POS Button */
@@ -338,32 +355,47 @@ html.sidebar-is-collapsed #app-sidebar .sidebar-pos-container,
   display: flex !important;
   justify-content: center !important;
 }
-html.sidebar-is-collapsed #app-sidebar .sidebar-pos-btn,
-#app-sidebar.collapsed .sidebar-pos-btn {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 0 !important;
+
+html.sidebar-is-collapsed #app-sidebar .sidebar-pos-link,
+#app-sidebar.collapsed .sidebar-pos-link {
   width: 38px !important;
   height: 38px !important;
-  margin: 0 auto 6px auto !important;
+  margin: 0 auto 4px auto !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   border-radius: 12px !important;
+  border: 1px solid transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
 }
-html.sidebar-is-collapsed #app-sidebar .sidebar-pos-btn .pos-icon-box,
-#app-sidebar.collapsed .sidebar-pos-btn .pos-icon-box {
+
+html.sidebar-is-collapsed #app-sidebar .sidebar-pos-link:hover,
+#app-sidebar.collapsed .sidebar-pos-link:hover {
+  background-color: #f1f5f9 !important;
+  color: #0a192f !important;
+}
+
+html.sidebar-is-collapsed #app-sidebar .sidebar-pos-link i,
+#app-sidebar.collapsed .sidebar-pos-link i {
   margin-right: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  background: transparent !important;
-  border: none !important;
+  font-size: 1.05rem !important;
+  color: #0a192f !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
 }
-html.sidebar-is-collapsed #app-sidebar .sidebar-pos-btn i,
-#app-sidebar.collapsed .sidebar-pos-btn i {
-  font-size: 1.1rem !important;
-  color: #60a5fa !important; /* Light blue */
+
+html.sidebar-is-collapsed #app-sidebar .sidebar-pos-link.sidebar-link-active,
+#app-sidebar.collapsed .sidebar-pos-link.sidebar-link-active {
+  background-color: #eff6ff !important;
+  border: 1px solid #bfdbfe !important;
+  border-left: 3px solid #2563eb !important;
+}
+html.sidebar-is-collapsed #app-sidebar .sidebar-pos-link.sidebar-link-active i,
+#app-sidebar.collapsed .sidebar-pos-link.sidebar-link-active i {
+  color: #2563eb !important;
 }
 
 /* Collapsed Sidebar Footer */
