@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.41",
-  "build": "v2.4.41-4daa872",
-  "commit_count": 41,
-  "commit_hash": "4daa872",
+  "version": "v2.4.42",
+  "build": "v2.4.42-4575a56",
+  "commit_count": 42,
+  "commit_hash": "4575a56",
   "branch": "main",
-  "commit_subject": "Remove search trigger from top navigation bar in favor of sidebar search",
-  "updated_at": "2026-11-15 20:04",
-  "last_pushed_at": "2026-11-15 20:05:01"
+  "commit_subject": "Sidebar brand header links to home / and displays company name with branch name",
+  "updated_at": "2026-11-15 20:15",
+  "last_pushed_at": "2026-11-15 20:15:48"
 }
