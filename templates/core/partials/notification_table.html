@@ -2,25 +2,26 @@
   <table class="w-full text-left border-collapse text-xs">
     <thead class="sticky top-0 z-20 bg-slate-100 border-b border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
       <tr>
-        <th class="py-3 px-4">Type</th>
-        <th class="py-3 px-4">Subject / Title</th>
-        <th class="py-3 px-4">Stock Remaining / Level</th>
+        <th class="py-3 px-4 w-32">Type</th>
+        <th class="py-3 px-4">Subject</th>
         <th class="py-3 px-4">Message</th>
-        <th class="py-3 px-4">Date & Time</th>
+        <th class="py-3 px-4 whitespace-nowrap">Date &amp; Time</th>
         <th class="py-3 px-4 text-center">Status</th>
-        <th class="py-3 px-4 text-center">Actions</th>
+        <th class="py-3 px-4 text-center w-28">Actions</th>
       </tr>
     </thead>
     <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
       {% for n in notifications %}
       <tr class="hover:bg-blue-50/50 transition-colors {% if not n.is_read %}bg-blue-50/20 font-semibold{% endif %}">
+        
+        <!-- Type Pill -->
         <td class="py-3 px-4 whitespace-nowrap">
           {% if n.notification_type == 'LOW_STOCK' %}
             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
               <i class="fas fa-boxes-stacked mr-1 text-[9px] text-blue-600"></i> Stock Alert
             </span>
           {% elif n.notification_type == 'EXPIRING' %}
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-950 border border-blue-200 border border-sky-300">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-sky-900 border border-sky-200">
               <i class="fas fa-clock mr-1 text-[9px] text-sky-600"></i> Expiry Alert
             </span>
           {% elif n.notification_type == 'EXPENSE' %}
@@ -33,79 +34,61 @@
             </span>
           {% endif %}
         </td>
+
+        <!-- Subject / Title -->
         <td class="py-3 px-4">
-          <div class="font-bold text-slate-900">{{ n.title }}</div>
+          <div class="flex items-center">
+            {% if not n.is_read %}
+              <span class="w-1.5 h-1.5 rounded-full bg-blue-600 inline-block mr-1.5 flex-shrink-0 animate-pulse" title="Unread Notice"></span>
+            {% endif %}
+            <a href="javascript:void(0)" 
+               data-modal-url="{% url 'core:notification_detail_modal' n.pk %}"
+               data-modal-size="max-w-lg"
+               title="View Full Details"
+               class="font-bold text-slate-900 hover:text-blue-600 transition-colors block truncate max-w-xs">
+              {{ n.title }}
+            </a>
+          </div>
         </td>
-        <td class="py-3 px-4 whitespace-nowrap">
-          {% if n.notification_type == 'EXPIRING' and n.expiry_data %}
-            <div class="space-y-1">
-              <div class="flex items-center space-x-2">
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black {{ n.expiry_data.badge_class }}">
-                  <span class="w-1.5 h-1.5 rounded-full mr-1.5 {{ n.expiry_data.dot_class }} animate-pulse"></span>
-                  {{ n.expiry_data.label }}
-                </span>
-                <span class="text-[10px] font-mono font-bold text-slate-600">
-                  Batch #{{ n.batch.id }}{% if n.batch.serial_number %} [SN: {{ n.batch.serial_number }}]{% endif %}
-                </span>
-              </div>
-              <div class="text-[10px] text-slate-500 font-mono">
-                Exp: {{ n.batch.expiration_date|date:"Y-m-d" }} ({{ n.batch.quantity_remaining }} units)
-              </div>
-            </div>
-          {% elif n.stock_level_data %}
-            <div class="space-y-1">
-              <div class="flex items-center space-x-2">
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black {{ n.stock_level_data.badge_soft }}">
-                  <span class="w-1.5 h-1.5 rounded-full mr-1.5 {{ n.stock_level_data.bar_bg }} animate-pulse"></span>
-                  {{ n.stock_level_data.label }}
-                </span>
-                <span class="text-[10px] font-mono font-bold text-slate-600">
-                  <b>{{ n.stock_level_data.qty }}</b> / {{ n.stock_level_data.reorder }} units
-                </span>
-              </div>
-              <!-- Progress band respective to reorder level -->
-              <div class="w-32 bg-slate-100 h-1.5 rounded-full overflow-hidden flex border border-slate-200">
-                <div class="{{ n.stock_level_data.bar_bg }} h-full rounded-full transition-all" style="width: {{ n.stock_level_data.pct }}%"></div>
-              </div>
-            </div>
-          {% else %}
-            <span class="text-slate-400 text-[11px]">—</span>
-          {% endif %}
+
+        <!-- Limited Message Preview -->
+        <td class="py-3 px-4 text-slate-600">
+          <span class="truncate block max-w-md" title="{{ n.message }}">
+            {{ n.message|truncatechars:75 }}
+          </span>
         </td>
-        <td class="py-3 px-4 text-slate-600 max-w-sm">
-          {{ n.message }}
-        </td>
+
+        <!-- Date & Time -->
         <td class="py-3 px-4 whitespace-nowrap font-mono text-slate-500 text-[11px]">
           {{ n.created_at|date:"M d, Y H:i" }}
         </td>
+
+        <!-- Status -->
         <td class="py-3 px-4 whitespace-nowrap text-center">
           {% if n.is_read %}
             <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-500">
               Read
             </span>
           {% else %}
-            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-600 text-white">
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-600 text-white shadow-xs">
               Unread
             </span>
           {% endif %}
         </td>
+
+        <!-- Actions -->
         <td class="py-3 px-4 whitespace-nowrap text-center">
           <div class="inline-flex items-center justify-center space-x-1.5">
-            {% if n.product %}
-              <button type="button"
-                      data-modal-url="{% url 'inventory:product_detail_modal' n.product.id %}"
-                      data-modal-size="max-w-3xl"
-                      title="Inspect Product & Batches"
-                      class="w-7 h-7 rounded-lg bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center text-xs shadow-sm transition-all">
-                <i class="fas fa-boxes-stacked"></i>
-              </button>
-            {% elif n.link_url %}
-              <a href="{{ n.link_url }}" 
-                 title="View Related Item"
-                 class="w-7 h-7 rounded-lg bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center text-xs shadow-sm transition-all">
-                <i class="fas fa-external-link-alt"></i>
-              </a>
-            {% endif %}
+            <!-- Details Modal -->
+            <button type="button"
+                    data-modal-url="{% url 'core:notification_detail_modal' n.pk %}"
+                    data-modal-size="max-w-lg"
+                    title="View Full Notification Details"
+                    class="w-7 h-7 rounded-lg bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center text-xs shadow-sm transition-all">
+              <i class="fas fa-eye"></i>
+            </button>
+
+            <!-- Mark as Read (if unread) -->
             {% if not n.is_read %}
               <button type="button"
                       onclick="markNotifRead('{% url 'core:notification_mark_read' n.pk %}', {{ n.pk }})"
@@ -114,6 +97,8 @@
                 <i class="fas fa-check"></i>
               </button>
             {% endif %}
+
+            <!-- Delete Confirmation -->
             <button type="button"
                     data-action-url="{% url 'core:notification_delete' n.pk %}"
                     data-confirm-title="Delete Notification?"
@@ -133,6 +118,15 @@
             <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
               <i class="fas fa-bell-slash text-lg"></i>
             </div>
+            <p class="font-bold text-slate-600">No notifications found</p>
+            <p class="text-xs text-slate-400">You are all caught up! No active stock alerts or system notices.</p>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
             <p class="font-bold text-slate-600">No notifications found</p>
             <p class="text-xs text-slate-400">You are all caught up! No active stock alerts or system notices.</p>
           </div>

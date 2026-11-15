@@ -1,0 +1,158 @@
+<!-- Notification Details Modal Partial -->
+<div class="p-6">
+  
+  <!-- Modal Header -->
+  <div class="flex items-start justify-between pb-4 border-b border-slate-100">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg flex-shrink-0">
+        {% if notif.notification_type == 'LOW_STOCK' %}
+          <i class="fas fa-boxes-stacked"></i>
+        {% elif notif.notification_type == 'EXPIRING' %}
+          <i class="fas fa-clock text-sky-600"></i>
+        {% elif notif.notification_type == 'EXPENSE' %}
+          <i class="fas fa-wallet text-blue-700"></i>
+        {% else %}
+          <i class="fas fa-bell text-blue-800"></i>
+        {% endif %}
+      </div>
+      <div>
+        <div class="flex items-center space-x-2">
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold 
+            {% if notif.severity == 'CRITICAL' %}bg-rose-50 text-rose-700 border border-rose-200
+            {% elif notif.severity == 'URGENT' %}bg-amber-50 text-amber-700 border border-amber-200
+            {% else %}bg-blue-50 text-blue-700 border border-blue-200{% endif %}">
+            {{ notif.get_severity_display|default:notif.severity }}
+          </span>
+          <span class="text-[11px] text-slate-400 font-mono">
+            {{ notif.created_at|date:"M d, Y • H:i" }}
+          </span>
+        </div>
+        <h3 class="text-base font-black tracking-tight text-slate-900 mt-1">
+          {{ notif.title }}
+        </h3>
+      </div>
+    </div>
+    
+    <button type="button" data-modal-close class="text-slate-400 hover:text-slate-600 p-1 rounded-lg transition-colors focus:outline-none">
+      <i class="fas fa-times text-sm"></i>
+    </button>
+  </div>
+
+  <!-- Modal Body -->
+  <div class="py-5 space-y-4 text-xs">
+    
+    <!-- Full Message Content -->
+    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-slate-700 leading-relaxed font-medium">
+      <div class="text-[10px] font-extrabold uppercase text-slate-400 mb-1 tracking-wider">Notice Message</div>
+      {{ notif.message }}
+    </div>
+
+    <!-- Stock / Product / Batch Details Card if attached -->
+    {% if notif.product %}
+    <div class="rounded-2xl border border-slate-200 p-4 space-y-3 bg-white">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+        <div class="font-bold text-slate-900 text-xs flex items-center">
+          <i class="fas fa-cubes text-blue-600 mr-2"></i> Inventory Item Details
+        </div>
+        {% if notif.product.category %}
+          <span class="px-2 py-0.5 rounded-lg bg-blue-50 text-blue-700 font-bold text-[10px] border border-blue-100">
+            {{ notif.product.category.name }}
+          </span>
+        {% endif %}
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 pt-1">
+        <div>
+          <div class="text-[10px] uppercase font-bold text-slate-400">Product Name</div>
+          <div class="font-bold text-slate-900 text-xs mt-0.5">{{ notif.product.name }}</div>
+          {% if notif.product.sku %}
+            <div class="text-[10px] font-mono text-slate-500 mt-0.5">SKU: {{ notif.product.sku }}</div>
+          {% endif %}
+        </div>
+        <div>
+          <div class="text-[10px] uppercase font-bold text-slate-400">Stock on Hand</div>
+          <div class="text-base font-black text-slate-900 font-mono mt-0.5">
+            {{ notif.product.stock.quantity_on_hand|default:0 }} units
+          </div>
+          <div class="text-[10px] text-slate-500 mt-0.5">
+            Reorder Level: {{ notif.product.stock.reorder_level|default:5 }} units
+          </div>
+        </div>
+      </div>
+
+      <!-- Batch breakdown if expiring -->
+      {% if notif.batch %}
+      <div class="pt-2 border-t border-slate-100 grid grid-cols-2 gap-3 text-[11px]">
+        <div>
+          <span class="text-slate-400">Batch ID:</span> 
+          <span class="font-mono font-bold text-slate-800">#{{ notif.batch.id }}</span>
+          {% if notif.batch.serial_number %}
+            <div class="font-mono text-blue-600 text-[10px]">SN: {{ notif.batch.serial_number }}</div>
+          {% endif %}
+        </div>
+        <div>
+          {% if notif.batch.expiration_date %}
+            <span class="text-slate-400">Expiration:</span> 
+            <span class="font-mono font-bold text-slate-800">{{ notif.batch.expiration_date|date:"Y-m-d" }}</span>
+          {% endif %}
+          {% if notif.batch.supplier_ref %}
+            <div class="text-slate-500 text-[10px]">Supplier: {{ notif.batch.supplier_ref.name }}</div>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Visual progress to reorder level -->
+      {% if notif.stock_level_data %}
+      <div class="pt-2">
+        <div class="flex items-center justify-between text-[10px] text-slate-500 mb-1">
+          <span>Capacity vs Reorder Level</span>
+          <span class="font-bold">{{ notif.stock_level_data.qty }} / {{ notif.stock_level_data.reorder }} units</span>
+        </div>
+        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden flex border border-slate-200">
+          <div class="{{ notif.stock_level_data.bar_bg }} h-full rounded-full transition-all" style="width: {{ notif.stock_level_data.pct }}%"></div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Link / Destination Action if present -->
+    {% if notif.link_url or notif.product %}
+    <div class="flex items-center justify-end space-x-2 pt-1">
+      {% if notif.product %}
+        <button type="button" 
+                data-modal-url="{% url 'inventory:product_detail_modal' notif.product.id %}"
+                data-modal-size="max-w-3xl"
+                class="inline-flex items-center px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-colors shadow-sm">
+          <i class="fas fa-boxes-stacked mr-1.5"></i> Inspect Product &amp; Batches
+        </button>
+      {% elif notif.link_url %}
+        <a href="{{ notif.link_url }}" 
+           class="inline-flex items-center px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-colors shadow-sm">
+          <i class="fas fa-external-link-alt mr-1.5"></i> Open Related Record
+        </a>
+      {% endif %}
+    </div>
+    {% endif %}
+
+  </div>
+
+  <!-- Modal Footer -->
+  <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+    <button type="button"
+            data-action-url="{% url 'core:notification_delete' notif.pk %}"
+            data-confirm-title="Delete Notification?"
+            data-confirm-message="Are you sure you want to remove this notification?"
+            data-refresh-target="#notification-table-container"
+            onclick="ModalManager.close();"
+            class="btn-delete-confirm inline-flex items-center px-3 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors">
+      <i class="fas fa-trash-alt mr-1.5"></i> Delete Notice
+    </button>
+    <button type="button" 
+            data-modal-close 
+            class="px-4 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-100 transition-all">
+      Close
+    </button>
+  </div>
+</div>

@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.35",
-  "build": "v2.4.35-713a110",
-  "commit_count": 35,
-  "commit_hash": "713a110",
+  "version": "v2.4.36",
+  "build": "v2.4.36-2990f46",
+  "commit_count": 36,
+  "commit_hash": "2990f46",
   "branch": "main",
-  "commit_subject": "Direct sidebar brand title and branch to home/dashboard directly without role checks",
-  "updated_at": "2026-11-15 18:49",
-  "last_pushed_at": "2026-11-15 18:49:07"
+  "commit_subject": "Add print dropdown with POS, A5, A4, and Share PDF options to transactions table",
+  "updated_at": "2026-11-15 19:00",
+  "last_pushed_at": "2026-11-15 19:00:36"
 }

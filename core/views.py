@@ -19,7 +19,7 @@ def test_ajax(request):
         data={"status": "online"}
     )
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .feature_updates import parse_feature_updates
@@ -293,6 +293,24 @@ def notification_table_partial(request):
         'notifications': notifications,
         'paginator': paginator,
         'total_count': paginator.count,
+    })
+
+
+def notification_detail_modal(request, pk):
+    """
+    Renders the Notification details modal partial, presenting complete message,
+    stock breakdown, batch info, and action shortcuts, while automatically marking as read.
+    """
+    notif = get_object_or_404(
+        Notification.objects.select_related('product', 'product__stock', 'product__category', 'batch'),
+        pk=pk
+    )
+    if not notif.is_read:
+        notif.is_read = True
+        notif.save(update_fields=['is_read'])
+
+    return render(request, 'core/partials/notification_detail_modal.html', {
+        'notif': notif,
     })
 
 

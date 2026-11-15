@@ -21,6 +21,7 @@ urlpatterns = [
     # Notifications routes
     path('notifications/', views.notification_list_view, name='notification_list'),
     path('notifications/table/', views.notification_table_partial, name='notification_table'),
+    path('notifications/<int:pk>/detail/', views.notification_detail_modal, name='notification_detail_modal'),
     path('notifications/<int:pk>/mark-read/', views.notification_mark_read, name='notification_mark_read'),
     path('notifications/mark-all-read/', views.notification_mark_all_read, name='notification_mark_all_read'),
     path('notifications/<int:pk>/delete/', views.notification_delete, name='notification_delete'),
