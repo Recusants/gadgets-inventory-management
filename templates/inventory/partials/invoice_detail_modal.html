@@ -36,7 +36,7 @@
       </div>
       <div>
         <span class="text-slate-500 text-[10px] uppercase font-bold block">Available Units</span>
-        <span class="text-lg font-black text-emerald-600 mt-0.5 block">
+        <span class="text-lg font-black text-sky-600 mt-0.5 block">
           {{ total_rem|intcomma }} units
         </span>
       </div>
@@ -82,13 +82,13 @@
                     <span class="ml-1.5 px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-mono font-bold"><i class="fas fa-envelope text-[9px] mr-1 text-blue-500"></i>{{ b.email }}</span>
                   {% endif %}
                   {% if b.expiration_date %}
-                    <span class="ml-1.5 px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-mono font-bold">Exp: {{ b.expiration_date|date:"Y-m-d" }}</span>
+                    <span class="ml-1.5 px-1.5 py-0.5 rounded bg-blue-100 text-[#0a192f] border border-sky-300 text-[10px] font-mono font-bold">Exp: {{ b.expiration_date|date:"Y-m-d" }}</span>
                   {% endif %}
                 </td>
                 <td class="py-2 px-3 text-slate-600">{{ b.product.category.name|default:"General" }}</td>
                 <td class="py-2 px-3 font-mono font-bold text-slate-900 text-right">{{ company_settings.currency_symbol|default:'$' }}{{ b.cost_price|floatformat:2|intcomma }}</td>
                 <td class="py-2 px-3 text-center font-bold text-slate-900">{{ b.quantity_received|intcomma }}</td>
-                <td class="py-2 px-3 text-center font-bold {% if b.quantity_remaining > 0 %}text-emerald-700{% else %}text-slate-400{% endif %}">
+                <td class="py-2 px-3 text-center font-bold {% if b.quantity_remaining > 0 %}text-blue-900{% else %}text-slate-400{% endif %}">
                   {{ b.quantity_remaining|intcomma }}
                 </td>
                 <td class="py-2 px-3 font-mono font-black text-slate-900 text-right">

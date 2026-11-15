@@ -58,7 +58,7 @@
               <td class="py-3 px-4 font-mono whitespace-nowrap">
                 {% if b.serial_number %}
                   <div class="flex flex-col gap-0.5">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-purple-100 text-purple-800 border border-purple-200 w-fit">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-sky-100 text-[#0a192f] border border-sky-300 w-fit">
                       {{ b.serial_number }}
                     </span>
                     {% if b.email %}
@@ -78,12 +78,12 @@
               <td class="py-3 px-4 whitespace-nowrap">
                 {% if b.expiration_date %}
                   {% if b.expiry_status == 'EXPIRED' %}
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black bg-red-100 text-red-800 font-mono border border-red-200">
-                      <i class="fas fa-exclamation-triangle mr-1"></i> Expired ({{ b.expiration_date|date:"Y-m-d" }})
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black bg-[#0a192f] text-white font-mono border border-sky-400">
+                      <i class="fas fa-exclamation-triangle mr-1 text-sky-300"></i> Expired ({{ b.expiration_date|date:"Y-m-d" }})
                     </span>
                   {% elif b.expiry_status == 'EXPIRING_SOON' %}
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 font-mono border border-amber-200">
-                      <i class="fas fa-clock mr-1"></i> {{ b.expiration_date|date:"Y-m-d" }} ({{ b.days_until_expiry }}d)
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-[#0a192f] font-mono border border-blue-300">
+                      <i class="fas fa-clock mr-1 text-sky-600"></i> {{ b.expiration_date|date:"Y-m-d" }} ({{ b.days_until_expiry }}d)
                     </span>
                   {% else %}
                     <span class="font-mono text-[11px] text-slate-700">{{ b.expiration_date|date:"Y-m-d" }}</span>

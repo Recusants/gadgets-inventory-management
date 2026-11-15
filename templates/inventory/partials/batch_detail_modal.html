@@ -28,7 +28,7 @@
       </div>
       <div>
         {% if batch.quantity_remaining > 0 %}
-          <span class="px-3 py-1 rounded-full font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+          <span class="px-3 py-1 rounded-full font-bold bg-blue-100 text-[#0a192f] border border-blue-200 border border-sky-200">
             Available for Sale
           </span>
         {% else %}
@@ -66,12 +66,12 @@
         <div class="font-mono font-bold text-xs mt-1">
           {% if batch.serial_number %}
             <div class="flex flex-wrap items-center gap-2">
-              <span class="inline-flex items-center px-2 py-0.5 rounded text-purple-800 bg-purple-100 border border-purple-200">
-                <i class="fas fa-barcode mr-1.5"></i> {{ batch.serial_number }}
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-[#0a192f] bg-blue-100 border border-sky-300">
+                <i class="fas fa-barcode mr-1.5 text-sky-600"></i> {{ batch.serial_number }}
               </span>
               {% if batch.email %}
-                <span class="inline-flex items-center px-2 py-0.5 rounded text-blue-800 bg-blue-50 border border-blue-200">
-                  <i class="fas fa-envelope mr-1.5 text-blue-500"></i> {{ batch.email }}
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[#0a192f] bg-sky-50 border border-sky-200">
+                  <i class="fas fa-envelope mr-1.5 text-sky-500"></i> {{ batch.email }}
                 </span>
               {% endif %}
             </div>
@@ -85,12 +85,12 @@
         <div class="font-mono font-bold text-xs mt-1">
           {% if batch.expiration_date %}
             {% if batch.expiry_status == 'EXPIRED' %}
-              <span class="inline-flex items-center px-2 py-0.5 rounded text-red-800 bg-red-100 border border-red-200">
-                <i class="fas fa-exclamation-triangle mr-1.5"></i> Expired ({{ batch.expiration_date|date:"d M Y" }})
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-white bg-[#0a192f] border border-sky-400">
+                <i class="fas fa-exclamation-triangle mr-1.5 text-sky-300"></i> Expired ({{ batch.expiration_date|date:"d M Y" }})
               </span>
             {% elif batch.expiry_status == 'EXPIRING_SOON' %}
-              <span class="inline-flex items-center px-2 py-0.5 rounded text-amber-800 bg-amber-100 border border-amber-200">
-                <i class="fas fa-clock mr-1.5"></i> {{ batch.expiration_date|date:"d M Y" }} ({{ batch.days_until_expiry }} days left)
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-[#0a192f] bg-blue-100 border border-sky-300">
+                <i class="fas fa-clock mr-1.5 text-sky-600"></i> {{ batch.expiration_date|date:"d M Y" }} ({{ batch.days_until_expiry }} days left)
               </span>
             {% else %}
               <span class="text-slate-800">{{ batch.expiration_date|date:"d M Y" }}</span>

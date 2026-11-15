@@ -77,7 +77,7 @@
         <!-- Supplier Invoice Number (3 cols) -->
         <div class="lg:col-span-3 sm:col-span-1">
           <label class="block text-xs font-bold text-slate-700 mb-1">
-            Supplier Invoice # <span class="text-red-500">*</span>
+            Supplier Invoice # <span class="text-sky-500">*</span>
           </label>
           <input type="text" 
                  name="supplier_invoice_number" 
@@ -89,7 +89,7 @@
         <!-- Date Received (2 cols) -->
         <div class="lg:col-span-2 sm:col-span-1">
           <label class="block text-xs font-bold text-slate-700 mb-1">
-            Date Received <span class="text-red-500">*</span>
+            Date Received <span class="text-sky-500">*</span>
           </label>
           <input type="date" 
                  name="date_received" 
@@ -659,14 +659,14 @@
             ` : `<span class="text-slate-400 italic text-[11px]">None</span>`}
           </td>
           <td class="py-2.5 px-3.5">
-            ${item.expiration_date ? `<span class="font-mono text-[11px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 font-bold">${item.expiration_date}</span>` : `<span class="text-slate-400 italic text-[11px]">None</span>`}
+            ${item.expiration_date ? `<span class="font-mono text-[11px] text-[#0a192f] bg-blue-100 px-2 py-0.5 rounded-md border border-sky-300 font-bold">${item.expiration_date}</span>` : `<span class="text-slate-400 italic text-[11px]">None</span>`}
           </td>
           <td class="py-2.5 px-3 text-center font-bold font-mono">${formatNumber(item.quantity)}</td>
           <td class="py-2.5 px-3.5 text-right font-mono">${formatMoney(item.cost_price)}</td>
           <td class="py-2.5 px-3.5 text-right font-mono font-bold text-slate-900">${formatMoney(item.subtotal)}</td>
           <td class="py-2.5 px-3.5 text-right font-mono text-blue-600 font-bold">${formatMoney(item.selling_price)}</td>
           <td class="py-2.5 px-3 text-center">
-            <button type="button" onclick="removeItemFromInvoice(${idx})" class="w-6 h-6 rounded-md bg-blue-900 hover:bg-red-600 text-white flex items-center justify-center text-[10px] mx-auto transition-colors">
+            <button type="button" onclick="removeItemFromInvoice(${idx})" class="w-6 h-6 rounded-md bg-blue-900 hover:bg-[#0a192f] text-white flex items-center justify-center text-[10px] mx-auto transition-colors">
               <i class="fas fa-trash-alt"></i>
             </button>
           </td>
@@ -708,7 +708,7 @@
             ` : `<span class="text-slate-400 italic text-[11px]">None</span>`}
           </td>
           <td class="py-2.5 px-3.5">
-            ${item.expiration_date ? `<span class="font-mono text-[11px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 font-bold">${item.expiration_date}</span>` : `<span class="text-slate-400 italic text-[11px]">None</span>`}
+            ${item.expiration_date ? `<span class="font-mono text-[11px] text-[#0a192f] bg-blue-100 px-2 py-0.5 rounded-md border border-sky-300 font-bold">${item.expiration_date}</span>` : `<span class="text-slate-400 italic text-[11px]">None</span>`}
           </td>
           <td class="py-2.5 px-3 text-center font-bold font-mono">${formatNumber(item.quantity)}</td>
           <td class="py-2.5 px-3.5 text-right font-mono">${formatMoney(item.cost_price)}</td>

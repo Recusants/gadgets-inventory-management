@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.20",
-  "build": "v2.4.20-cf34969",
-  "commit_count": 20,
-  "commit_hash": "cf34969",
+  "version": "v2.4.21",
+  "build": "v2.4.21-d9af863",
+  "commit_count": 21,
+  "commit_hash": "d9af863",
   "branch": "main",
-  "commit_subject": "Implement POS thermal printing engine, print server integration, and clean legacy push scripts",
-  "updated_at": "2026-11-15 15:06",
-  "last_pushed_at": "2026-11-15 15:19:14"
+  "commit_subject": "Add root@gmail.com superuser and seed all database tables across SQLite and PostgreSQL environments",
+  "updated_at": "2026-11-15 15:23",
+  "last_pushed_at": "2026-11-15 15:27:41"
 }

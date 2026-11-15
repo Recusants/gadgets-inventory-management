@@ -19,14 +19,14 @@
   <!-- Top Telemetry & Controls Bar (High-Contrast System Information) -->
   <div class="w-full max-w-5xl flex items-center justify-between z-10 text-xs font-mono">
     <div class="flex items-center space-x-3">
-      <span class="inline-flex items-center px-3 py-1 rounded-full bg-cyan-950 border-2 border-cyan-400 text-cyan-200 font-extrabold shadow-[0_0_12px_rgba(6,182,212,0.4)]">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping mr-2 inline-block"></span>
-        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 absolute mr-2 inline-block"></span>
+      <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-950 border-2 border-sky-400 text-sky-200 font-extrabold shadow-[0_0_12px_rgba(56,189,248,0.4)]">
+        <span class="w-2 h-2 rounded-full bg-sky-400 animate-ping mr-2 inline-block"></span>
+        <span class="w-1.5 h-1.5 rounded-full bg-sky-400 absolute mr-2 inline-block"></span>
         SYSTEM BOOT
       </span>
-      <span class="text-cyan-300 font-bold hidden sm:inline-block">DB ENGINE: <strong class="text-white font-extrabold">{{ system_details.db_engine|default:"SQLITE3" }}</strong></span>
-      <span class="text-cyan-300 font-bold hidden md:inline-block">ENV: <strong class="text-emerald-400 font-black">{{ system_details.edition|default:"ENTERPRISE RETAIL" }}</strong></span>
-      <span class="text-cyan-300 font-bold hidden lg:inline-block">PLATFORM: <strong class="text-white font-extrabold">{{ system_details.os_platform }}</strong></span>
+      <span class="text-sky-300 font-bold hidden sm:inline-block">DB ENGINE: <strong class="text-white font-extrabold">{{ system_details.db_engine|default:"SQLITE3" }}</strong></span>
+      <span class="text-sky-300 font-bold hidden md:inline-block">ENV: <strong class="text-sky-300 font-black">{{ system_details.edition|default:"ENTERPRISE RETAIL" }}</strong></span>
+      <span class="text-sky-300 font-bold hidden lg:inline-block">PLATFORM: <strong class="text-white font-extrabold">{{ system_details.os_platform }}</strong></span>
     </div>
 
     <!-- Quick Skip Button (Immediate Bypass) -->
@@ -90,19 +90,19 @@
       <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 pt-1 text-[11px] font-mono text-slate-300 font-semibold">
         {% if company_settings.address %}
           <span class="flex items-center space-x-1">
-            <i class="fas fa-map-marker-alt text-rose-400"></i>
+            <i class="fas fa-map-marker-alt text-sky-400"></i>
             <span>{{ company_settings.address }}</span>
           </span>
         {% endif %}
         {% if company_settings.phone %}
           <span class="flex items-center space-x-1">
-            <i class="fas fa-phone-alt text-emerald-400"></i>
+            <i class="fas fa-phone-alt text-sky-400"></i>
             <span>{{ company_settings.phone }}</span>
           </span>
         {% endif %}
         {% if company_settings.currency_code %}
           <span class="flex items-center space-x-1">
-            <i class="fas fa-coins text-amber-400"></i>
+            <i class="fas fa-coins text-sky-300"></i>
             <span>CURRENCY: <strong class="text-white">{{ company_settings.currency_code }} ({{ company_settings.currency_symbol }})</strong></span>
           </span>
         {% endif %}
@@ -111,32 +111,32 @@
 
     <!-- System Details Specification Chips -->
     <div class="flex flex-wrap items-center justify-center gap-2 pt-1 font-mono text-xs">
-      <span class="px-3 py-1.5 rounded-lg bg-black border-2 border-slate-600 text-white font-extrabold flex items-center space-x-2 shadow-md">
-        <i class="fas fa-layer-group text-blue-400 text-xs"></i>
+      <span class="px-3 py-1.5 rounded-lg bg-black border-2 border-sky-600 text-white font-extrabold flex items-center space-x-2 shadow-md">
+        <i class="fas fa-layer-group text-sky-400 text-xs"></i>
         <span>{{ system_details.system_name|default:"Clarity Retail" }}</span>
       </span>
-      <span class="px-3 py-1.5 rounded-lg bg-cyan-950 border-2 border-cyan-400 text-cyan-200 font-black flex items-center space-x-2 shadow-[0_0_15px_rgba(6,182,212,0.5)]">
-        <i class="fas fa-code-branch text-cyan-300 text-xs"></i>
+      <span class="px-3 py-1.5 rounded-lg bg-blue-950 border-2 border-sky-400 text-sky-200 font-black flex items-center space-x-2 shadow-[0_0_15px_rgba(56,189,248,0.5)]">
+        <i class="fas fa-code-branch text-sky-300 text-xs"></i>
         <span>{{ system_details.version|default:"v2.4.8" }}</span>
       </span>
-      <span class="px-3 py-1.5 rounded-lg bg-black border-2 border-slate-600 text-slate-100 font-extrabold flex items-center space-x-2 shadow-md">
-        <i class="fas fa-hashtag text-cyan-400 text-xs"></i>
+      <span class="px-3 py-1.5 rounded-lg bg-black border-2 border-sky-600 text-slate-100 font-extrabold flex items-center space-x-2 shadow-md">
+        <i class="fas fa-hashtag text-sky-400 text-xs"></i>
         <span>BUILD <strong class="text-white">{{ system_details.commit_hash|default:"236657a" }}</strong></span>
       </span>
-      <span class="px-3 py-1.5 rounded-lg bg-black border-2 border-slate-700 text-slate-300 font-bold hidden sm:flex items-center space-x-2 shadow-md">
-        <i class="fas fa-shield-alt text-emerald-400 text-xs"></i>
+      <span class="px-3 py-1.5 rounded-lg bg-black border-2 border-sky-700 text-slate-300 font-bold hidden sm:flex items-center space-x-2 shadow-md">
+        <i class="fas fa-shield-alt text-sky-400 text-xs"></i>
         <span>{{ system_details.developer_name|default:"Avail Technologies" }}</span>
       </span>
     </div>
 
     <!-- Live Telemetry Terminal Console (Comprehensive 8-Step System Diagnostic) -->
-    <div class="w-full max-w-xl bg-black border-2 border-cyan-500/70 rounded-2xl p-4 shadow-[0_0_35px_rgba(0,0,0,0.95)] text-left font-mono space-y-2">
-      <div class="flex items-center justify-between pb-2 border-b border-cyan-900/60 text-xs">
-        <span class="flex items-center space-x-2 text-cyan-300 font-black tracking-wider">
-          <i class="fas fa-terminal text-cyan-400"></i>
+    <div class="w-full max-w-xl bg-black border-2 border-sky-500/70 rounded-2xl p-4 shadow-[0_0_35px_rgba(0,0,0,0.95)] text-left font-mono space-y-2">
+      <div class="flex items-center justify-between pb-2 border-b border-sky-900/60 text-xs">
+        <span class="flex items-center space-x-2 text-sky-300 font-black tracking-wider">
+          <i class="fas fa-terminal text-sky-400"></i>
           <span>SYSTEM_INITIALIZATION_TELEMETRY</span>
         </span>
-        <span id="splash-status-badge" class="text-cyan-200 font-black tracking-widest text-[11px] bg-cyan-950 border border-cyan-400 px-2.5 py-0.5 rounded shadow-[0_0_10px_rgba(6,182,212,0.5)] uppercase animate-pulse">
+        <span id="splash-status-badge" class="text-sky-200 font-black tracking-widest text-[11px] bg-blue-950 border border-sky-400 px-2.5 py-0.5 rounded shadow-[0_0_10px_rgba(56,189,248,0.5)] uppercase animate-pulse">
           INITIALIZING
         </span>
       </div>
@@ -145,7 +145,7 @@
       <div id="splash-terminal-logs" class="text-xs leading-relaxed space-y-1.5 h-20 overflow-hidden flex flex-col justify-end">
         <div class="text-white font-mono font-bold flex items-center justify-between">
           <span>&gt; KERNEL: SECURE RUNTIME VERIFIED</span>
-          <span class="text-emerald-400 font-black drop-shadow-[0_0_8px_rgba(52,211,153,0.8)]">[OK]</span>
+          <span class="text-sky-400 font-black drop-shadow-[0_0_8px_rgba(56,189,248,0.8)]">[OK]</span>
         </div>
       </div>
     </div>
@@ -155,28 +155,28 @@
   <!-- Bottom Progressive Loading Engine Bar (Timed for 8.0 Seconds) -->
   <div class="w-full max-w-2xl z-10 space-y-2.5 pb-2">
     <div class="flex items-center justify-between text-xs font-mono">
-      <div class="flex items-center space-x-2 text-cyan-300">
-        <i class="fas fa-circle-notch fa-spin text-xs text-cyan-400"></i>
+      <div class="flex items-center space-x-2 text-sky-300">
+        <i class="fas fa-circle-notch fa-spin text-xs text-sky-400"></i>
         <span id="splash-loading-task" class="font-extrabold tracking-wider text-white uppercase">MOUNTING INVENTORY MATRIX...</span>
       </div>
-      <div class="font-black text-white font-mono text-base tracking-widest drop-shadow-[0_0_12px_rgba(6,182,212,0.8)]">
+      <div class="font-black text-white font-mono text-base tracking-widest drop-shadow-[0_0_12px_rgba(56,189,248,0.8)]">
         <span id="splash-progress-number">0</span>%
       </div>
     </div>
 
-    <!-- Segmented Neon Glowing Progress Track (Solid Black with Cyan Border) -->
-    <div class="relative w-full h-3.5 bg-black rounded-full border-2 border-cyan-500/70 p-0.5 overflow-hidden shadow-inner">
+    <!-- Segmented Neon Glowing Progress Track (Solid Black with Sky Border) -->
+    <div class="relative w-full h-3.5 bg-black rounded-full border-2 border-sky-500/70 p-0.5 overflow-hidden shadow-inner">
       <div id="splash-progress-bar" 
-           class="h-full rounded-full bg-gradient-to-r from-blue-500 via-cyan-400 to-emerald-400 shadow-[0_0_20px_rgba(6,182,212,1)] transition-all duration-100 ease-out" 
+           class="h-full rounded-full bg-gradient-to-r from-[#0a192f] via-blue-600 to-sky-400 shadow-[0_0_20px_rgba(56,189,248,1)] transition-all duration-100 ease-out" 
            style="width: 0%;">
       </div>
     </div>
 
     <!-- System Spec Footnote (High Contrast) -->
     <div class="flex items-center justify-between text-[11px] font-mono text-slate-200 font-bold pt-0.5">
-      <span>DATABASE: <span class="text-emerald-400 font-extrabold">{{ system_details.db_engine|default:"SQLITE3" }} &bull; ACTIVE</span></span>
+      <span>DATABASE: <span class="text-sky-400 font-extrabold">{{ system_details.db_engine|default:"SQLITE3" }} &bull; ACTIVE</span></span>
       <span class="tracking-widest text-slate-300 hidden sm:inline-block">STORE: <strong class="text-white">{{ company_settings.company_name|default:"21 VOID" }}</strong></span>
-      <span>READY IN: <span id="splash-timer-countdown" class="text-cyan-300 font-black text-sm">8.0s</span></span>
+      <span>READY IN: <span id="splash-timer-countdown" class="text-sky-300 font-black text-sm">8.0s</span></span>
     </div>
   </div>
 
@@ -258,7 +258,7 @@
     { atPercent: 62, msg: `&gt; SYNCHRONIZING FIFO BATCHES &amp; SERIAL MATRIX...`, status: "[SECURED]", task: "SYNCING INVENTORY REPOSITORIES..." },
     { atPercent: 74, msg: `&gt; CONFIGURING POS ENGINE [CURRENCY: ${currencyCode}]...`, status: "[CALIBRATED]", task: "CALIBRATING POS ENGINES..." },
     { atPercent: 86, msg: `&gt; CRYPTO TELEMETRY &amp; INTEGRITY CHECK [${commitHash}]...`, status: "[PASSED]", task: "FINALIZING SECURITY TELEMETRY..." },
-    { atPercent: 97, msg: `&gt; ALL SYSTEMS GREEN. LAUNCHING WORKSPACE...`, status: "[ONLINE]", task: "SYSTEM READY. PREPARING LOGIN..." }
+    { atPercent: 97, msg: `&gt; ALL SYSTEMS ONLINE. LAUNCHING WORKSPACE...`, status: "[ONLINE]", task: "SYSTEM READY. PREPARING LOGIN..." }
   ];
 
   let currentStepIdx = 0;
@@ -285,7 +285,7 @@
       if (logs) {
         const line = document.createElement('div');
         line.className = "flex items-center justify-between text-white font-mono font-bold animate-fadeIn";
-        line.innerHTML = `<span>${step.msg}</span><span class="text-emerald-400 font-black drop-shadow-[0_0_8px_rgba(52,211,153,0.8)] ml-2">${step.status}</span>`;
+        line.innerHTML = `<span>${step.msg}</span><span class="text-sky-300 font-black drop-shadow-[0_0_8px_rgba(56,189,248,0.8)] ml-2">${step.status}</span>`;
         logs.appendChild(line);
         while (logs.children.length > 3) {
           logs.removeChild(logs.firstChild);
@@ -302,7 +302,7 @@
       if (task) task.textContent = 'SYSTEM OPERATIONAL';
       if (statusBadge) {
         statusBadge.textContent = 'ONLINE';
-        statusBadge.className = 'text-emerald-400 font-black tracking-widest text-[11px] bg-emerald-950 border border-emerald-400 px-2.5 py-0.5 rounded shadow-[0_0_10px_rgba(52,211,153,0.5)] uppercase';
+        statusBadge.className = 'text-sky-300 font-black tracking-widest text-[11px] bg-blue-950 border border-sky-400 px-2.5 py-0.5 rounded shadow-[0_0_10px_rgba(56,189,248,0.5)] uppercase';
       }
       if (timerCountdown) timerCountdown.textContent = '0.0s';
 

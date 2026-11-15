@@ -6,6 +6,16 @@ Version Track: 2026.x Release Series
 Last Updated: October 2026
 
 ================================================================================
+[NOVEMBER 2026] - v2.4.171
+================================================================================
+
+* System Enhancements & Feature Updates
+  - Add root@gmail.com superuser and seed all database tables across SQLite and PostgreSQL environments
+  - Implement POS thermal printing engine, print server integration, and clean legacy push scripts
+  - Add multi-environment support: SQLite for dev, Docker dev with PostgreSQL, Env dev with PostgreSQL, and Prod PostgreSQL
+  - Add ZIMRA fiscalisation module, What's New changelog, and email login backend
+
+================================================================================
 [NOVEMBER 2026] - v2.4.17
 ================================================================================
 

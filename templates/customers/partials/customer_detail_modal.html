@@ -20,7 +20,7 @@
     <div class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-700 space-y-1">
       <div class="text-gray-500">Email: <strong class="text-gray-900 dark:text-white">{{ customer.email|default:"Not provided" }}</strong></div>
       <div class="text-gray-500">Customer since: <strong class="text-gray-900 dark:text-white">{{ customer.created_at|date:"d M Y" }}</strong></div>
-      <div class="text-gray-500">Total Purchases: <strong class="text-emerald-600 dark:text-emerald-400">{{ customer.sales.count|intcomma }} orders</strong></div>
+      <div class="text-gray-500">Total Purchases: <strong class="text-sky-600 dark:text-sky-400">{{ customer.sales.count|intcomma }} orders</strong></div>
     </div>
 
     <!-- Purchase History Table -->

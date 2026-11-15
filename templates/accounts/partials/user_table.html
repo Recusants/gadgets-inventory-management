@@ -17,7 +17,7 @@
         <!-- User Info -->
         <td class="py-3 px-4 whitespace-nowrap">
           <div class="flex items-center space-x-2.5">
-            <div class="w-8 h-8 rounded-full {% if 'ADMIN' in u.roles or u.is_superuser %}bg-purple-600{% elif 'MANAGER' in u.roles %}bg-blue-600{% else %}bg-slate-700{% endif %} text-white font-black text-xs flex items-center justify-center shadow-sm flex-shrink-0">
+            <div class="w-8 h-8 rounded-full {% if 'ADMIN' in u.roles or u.is_superuser %}bg-[#0a192f] border border-sky-400{% elif 'MANAGER' in u.roles %}bg-blue-800 border border-sky-300{% else %}bg-blue-950 border border-blue-900{% endif %} text-white font-black text-xs flex items-center justify-center shadow-sm flex-shrink-0">
               {{ u.first_name|default:u.username|slice:":1"|upper }}
             </div>
             <div>
@@ -37,26 +37,26 @@
           <div class="flex flex-wrap items-center gap-1.5">
             {% for r in u.roles %}
               {% if r == 'ADMIN' %}
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-900 border border-purple-200">
-                  <i class="fas fa-shield-alt mr-1 text-[9px]"></i> Admin
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#0a192f] text-white border border-sky-400">
+                  <i class="fas fa-shield-alt mr-1 text-[9px] text-sky-300"></i> Admin
                 </span>
               {% elif r == 'MANAGER' %}
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-900 border border-blue-200">
-                  <i class="fas fa-user-tie mr-1 text-[9px]"></i> Manager
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-[#0a192f] border border-sky-300">
+                  <i class="fas fa-user-tie mr-1 text-[9px] text-sky-600"></i> Manager
                 </span>
               {% else %}
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-800 border border-slate-200">
-                  <i class="fas fa-user mr-1 text-[9px]"></i> Staff
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-[#0a192f] border border-sky-200">
+                  <i class="fas fa-user mr-1 text-[9px] text-sky-500"></i> Staff
                 </span>
               {% endif %}
             {% empty %}
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-800 border border-slate-200">
-                <i class="fas fa-user mr-1 text-[9px]"></i> Staff
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-[#0a192f] border border-sky-200">
+                <i class="fas fa-user mr-1 text-[9px] text-sky-500"></i> Staff
               </span>
             {% endfor %}
             {% if u.is_superuser and 'ADMIN' not in u.roles %}
-              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">
-                <i class="fas fa-crown mr-1 text-[9px]"></i> Superuser
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-[#0a192f] border border-sky-300">
+                <i class="fas fa-crown mr-1 text-[9px] text-sky-600"></i> Superuser
               </span>
             {% endif %}
           </div>
@@ -81,12 +81,12 @@
         <!-- Active Status -->
         <td class="py-3 px-4 whitespace-nowrap text-center">
           {% if u.is_active %}
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></span> Active
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-[#0a192f] border border-blue-200 border border-sky-200">
+              <span class="w-1.5 h-1.5 rounded-full bg-sky-500 mr-1.5"></span> Active
             </span>
           {% else %}
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-200">
-              <span class="w-1.5 h-1.5 rounded-full bg-rose-500 mr-1.5"></span> Disabled
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-[#0a192f] text-white border border-sky-400 border border-sky-300">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#0a192f] mr-1.5"></span> Disabled
             </span>
           {% endif %}
         </td>
@@ -125,7 +125,7 @@
                       data-user-name="{{ u.username }}"
                       data-is-active="{{ u.is_active|yesno:'true,false' }}"
                       title="{% if u.is_active %}Disable Account{% else %}Activate Account{% endif %}"
-                      class="btn-toggle-user-status w-7 h-7 rounded-lg {% if u.is_active %}bg-blue-800 hover:bg-amber-600{% else %}bg-emerald-600 hover:bg-emerald-700{% endif %} text-white flex items-center justify-center text-xs shadow-sm transition-all">
+                      class="btn-toggle-user-status w-7 h-7 rounded-lg {% if u.is_active %}bg-blue-800 hover:bg-blue-600{% else %}bg-[#0a192f] hover:bg-[#0a192f]{% endif %} text-white flex items-center justify-center text-xs shadow-sm transition-all">
                 <i class="fas fa-power-off"></i>
               </button>
 
@@ -136,7 +136,7 @@
                       data-confirm-message="Are you sure you want to permanently remove user '@{{ u.username }}'?"
                       data-refresh-target="#user-table-container"
                       title="Delete User"
-                      class="btn-delete-confirm w-7 h-7 rounded-lg bg-blue-900 hover:bg-red-600 text-white flex items-center justify-center text-xs shadow-sm transition-all">
+                      class="btn-delete-confirm w-7 h-7 rounded-lg bg-blue-900 hover:bg-[#0a192f] text-white flex items-center justify-center text-xs shadow-sm transition-all">
                 <i class="fas fa-trash-alt"></i>
               </button>
             {% else %}

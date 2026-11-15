@@ -14,7 +14,7 @@
         </div>
         <div>
           <div class="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-white/20 text-white border border-white/30 mb-1">
-            <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+            <span class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
             <span>Critical Setup Required</span>
           </div>
           <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">Store Setup &amp; Configuration</h2>
@@ -25,16 +25,16 @@
       <!-- Real-Time Operating Settings Status Pills -->
       <div class="mt-5 pt-4 border-t border-white/20 grid grid-cols-2 sm:grid-cols-4 gap-2">
         {% for item in mandatory_checklist %}
-          <div class="p-2 rounded-xl border text-center {% if item.is_configured %}bg-emerald-950/60 border-emerald-500 text-emerald-300{% else %}bg-rose-950/60 border-rose-500 text-rose-300 animate-pulse{% endif %}">
+          <div class="p-2 rounded-xl border text-center {% if item.is_configured %}bg-blue-950 border-sky-400 text-sky-200{% else %}bg-[#0a192f] border-sky-400 text-white animate-pulse{% endif %}">
             <div class="text-[10px] font-black flex items-center justify-center space-x-1">
               {% if item.is_configured %}
-                <i class="fas fa-check-circle text-emerald-400"></i>
+                <i class="fas fa-check-circle text-sky-400"></i>
               {% else %}
-                <i class="fas fa-times-circle text-rose-400"></i>
+                <i class="fas fa-times-circle text-sky-400"></i>
               {% endif %}
               <span class="truncate">{{ item.title }}</span>
             </div>
-            <div class="text-[9px] font-bold mt-0.5 {% if item.is_configured %}text-emerald-300{% else %}text-rose-300 font-black{% endif %}">
+            <div class="text-[9px] font-bold mt-0.5 {% if item.is_configured %}text-sky-300{% else %}text-sky-300 font-black{% endif %}">
               {% if item.is_configured %}Configured{% else %}Required{% endif %}
             </div>
           </div>
@@ -78,7 +78,7 @@
           <!-- Store / Company Name -->
           <div>
             <label class="block text-xs font-black text-black mb-1">
-              Store / Business Name <span class="text-red-600">*</span>
+              Store / Business Name <span class="text-sky-500">*</span>
             </label>
             <input type="text" 
                    name="company_name" 
@@ -91,7 +91,7 @@
           <!-- Contact Phone -->
           <div>
             <label class="block text-xs font-black text-black mb-1">
-              Contact Phone <span class="text-red-600">*</span>
+              Contact Phone <span class="text-sky-500">*</span>
             </label>
             <input type="text" 
                    name="phone" 
@@ -104,7 +104,7 @@
           <!-- Currency Symbol & Code -->
           <div>
             <label class="block text-xs font-black text-black mb-1">
-              Currency Symbol &amp; Code <span class="text-red-600">*</span>
+              Currency Symbol &amp; Code <span class="text-sky-500">*</span>
             </label>
             <div class="grid grid-cols-2 gap-2">
               <input type="text" 
@@ -220,7 +220,7 @@
           <!-- Backup File Input -->
           <div>
             <label class="block text-xs font-black text-black mb-1.5">
-              Select Backup Archive File (.json or .sqlite3) <span class="text-red-600">*</span>
+              Select Backup Archive File (.json or .sqlite3) <span class="text-sky-500">*</span>
             </label>
             <input type="file" 
                    name="backup_file" 
@@ -236,14 +236,14 @@
                 <span id="setup-file-badge-name" class="truncate font-mono">backup.json</span>
                 <span id="setup-file-badge-size" class="text-[10px] text-slate-700 bg-white px-2 py-0.5 rounded-md border border-slate-200 flex-shrink-0 font-mono">0 KB</span>
               </div>
-              <span id="setup-file-badge-type" class="text-[10px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md flex-shrink-0">Universal JSON</span>
+              <span id="setup-file-badge-type" class="text-[10px] font-black text-[#0a192f] bg-blue-100 border border-sky-300 px-2 py-0.5 rounded-md flex-shrink-0">Universal JSON</span>
             </div>
           </div>
 
           <!-- Mode -->
           <div>
             <label class="block text-xs font-black text-black mb-1.5">
-              Restoration Mode <span class="text-red-600">*</span>
+              Restoration Mode <span class="text-sky-500">*</span>
             </label>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <label class="p-3 rounded-xl border-2 border-slate-200 hover:border-black cursor-pointer flex items-start space-x-2.5 transition-all">
@@ -283,14 +283,14 @@
         </div>
 
         <!-- Result Feedback Banner (Hidden until done) -->
-        <div id="setup-restore-result-box" class="hidden p-4 bg-emerald-50 border-2 border-emerald-500 rounded-2xl space-y-2">
-          <div class="flex items-center space-x-2 text-emerald-900 font-black text-sm">
-            <i class="fas fa-check-circle text-emerald-600"></i>
+        <div id="setup-restore-result-box" class="hidden p-4 bg-sky-50 border-2 border-sky-400 rounded-2xl space-y-2">
+          <div class="flex items-center space-x-2 text-[#0a192f] font-black text-sm">
+            <i class="fas fa-check-circle text-sky-600"></i>
             <span id="setup-result-title">Database Restored Successfully</span>
           </div>
-          <p id="setup-result-msg" class="text-xs text-emerald-800 font-medium"></p>
+          <p id="setup-result-msg" class="text-xs text-blue-950 font-medium"></p>
           <div class="pt-2 flex items-center justify-between">
-            <span class="text-xs text-emerald-900 font-bold">
+            <span class="text-xs text-[#0a192f] font-bold">
               Auto-reloading application in <b class="font-mono text-black" id="setup-reload-countdown">5</b>s...
             </span>
             <button type="button" onclick="window.location.reload()" class="px-4 py-1.5 rounded-lg bg-black text-white text-xs font-black uppercase tracking-wider">
@@ -344,11 +344,11 @@
 
       const $bType = $('#setup-file-badge-type');
       if (isJson) {
-        $bType.text('Universal JSON').attr('class', 'text-[10px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md flex-shrink-0');
+        $bType.text('Universal JSON').attr('class', 'text-[10px] font-black text-[#0a192f] bg-blue-100 border border-sky-300 px-2 py-0.5 rounded-md flex-shrink-0');
       } else if (isSqlite) {
-        $bType.text('Raw SQLite DB').attr('class', 'text-[10px] font-black text-blue-800 bg-blue-100 px-2 py-0.5 rounded-md flex-shrink-0');
+        $bType.text('Raw SQLite DB').attr('class', 'text-[10px] font-black text-[#0a192f] bg-sky-100 border border-sky-300 px-2 py-0.5 rounded-md flex-shrink-0');
       } else {
-        $bType.text('Unknown Format').attr('class', 'text-[10px] font-black text-red-800 bg-red-100 px-2 py-0.5 rounded-md flex-shrink-0');
+        $bType.text('Unknown Format').attr('class', 'text-[10px] font-black text-white bg-[#0a192f] border border-sky-400 px-2 py-0.5 rounded-md flex-shrink-0');
       }
       $('#setup-file-badge').removeClass('hidden');
     } else {

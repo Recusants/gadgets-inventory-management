@@ -54,12 +54,12 @@ function notifySwal(title, message, icon, timer = 2500) {
     timer: timer,
     timerProgressBar: timer ? true : false,
     showConfirmButton: timer ? false : true,
-    confirmButtonColor: '#2563eb',
-    background: $('html').hasClass('dark') ? '#0f172a' : '#ffffff',
-    color: $('html').hasClass('dark') ? '#f8fafc' : '#0f172a',
+    confirmButtonColor: '#0a192f',
+    background: $('html').hasClass('dark') ? '#0a192f' : '#ffffff',
+    color: $('html').hasClass('dark') ? '#ffffff' : '#0a192f',
     customClass: {
       container: 'swal-high-z',
-      popup: 'rounded-2xl shadow-2xl border border-slate-300 dark:border-slate-700'
+      popup: 'rounded-2xl shadow-2xl border border-sky-300 dark:border-sky-500'
     }
   });
 }
@@ -78,16 +78,16 @@ function confirmSwal(title, text, confirmButtonText = 'Yes, proceed', onConfirm 
     text: text || "This action cannot be undone.",
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#ef4444',
-    cancelButtonColor: '#64748b',
+    confirmButtonColor: '#0a192f',
+    cancelButtonColor: '#38bdf8',
     confirmButtonText: confirmButtonText,
     cancelButtonText: 'Cancel',
     reverseButtons: true,
-    background: $('html').hasClass('dark') ? '#0f172a' : '#ffffff',
-    color: $('html').hasClass('dark') ? '#f8fafc' : '#0f172a',
+    background: $('html').hasClass('dark') ? '#0a192f' : '#ffffff',
+    color: $('html').hasClass('dark') ? '#ffffff' : '#0a192f',
     customClass: {
       container: 'swal-high-z',
-      popup: 'rounded-2xl shadow-2xl border border-slate-300 dark:border-slate-700'
+      popup: 'rounded-2xl shadow-2xl border border-sky-300 dark:border-sky-500'
     }
   });
 

@@ -81,7 +81,7 @@
                 <div>
                   <div>{{ printer.display_name|default:printer.name }}</div>
                   {% if printer.is_paused %}
-                    <span class="text-[10px] text-amber-400 font-normal"><i class="fas fa-pause-circle mr-0.5"></i> Paused</span>
+                    <span class="text-[10px] text-sky-300 font-normal"><i class="fas fa-pause-circle mr-0.5"></i> Paused</span>
                   {% endif %}
                 </div>
               </div>
@@ -124,14 +124,14 @@
 
                 <button type="button" 
                         onclick="togglePause({{ printer.id }})" 
-                        class="p-1.5 rounded-lg text-slate-400 hover:text-amber-300 hover:bg-slate-800 transition-colors"
+                        class="p-1.5 rounded-lg text-slate-400 hover:text-sky-300 hover:bg-slate-800 transition-colors"
                         title="{% if printer.is_paused %}Resume{% else %}Pause{% endif %}">
                   <i class="fas {% if printer.is_paused %}fa-play{% else %}fa-pause{% endif %}"></i>
                 </button>
 
                 <button type="button" 
                         onclick="deletePrinter({{ printer.id }}, '{{ printer.display_name|default:printer.name }}')" 
-                        class="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-colors"
+                        class="p-1.5 rounded-lg text-slate-400 hover:text-sky-300 hover:bg-slate-800 transition-colors"
                         title="Delete Printer">
                   <i class="fas fa-trash-alt"></i>
                 </button>
@@ -181,7 +181,7 @@
     <form id="add-printer-form" class="space-y-4">
       {% csrf_token %}
       <div>
-        <label class="block text-xs font-bold text-slate-300 mb-1">Exact Windows Printer Name <span class="text-rose-400">*</span></label>
+        <label class="block text-xs font-bold text-slate-300 mb-1">Exact Windows Printer Name <span class="text-sky-400">*</span></label>
         <input type="text" name="name" required placeholder="e.g. POS-80 or POS-90" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-700 bg-slate-950 text-xs text-white placeholder-slate-500 focus:border-cyan-500 outline-none">
         <span class="text-[10px] text-slate-400 mt-0.5 block">Must match the exact queue name in Windows Printers & Scanners.</span>
       </div>
@@ -241,13 +241,13 @@ function checkAllHealth() {
     const $badge = $row.find('.health-badge');
     $.get(`/printers/api/${pid}/health/`, function(res) {
       if (res.online) {
-        $badge.removeClass('bg-slate-800 bg-rose-950/60 text-slate-400 text-rose-300 border-slate-700 border-rose-800')
-              .addClass('bg-emerald-950/60 text-emerald-300 border border-emerald-800/80')
-              .html('<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>Online</span>');
+        $badge.removeClass('bg-slate-800 bg-[#0a192f] text-slate-400 text-white border-slate-700 border-blue-800')
+              .addClass('bg-blue-950 text-sky-300 border border-sky-500')
+              .html('<span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span><span>Online</span>');
       } else {
-        $badge.removeClass('bg-slate-800 bg-emerald-950/60 text-slate-400 text-emerald-300 border-slate-700 border-emerald-800/80')
-              .addClass('bg-rose-950/60 text-rose-300 border border-rose-800')
-              .html('<span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span><span>Offline</span>');
+        $badge.removeClass('bg-slate-800 bg-blue-950 text-slate-400 text-sky-300 border-slate-700 border-sky-500')
+              .addClass('bg-[#0a192f] text-white border border-blue-800')
+              .html('<span class="w-1.5 h-1.5 rounded-full bg-sky-200"></span><span>Offline</span>');
       }
     }).always(function() {
       setTimeout(function() { $('#refresh-icon').removeClass('fa-spin'); }, 500);

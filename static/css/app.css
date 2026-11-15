@@ -9,17 +9,17 @@
 @import url('../vendor/sweetalert2.min.css');
 
 :root {
-  --bg-app: #f4f7fb;
+  --bg-app: #f0f7ff;
   --bg-surface: #ffffff;
   --bg-sidebar: #0a192f;
-  --bg-topbar: #0b192c;
-  --bg-sidebar-hover: #172a45;
-  --bg-sidebar-active: #1d4ed8;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-sidebar: #f8fafc;
-  --border-color: #cbd5e1;
-  --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+  --bg-topbar: #071324;
+  --bg-sidebar-hover: #132a4a;
+  --bg-sidebar-active: #1e3a8a;
+  --text-primary: #0a192f;
+  --text-secondary: #1e3a8a;
+  --text-sidebar: #ffffff;
+  --border-color: #bfdbfe;
+  --card-shadow: 0 1px 3px 0 rgba(10, 25, 47, 0.08), 0 1px 2px -1px rgba(10, 25, 47, 0.04);
 }
 
 * {
@@ -175,12 +175,12 @@ html.sidebar-is-collapsed #app-sidebar .sidebar-collapse-btn .sidebar-collapse-i
 }
 #app-content-panel::-webkit-scrollbar-thumb,
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #94a3b8;
+  background: #93c5fd;
   border-radius: 9999px;
 }
 .dark #app-content-panel::-webkit-scrollbar-thumb,
 .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #475569;
+  background: #38bdf8;
 }
 
 /* High-Contrast Cards & Surfaces */
@@ -194,36 +194,39 @@ html.sidebar-is-collapsed #app-sidebar .sidebar-collapse-btn .sidebar-collapse-i
 
 /* High-Contrast Tables */
 table thead tr {
-  background-color: #f1f5f9 !important;
-  border-bottom: 2px solid #cbd5e1 !important;
+  background-color: #e0f2fe !important;
+  border-bottom: 2px solid #93c5fd !important;
 }
 .dark table thead tr {
-  background-color: #1e293b !important;
-  border-bottom: 2px solid #334155 !important;
+  background-color: #0b192c !important;
+  border-bottom: 2px solid #1e3a8a !important;
 }
 
 table thead th {
-  color: #0f172a !important;
-  font-weight: 700 !important;
+  color: #0a192f !important;
+  font-weight: 800 !important;
   letter-spacing: 0.025em;
 }
 .dark table thead th {
-  color: #f8fafc !important;
-  font-weight: 700 !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
 }
 
 table tbody tr {
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #dbeafe;
+}
+table tbody tr:hover {
+  background-color: #eff6ff !important;
 }
 .dark table tbody tr {
   border-bottom: 1px solid #1e293b;
 }
 
 table tbody td {
-  color: #0f172a;
+  color: #0a192f;
 }
 .dark table tbody td {
-  color: #f8fafc;
+  color: #f0f7ff;
 }
 
 /* High-Contrast Inputs & Select Controls */
@@ -235,9 +238,17 @@ input[type="password"],
 select,
 textarea {
   background-color: #ffffff !important;
-  border: 1.5px solid #94a3b8 !important;
-  color: #0f172a !important;
+  border: 1.5px solid #93c5fd !important;
+  color: #0a192f !important;
   font-weight: 600;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #0a192f !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.35) !important;
 }
 
 .dark input[type="text"],
@@ -313,13 +324,13 @@ textarea::placeholder {
 
 /* Skeleton Loading Shimmer */
 .skeleton {
-  background: linear-gradient(90deg, #e2e8f0 25%, #cbd5e1 50%, #e2e8f0 75%);
+  background: linear-gradient(90deg, #eff6ff 25%, #bfdbfe 50%, #eff6ff 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 8px;
 }
 .dark .skeleton {
-  background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+  background: linear-gradient(90deg, #0a192f 25%, #1e3a8a 50%, #0a192f 75%);
   background-size: 200% 100%;
 }
 @keyframes shimmer {
@@ -327,31 +338,31 @@ textarea::placeholder {
   100% { background-position: -200% 0; }
 }
 
-/* Input validation error highlight */
+/* Input validation error highlight - Navy/Light Blue Accent */
 .input-error {
-  border-color: #ef4444 !important;
-  background-color: #fef2f2 !important;
+  border-color: #0a192f !important;
+  background-color: #eff6ff !important;
 }
 .dark .input-error {
-  border-color: #ef4444 !important;
-  background-color: #450a0a !important;
+  border-color: #38bdf8 !important;
+  background-color: #0c1a30 !important;
 }
 .field-error-text {
-  color: #ef4444;
+  color: #0a192f;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   margin-top: 4px;
 }
 
 /* =========================================================================
-   Standardized Button Design System
-   btn-primary   : Solid Royal/Navy Blue with crisp white text
-   btn-secondary : Slate/Neutral outline with dark slate text
-   btn-default   : Soft light blue badge button with navy blue text
-   btn-danger    : Crimson/Rose button with white text
+   Standardized Button Design System (Navy Blue, Light Blue & White Only)
+   btn-primary   : Solid Navy Blue with crisp white text
+   btn-secondary : Pure White surface with Light Blue border and Navy Blue text
+   btn-default   : Soft Light Blue surface with Navy Blue text
+   btn-danger    : Deep Midnight Navy with Light Blue border & crisp white text
    ========================================================================= */
 .btn-primary {
-  background-color: #2563eb !important;
+  background-color: #0a192f !important;
   color: #ffffff !important;
   font-weight: 700 !important;
   border-radius: 0.75rem !important;
@@ -359,35 +370,18 @@ textarea::placeholder {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.25) !important;
+  box-shadow: 0 4px 6px -1px rgba(10, 25, 47, 0.3) !important;
   transition: all 0.15s ease-in-out !important;
-  border: 1px solid transparent !important;
+  border: 1px solid #1e3a8a !important;
 }
 .btn-primary:hover {
-  background-color: #1d4ed8 !important;
-  box-shadow: 0 6px 12px -2px rgba(37, 99, 235, 0.35) !important;
+  background-color: #1e3a8a !important;
+  box-shadow: 0 6px 12px -2px rgba(10, 25, 47, 0.4) !important;
 }
 
 .btn-secondary {
-  background-color: #f1f5f9 !important;
-  color: #334155 !important;
-  font-weight: 700 !important;
-  border-radius: 0.75rem !important;
-  padding: 0.5rem 1rem !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border: 1.5px solid #cbd5e1 !important;
-  transition: all 0.15s ease-in-out !important;
-}
-.btn-secondary:hover {
-  background-color: #e2e8f0 !important;
-  color: #0f172a !important;
-}
-
-.btn-default {
-  background-color: #eff6ff !important;
-  color: #1e3a8a !important;
+  background-color: #ffffff !important;
+  color: #0a192f !important;
   font-weight: 700 !important;
   border-radius: 0.75rem !important;
   padding: 0.5rem 1rem !important;
@@ -397,13 +391,31 @@ textarea::placeholder {
   border: 1.5px solid #bfdbfe !important;
   transition: all 0.15s ease-in-out !important;
 }
+.btn-secondary:hover {
+  background-color: #eff6ff !important;
+  color: #1e3a8a !important;
+  border-color: #93c5fd !important;
+}
+
+.btn-default {
+  background-color: #e0f2fe !important;
+  color: #0a192f !important;
+  font-weight: 700 !important;
+  border-radius: 0.75rem !important;
+  padding: 0.5rem 1rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1.5px solid #93c5fd !important;
+  transition: all 0.15s ease-in-out !important;
+}
 .btn-default:hover {
-  background-color: #dbeafe !important;
-  color: #0b192c !important;
+  background-color: #bae6fd !important;
+  color: #071324 !important;
 }
 
 .btn-danger {
-  background-color: #e11d48 !important;
+  background-color: #071324 !important;
   color: #ffffff !important;
   font-weight: 700 !important;
   border-radius: 0.75rem !important;
@@ -411,12 +423,13 @@ textarea::placeholder {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  box-shadow: 0 4px 6px -1px rgba(225, 29, 72, 0.25) !important;
+  box-shadow: 0 4px 6px -1px rgba(7, 19, 36, 0.3) !important;
   transition: all 0.15s ease-in-out !important;
-  border: 1px solid transparent !important;
+  border: 1.5px solid #38bdf8 !important;
 }
 .btn-danger:hover {
-  background-color: #be123c !important;
+  background-color: #0a192f !important;
+  border-color: #60a5fa !important;
 }
 
 /* Ensure SweetAlert2 feedback always renders prominently above modal shells and backdrops */

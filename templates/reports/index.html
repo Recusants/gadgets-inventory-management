@@ -291,11 +291,11 @@
               <td class="py-3 px-4 text-right font-black font-mono text-blue-600">{{ company_settings.currency_symbol|default:'$' }}{{ p.current_selling_price|floatformat:2|intcomma }}</td>
               <td class="py-3 px-4 text-center">
                 {% if p.available_quantity > 5 %}
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">In Stock</span>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-900 border border-blue-200">In Stock</span>
                 {% elif p.available_quantity > 0 %}
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">Low Stock</span>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-[#0a192f] border border-sky-300">Low Stock</span>
                 {% else %}
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">Out of Stock</span>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-[#0a192f] text-white border border-sky-400">Out of Stock</span>
                 {% endif %}
               </td>
             </tr>

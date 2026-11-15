@@ -24,7 +24,7 @@
 
       <div class="mt-4 sm:mt-0 flex items-center space-x-3 flex-shrink-0">
         <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-black bg-black text-white border-2 border-black shadow-sm">
-          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse mr-2"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-sky-400 animate-pulse mr-2"></span>
           System Operational
         </span>
         <a href="{% url 'core:settings' %}" class="inline-flex items-center px-3.5 py-1.5 rounded-lg text-xs font-black bg-white text-black border-2 border-black hover:bg-slate-100 transition-colors shadow-sm">
@@ -55,7 +55,7 @@
           <i class="fas fa-bullhorn text-cyan-400 mr-1.5 text-xs"></i> What's New
         </a>
         <span class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-black bg-black text-white shadow-sm">
-          <i class="fas fa-check-circle text-emerald-400 mr-1.5 text-xs"></i> Verified Release
+          <i class="fas fa-check-circle text-sky-400 mr-1.5 text-xs"></i> Verified Release
         </span>
       </div>
     </div>
@@ -145,7 +145,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {% for service in developer_info.services %}
             <div class="flex items-center space-x-2 text-xs font-bold text-slate-200">
-              <i class="fas fa-check text-emerald-400 font-black"></i>
+              <i class="fas fa-check text-sky-400 font-black"></i>
               <span>{{ service }}</span>
             </div>
           {% endfor %}
