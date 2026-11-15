@@ -6,6 +6,7 @@
     <div class="flex items-center space-x-2.5 min-w-0">
       <div id="sidebar-brand-logo" 
            class="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-sm shadow-xs flex-shrink-0 overflow-hidden cursor-pointer" 
+           style="background-color: #0f172a; color: #ffffff;"
            title="Toggle Sidebar">
         {% if company_settings.logo %}
           <img src="{{ company_settings.logo.url }}" alt="Logo" class="w-full h-full object-contain p-1">
@@ -13,8 +14,8 @@
           <i class="fas fa-cubes text-emerald-400 text-xs"></i>
         {% endif %}
       </div>
-      <div class="sidebar-label flex items-center space-x-1 truncate">
-        <span class="font-bold text-sm text-slate-900 tracking-tight truncate">{{ company_settings.company_name|default:"Fixoria" }}</span>
+      <div class="sidebar-label flex items-center space-x-1 min-w-0 truncate">
+        <span class="font-bold text-sm text-slate-900 tracking-tight">Gadget Store</span>
         <span class="text-[10px] text-slate-400 font-medium">™</span>
       </div>
     </div>
@@ -30,17 +31,17 @@
   <!-- Organization / Store Selector Card (Fixoria Inspired) -->
   <div class="px-3 pt-3 pb-1 flex-shrink-0">
     <a href="{% url 'core:settings' %}" 
-       class="p-2 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-100 flex items-center justify-between transition-colors group"
-       title="{{ company_settings.company_name|default:'Main Branch Store' }}">
+       class="p-2.5 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-100 flex items-center justify-between transition-colors group"
+       title="Store Settings & Profile">
       <div class="flex items-center space-x-2.5 min-w-0">
-        <div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center justify-center flex-shrink-0">
-          {{ company_settings.company_name|default:"G"|slice:":1"|upper }}
+        <div class="w-7 h-7 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs flex items-center justify-center flex-shrink-0">
+          <i class="fas fa-store text-[11px]"></i>
         </div>
         <div class="truncate sidebar-label">
           <div class="text-xs font-semibold text-slate-900 truncate leading-tight group-hover:text-slate-950">
             {{ company_settings.company_name|default:"Main Branch Store" }}
           </div>
-          <div class="text-[10px] text-slate-400 font-medium leading-tight">Active LAN Store</div>
+          <div class="text-[10px] text-slate-400 font-medium leading-tight mt-0.5">Active LAN Store</div>
         </div>
       </div>
       <i class="fas fa-chevron-right text-[10px] text-slate-400 group-hover:text-slate-600 transition-transform sidebar-label"></i>

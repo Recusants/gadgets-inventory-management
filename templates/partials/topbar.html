@@ -1,7 +1,7 @@
 {% load static %}
 <header id="app-topbar" class="w-full h-14 flex-shrink-0 flex items-center justify-between border-b border-slate-100 bg-white px-4 sm:px-6 select-none z-30 transition-colors">
   
-  <!-- Left Side: Sidebar Toggle & Clean Apple Breadcrumbs -->
+  <!-- Left Side: Sidebar Toggle (When Collapsed) & Clean Apple Breadcrumbs -->
   <div class="flex items-center space-x-2 text-xs text-slate-400 font-medium">
     <button id="topbar-sidebar-toggle-btn" 
             type="button" 
@@ -9,17 +9,15 @@
             title="Toggle Sidebar">
       <i class="fas fa-bars text-xs"></i>
     </button>
-    <a href="{% url 'dashboard:index' %}" class="text-slate-400 hover:text-slate-700 transition-colors flex items-center">
+    <a href="{% url 'dashboard:index' %}" class="text-slate-400 hover:text-slate-700 transition-colors flex items-center" title="Dashboard Home">
       <i class="fas fa-home text-xs"></i>
     </a>
-    <span class="text-slate-300">/</span>
-    <span class="text-slate-500 capitalize font-medium">
-      {% if request.resolver_match.app_name %}
+    {% if request.resolver_match.app_name and request.resolver_match.app_name != 'dashboard' %}
+      <span class="text-slate-300">/</span>
+      <span class="text-slate-500 capitalize font-medium">
         {{ request.resolver_match.app_name }}
-      {% else %}
-        System
-      {% endif %}
-    </span>
+      </span>
+    {% endif %}
     <span class="text-slate-300">/</span>
     <span class="text-slate-800 font-semibold truncate">
       {% block breadcrumb_title %}
@@ -50,16 +48,16 @@
         {% endif %}
       {% endblock %}
     </span>
-
-    <!-- Subtle Live LAN Status Pill -->
-    <div class="hidden md:inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-slate-50 border border-slate-100 text-[10px] text-slate-500 font-medium ml-2">
-      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-      <span>Live</span>
-    </div>
   </div>
 
   <!-- Right Side: Clean Apple Action Controls -->
-  <div class="flex items-center space-x-2">
+  <div class="flex items-center space-x-2.5">
+    
+    <!-- Subtle Live LAN Status Pill -->
+    <div class="hidden sm:inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-[10px] text-emerald-700 font-medium mr-1">
+      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+      <span>Live LAN</span>
+    </div>
     
     <!-- Notifications Bell Dropdown -->
     <div class="relative" x-data="{ open: false }">

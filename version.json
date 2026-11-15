@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.24",
-  "build": "v2.4.24-d6936ff",
-  "commit_count": 24,
-  "commit_hash": "d6936ff",
+  "version": "v2.4.25",
+  "build": "v2.4.25-471477a",
+  "commit_count": 25,
+  "commit_hash": "471477a",
   "branch": "main",
-  "commit_subject": "Implement 4-option print popup on checkout with preselection persistence (POS print, PDF, A4, No print)",
-  "updated_at": "2026-11-15 16:24",
-  "last_pushed_at": "2026-11-15 16:28:05"
+  "commit_subject": "Fix UI layout collapse: restore robust viewport flexbox hierarchy, add topbar sidebar toggle, and fix collapsed sidebar controls",
+  "updated_at": "2026-11-15 16:41",
+  "last_pushed_at": "2026-11-15 16:54:12"
 }
