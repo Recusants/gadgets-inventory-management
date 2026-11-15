@@ -14,18 +14,6 @@
           <i class="fas fa-store text-blue-400 text-xs"></i>
         {% endif %}
       </div>
-      {% if request.user.is_manager_role %}
-      <a href="{% url 'core:settings' %}" 
-         class="truncate sidebar-label min-w-0 flex-1 block group text-left" 
-         title="{{ company_settings.company_name|default:'Gadget Store' }} — {{ company_settings.tagline|default:'Main Branch • Active LAN' }}">
-        <div class="text-xs font-bold text-slate-900 truncate leading-tight group-hover:text-blue-600 transition-colors">
-          {{ company_settings.company_name|default:"Gadget Store" }}
-        </div>
-        <div class="text-[10px] text-slate-400 font-medium leading-tight truncate mt-0.5">
-          {{ company_settings.tagline|default:"Main Branch • Active LAN" }}
-        </div>
-      </a>
-      {% else %}
       <a href="{% url 'dashboard:index' %}" 
          class="truncate sidebar-label min-w-0 flex-1 block group text-left" 
          title="{{ company_settings.company_name|default:'Gadget Store' }} — {{ company_settings.tagline|default:'Main Branch • Active LAN' }}">
@@ -36,7 +24,6 @@
           {{ company_settings.tagline|default:"Main Branch • Active LAN" }}
         </div>
       </a>
-      {% endif %}
     </div>
     
     <button id="sidebar-toggle-btn" 

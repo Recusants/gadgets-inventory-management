@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.33",
-  "build": "v2.4.33-63a51e6",
-  "commit_count": 33,
-  "commit_hash": "63a51e6",
+  "version": "v2.4.34",
+  "build": "v2.4.34-119cd47",
+  "commit_count": 34,
+  "commit_hash": "119cd47",
   "branch": "main",
-  "commit_subject": "Enforce strict role-based access control (RBAC) on UI buttons, search features, and view endpoints",
-  "updated_at": "2026-11-15 18:37",
-  "last_pushed_at": "2026-11-15 18:37:43"
+  "commit_subject": "Move What's New button to the bottom of the sidebar pinned footer",
+  "updated_at": "2026-11-15 18:46",
+  "last_pushed_at": "2026-11-15 18:46:04"
 }
