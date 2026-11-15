@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.63",
-  "build": "v2.4.63-e9f6682",
-  "commit_count": 63,
-  "commit_hash": "e9f6682",
+  "version": "v2.4.64",
+  "build": "v2.4.64-9934eca",
+  "commit_count": 64,
+  "commit_hash": "9934eca",
   "branch": "main",
-  "commit_subject": "Fix modal stacking on top of top nav with translucent glass backdrop",
-  "updated_at": "2026-11-15 22:45",
-  "last_pushed_at": "2026-11-15 22:45:45"
+  "commit_subject": "Sync version.json v2.4.63-e9f6682",
+  "updated_at": "2026-11-15 22:46",
+  "last_pushed_at": "2026-11-15 22:46:22"
 }
