@@ -14,21 +14,40 @@
     <link rel="icon" type="image/jpeg" href="{% static 'img/logo.jpg' %}">
   {% endif %}
 
-  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=20261115.3">
   <style>
     body {
       background-color: #f5f6f8;
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", system-ui, sans-serif;
     }
+    #login-card-container {
+      max-width: 420px !important;
+      width: 100% !important;
+      margin: 0 auto !important;
+      background: #ffffff !important;
+      border-radius: 28px !important;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
+    }
+    .btn-login-submit {
+      background-color: #0f172a !important;
+      color: #ffffff !important;
+    }
+    .btn-login-submit:hover {
+      background-color: #000000 !important;
+      color: #ffffff !important;
+    }
   </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4 select-none bg-[#f5f6f8] text-slate-900 antialiased">
 
-  <div id="login-card-container" class="w-full max-w-[400px] bg-white border border-slate-200/80 p-8 sm:p-9 rounded-[28px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-6 transition-all">
+  <div id="login-card-container" 
+       class="w-full max-w-sm sm:max-w-md bg-white border border-slate-200 p-8 sm:p-9 rounded-[28px] space-y-6 transition-all"
+       style="max-width: 420px; width: 100%; margin: 0 auto;">
     
     <!-- Apple-style Brand Icon & Title -->
     <div class="text-center space-y-3">
-      <div class="inline-flex w-14 h-14 rounded-2xl bg-slate-900 text-white items-center justify-center shadow-sm mx-auto overflow-hidden">
+      <div class="inline-flex w-14 h-14 rounded-2xl bg-slate-900 text-white items-center justify-center shadow-sm mx-auto overflow-hidden" 
+           style="background-color: #0f172a; color: #ffffff;">
         {% if company_settings.logo %}
           <img src="{{ company_settings.logo.url }}" alt="{{ company_settings.company_name }}" class="w-full h-full object-contain p-2">
         {% else %}
@@ -107,9 +126,10 @@
 
       <div class="pt-2">
         <button type="submit" 
-                class="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-semibold tracking-wide shadow-sm hover:shadow transition-all flex items-center justify-center space-x-2">
-          <span>Sign In</span>
-          <i class="fas fa-arrow-right text-[11px] opacity-70"></i>
+                class="btn-login-submit w-full py-3.5 px-4 rounded-xl text-white text-xs font-semibold tracking-wide shadow-sm hover:shadow transition-all flex items-center justify-center space-x-2 cursor-pointer"
+                style="background-color: #0f172a !important; color: #ffffff !important;">
+          <span style="color: #ffffff !important;">Sign In</span>
+          <i class="fas fa-arrow-right text-[11px]" style="color: #ffffff !important;"></i>
         </button>
       </div>
 
@@ -126,7 +146,7 @@
   <div id="app-modal-shell" class="hidden"></div>
   <script src="{% static 'vendor/jquery.min.js' %}"></script>
   <script src="{% static 'vendor/sweetalert2.all.min.js' %}"></script>
-  <script src="{% static 'js/app.js' %}?v=20261115.1"></script>
+  <script src="{% static 'js/app.js' %}?v=20261115.3"></script>
 
   <script>
     $(document).ready(function () {

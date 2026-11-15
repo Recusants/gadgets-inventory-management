@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.26",
-  "build": "v2.4.26-e2ace65",
-  "commit_count": 26,
-  "commit_hash": "e2ace65",
+  "version": "v2.4.27",
+  "build": "v2.4.27-ec28272",
+  "commit_count": 27,
+  "commit_hash": "ec28272",
   "branch": "main",
-  "commit_subject": "Declutter header and sidebar: remove duplicate toggle button, clean brand and store hierarchy, add Tailwind color classes, and fix Apple squircle contrast",
-  "updated_at": "2026-11-15 17:25",
-  "last_pushed_at": "2026-11-15 17:27:17"
+  "commit_subject": "Remove sidebar from POS Checkout (widescreen terminal mode with quick Dashboard exit button)",
+  "updated_at": "2026-11-15 17:28",
+  "last_pushed_at": "2026-11-15 17:31:20"
 }
