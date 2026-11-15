@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.43",
-  "build": "v2.4.43-685f343",
-  "commit_count": 43,
-  "commit_hash": "685f343",
+  "version": "v2.4.44",
+  "build": "v2.4.44-b86bbd9",
+  "commit_count": 44,
+  "commit_hash": "b86bbd9",
   "branch": "main",
-  "commit_subject": "Remove redundant subline under brand header keeping only company and branch name link",
-  "updated_at": "2026-11-15 20:18",
-  "last_pushed_at": "2026-11-15 20:18:48"
+  "commit_subject": "Fix Whats New icon using FontAwesome 6 Free magic sparkles with pulsing glow at bottom of scrollable menu",
+  "updated_at": "2026-11-15 20:24",
+  "last_pushed_at": "2026-11-15 20:25:10"
 }

@@ -197,13 +197,8 @@
       <table class="w-full text-left text-xs border-collapse">
         <thead>
           <tr>
-            <th class="w-8 pl-5 pr-2">
-              <input type="checkbox" class="rounded border-slate-300 text-slate-900 focus:ring-0 w-3.5 h-3.5">
-            </th>
-            <th class="py-3 px-4 font-semibold text-slate-400 uppercase text-[10px] tracking-wider">Booking / Sale No</th>
-            <th class="py-3 px-4 font-semibold text-slate-400 uppercase text-[10px] tracking-wider">Customer Name</th>
-            <th class="py-3 px-4 font-semibold text-slate-400 uppercase text-[10px] tracking-wider">Channel</th>
-            <th class="py-3 px-4 font-semibold text-slate-400 uppercase text-[10px] tracking-wider">Date &amp; Time</th>
+            <th class="py-3 px-4 font-semibold text-slate-400 uppercase text-[10px] tracking-wider">Sale &amp; Date</th>
+            <th class="py-3 px-4 font-semibold text-slate-400 uppercase text-[10px] tracking-wider">Customer</th>
             <th class="py-3 px-4 font-semibold text-slate-400 uppercase text-[10px] tracking-wider text-right">Amount</th>
             <th class="py-3 px-4 font-semibold text-slate-400 uppercase text-[10px] tracking-wider text-center">Status</th>
             <th class="py-3 px-4 text-center w-12"></th>
@@ -212,38 +207,31 @@
         <tbody class="divide-y divide-slate-50 text-slate-700">
           {% for s in recent_sales %}
             <tr class="hover:bg-slate-50/70 transition-colors">
-              <td class="pl-5 pr-2 py-3.5">
-                <input type="checkbox" class="rounded border-slate-300 text-slate-900 focus:ring-0 w-3.5 h-3.5">
-              </td>
-              <td class="py-3.5 px-4 font-mono font-medium text-slate-900">
-                #{{ s.invoice_number }}
+              <td class="py-3.5 px-4 font-medium text-slate-900 whitespace-nowrap">
+                <span class="font-mono font-bold text-blue-700">#{{ s.invoice_number }}</span>
+                <span class="text-[10px] text-slate-400 block font-mono">{{ s.date_sold|date:"d/m/Y" }}</span>
               </td>
               <td class="py-3.5 px-4 font-medium text-slate-900">
-                {{ s.customer.name|default:"Walk-in Customer" }}
+                <div class="font-bold text-slate-900">{{ s.customer.name|default:"Walk-in Customer" }}</div>
+                <div class="text-[10px] text-slate-400">POS Terminal</div>
               </td>
-              <td class="py-3.5 px-4 text-slate-500">
-                POS Terminal
-              </td>
-              <td class="py-3.5 px-4 font-mono text-[11px] text-slate-500">
-                {{ s.date_sold|date:"d/m/Y" }}
-              </td>
-              <td class="py-3.5 px-4 text-right font-semibold text-slate-900 font-sans">
+              <td class="py-3.5 px-4 text-right font-bold text-slate-900 font-mono">
                 {{ company_settings.currency_symbol|default:'$' }}{{ s.total_amount|floatformat:2|intcomma }}
               </td>
-              <td class="py-3.5 px-4 text-center">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
-                  Booked
+              <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                  Completed
                 </span>
               </td>
-              <td class="py-3.5 px-4 text-center">
-                <a href="{% url 'sales:transaction_list' %}" class="text-slate-400 hover:text-slate-700" title="View in Transactions Journal">
-                  <i class="fas fa-ellipsis-h text-xs"></i>
+              <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                <a href="{% url 'sales:transaction_list' %}" class="w-7 h-7 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 inline-flex items-center justify-center transition-colors" title="View in Transactions">
+                  <i class="fas fa-chevron-right text-[10px]"></i>
                 </a>
               </td>
             </tr>
           {% empty %}
             <tr>
-              <td colspan="8" class="py-8 text-center text-slate-400">
+              <td colspan="5" class="py-8 text-center text-slate-400">
                 <p class="font-medium text-slate-500">No transactions recorded yet</p>
                 <p class="text-[11px] text-slate-400 mt-1">Start by recording your first sale via POS Checkout</p>
               </td>

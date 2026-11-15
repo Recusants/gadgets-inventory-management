@@ -4,78 +4,74 @@
   <table class="w-full text-left border-collapse text-xs">
     <thead class="sticky top-0 z-20 bg-slate-100 border-b border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
       <tr>
-        <th class="py-3 px-4">Invoice Number</th>
-        <th class="py-3 px-4">Supplier Name</th>
-        <th class="py-3 px-4">Date Received</th>
-        <th class="py-3 px-4 text-center">Batch Items</th>
-        <th class="py-3 px-4 text-center">Total Units</th>
-        <th class="py-3 px-4 text-center">Units Remaining</th>
+        <th class="py-3 px-4">Invoice # &amp; Date</th>
+        <th class="py-3 px-4">Supplier</th>
+        <th class="py-3 px-4 text-center">Units (Left / Total)</th>
         <th class="py-3 px-4 text-right">Total Invoice Cost</th>
-        <th class="py-3 px-4 text-center">Actions</th>
+        <th class="py-3 px-4 text-center w-28">Actions</th>
       </tr>
     </thead>
     <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
       {% for inv in invoices %}
         <tr class="hover:bg-blue-50/50 transition-colors">
           
-          <!-- Invoice Number -->
-          <td class="py-3 px-4 whitespace-nowrap font-mono font-bold text-blue-700">
-            <span class="px-2 py-0.5 bg-blue-100 text-blue-900 rounded-lg text-xs">{{ inv.invoice_number }}</span>
+          <!-- Invoice Number & Date Received -->
+          <td class="py-3 px-4">
+            <div class="font-mono font-bold text-blue-700">
+              <span class="px-2 py-0.5 bg-blue-100 text-blue-900 rounded-lg text-xs">{{ inv.invoice_number }}</span>
+            </div>
+            <div class="font-mono text-slate-400 text-[10px] mt-0.5">
+              {{ inv.date_received|date:"Y-m-d" }}
+            </div>
           </td>
 
-          <!-- Supplier Name -->
-          <td class="py-3 px-4 font-bold text-slate-900 whitespace-nowrap">
-            {{ inv.supplier_name }}
+          <!-- Supplier Name & Batch Items Count -->
+          <td class="py-3 px-4">
+            <div class="font-bold text-slate-900 truncate max-w-xs">{{ inv.supplier_name }}</div>
+            <div class="mt-0.5">
+              <span class="inline-flex items-center px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-blue-50 text-blue-800 border border-blue-100">
+                {{ inv.batch_count }} line item{{ inv.batch_count|pluralize }}
+              </span>
+            </div>
           </td>
 
-          <!-- Date Received -->
-          <td class="py-3 px-4 whitespace-nowrap font-mono text-slate-500 text-[11px]">
-            {{ inv.date_received|date:"Y-m-d" }}
-          </td>
-
-          <!-- Batch Items Count -->
-          <td class="py-3 px-4 text-center whitespace-nowrap">
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-800">
-              {{ inv.batch_count }} item{{ inv.batch_count|pluralize }}
-            </span>
-          </td>
-
-          <!-- Total Units Received -->
-          <td class="py-3 px-4 text-center font-bold font-mono text-slate-900 whitespace-nowrap">
-            {{ inv.total_qty_received|intcomma }}
-          </td>
-
-          <!-- Units Remaining -->
-          <td class="py-3 px-4 text-center font-black font-mono whitespace-nowrap {% if inv.total_qty_remaining > 0 %}text-blue-700{% else %}text-slate-400{% endif %}">
-            {{ inv.total_qty_remaining|intcomma }}
+          <!-- Units Status (Remaining / Received) -->
+          <td class="py-3 px-4 text-center">
+            <div class="font-black font-mono text-xs {% if inv.total_qty_remaining > 0 %}text-blue-700{% else %}text-slate-400{% endif %}">
+              {{ inv.total_qty_remaining|intcomma }} left
+            </div>
+            <div class="text-[10px] font-mono text-slate-400">
+              of {{ inv.total_qty_received|intcomma }} total units
+            </div>
           </td>
 
           <!-- Total Invoice Cost -->
-          <td class="py-3 px-4 text-right font-mono font-black text-slate-900 text-sm whitespace-nowrap">
+          <td class="py-3 px-4 text-right font-mono font-black text-slate-900 text-sm">
             {{ company_settings.currency_symbol|default:'$' }}{{ inv.total_cost|floatformat:2|intcomma }}
           </td>
 
-          <!-- Actions -->
-          <td class="py-3 px-4 text-center whitespace-nowrap">
+          <!-- Actions: Details Modal -->
+          <td class="py-3 px-4 text-center">
             <button type="button" 
-                    data-modal-url="{% url 'inventory:invoice_detail_modal' inv.invoice_number %}"
-                    data-modal-size="max-w-2xl"
-                    title="View Invoice Batches & Items"
-                    class="w-7 h-7 rounded-lg bg-blue-600 hover:bg-blue-700 text-white inline-flex items-center justify-center text-xs shadow-sm transition-all">
-              <i class="fas fa-eye"></i>
+                    data-modal-url="{% url 'inventory:invoice_detail_modal' inv.id %}"
+                    data-modal-size="max-w-4xl"
+                    title="View Full Invoice &amp; Batch Deductions"
+                    class="px-2.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center space-x-1 text-xs font-bold shadow-sm transition-all mx-auto">
+              <i class="fas fa-eye text-[11px]"></i>
+              <span>Details</span>
             </button>
           </td>
 
         </tr>
       {% empty %}
         <tr>
-          <td colspan="8" class="py-12 text-center text-slate-400">
+          <td colspan="5" class="py-12 text-center text-slate-400">
             <div class="flex flex-col items-center justify-center">
               <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
                 <i class="fas fa-file-invoice text-lg"></i>
               </div>
-              <p class="font-bold text-slate-600">No invoices received yet</p>
-              <p class="text-xs text-slate-400">Click 'Receive Stock / Invoice' to process supplier invoices.</p>
+              <p class="font-bold text-slate-600">No stock intake invoices found</p>
+              <p class="text-xs text-slate-400">Click Receive Stock Invoice above to record your first inventory intake.</p>
             </div>
           </td>
         </tr>

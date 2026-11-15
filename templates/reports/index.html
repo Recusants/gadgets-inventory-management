@@ -207,21 +207,20 @@
       <table class="w-full text-left text-xs border-collapse">
         <thead class="sticky top-0 z-20 bg-slate-100 border-b border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
           <tr>
-            <th class="py-3 px-4">Date</th>
-            <th class="py-3 px-4">Invoice #</th>
+            <th class="py-3 px-4">Invoice # &amp; Date</th>
             <th class="py-3 px-4">Items / Products</th>
             <th class="py-3 px-4">Customer</th>
-            <th class="py-3 px-4 text-right">Cost</th>
-            <th class="py-3 px-4 text-right">Amount Sold</th>
-            <th class="py-3 px-4 text-right">Profit</th>
+            <th class="py-3 px-4 text-right">Sales &amp; Profit</th>
             <th class="py-3 px-4 text-center">Receipt</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
           {% for s in sales %}
             <tr class="hover:bg-blue-50/50 transition-colors">
-              <td class="py-3 px-4 font-mono text-[11px] text-slate-500 whitespace-nowrap">{{ s.date_sold|date:"Y-m-d" }}</td>
-              <td class="py-3 px-4 font-mono font-bold text-blue-700 whitespace-nowrap">{{ s.invoice_number }}</td>
+              <td class="py-3 px-4 whitespace-nowrap">
+                <span class="font-mono font-bold text-blue-700">{{ s.invoice_number }}</span>
+                <span class="text-[10px] text-slate-500 block font-mono">{{ s.date_sold|date:"Y-m-d" }}</span>
+              </td>
               <td class="py-3 px-4">
                 <span class="font-bold text-slate-900">{{ s.item_count }} unit(s)</span>
                 <span class="text-[10px] text-slate-400 block truncate max-w-xs">
@@ -229,9 +228,10 @@
                 </span>
               </td>
               <td class="py-3 px-4 whitespace-nowrap">{{ s.customer.name }}</td>
-              <td class="py-3 px-4 text-right font-mono text-slate-500 whitespace-nowrap">{{ company_settings.currency_symbol|default:'$' }}{{ s.total_cost|floatformat:2|intcomma }}</td>
-              <td class="py-3 px-4 text-right font-black font-mono text-slate-900 whitespace-nowrap">{{ company_settings.currency_symbol|default:'$' }}{{ s.total_amount|floatformat:2|intcomma }}</td>
-              <td class="py-3 px-4 text-right font-black font-mono text-blue-600 whitespace-nowrap">+{{ company_settings.currency_symbol|default:'$' }}{{ s.total_profit|floatformat:2|intcomma }}</td>
+              <td class="py-3 px-4 text-right whitespace-nowrap font-mono">
+                <div class="font-black text-slate-900">{{ company_settings.currency_symbol|default:'$' }}{{ s.total_amount|floatformat:2|intcomma }}</div>
+                <div class="text-[10px] font-bold text-blue-600">+{{ company_settings.currency_symbol|default:'$' }}{{ s.total_profit|floatformat:2|intcomma }}</div>
+              </td>
               <td class="py-3 px-4 text-center whitespace-nowrap">
                 <a href="{% url 'sales:receipt_pdf' s.id %}" target="_blank" 
                    title="Download PDF Receipt"
@@ -242,7 +242,7 @@
             </tr>
           {% empty %}
             <tr>
-              <td colspan="8" class="py-12 text-center text-slate-400">No sales recorded for this timeframe.</td>
+              <td colspan="5" class="py-12 text-center text-slate-400">No sales recorded for this timeframe.</td>
             </tr>
           {% endfor %}
         </tbody>
@@ -254,10 +254,8 @@
       <table class="w-full text-left text-xs border-collapse">
         <thead class="sticky top-0 z-20 bg-slate-100 border-b border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
           <tr>
-            <th class="py-3 px-4">Date</th>
-            <th class="py-3 px-4">Expense Title</th>
+            <th class="py-3 px-4">Expense &amp; Date</th>
             <th class="py-3 px-4">Category</th>
-            <th class="py-3 px-4">Ref #</th>
             <th class="py-3 px-4">Method</th>
             <th class="py-3 px-4 text-right">Amount</th>
           </tr>
@@ -265,20 +263,24 @@
         <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
           {% for exp in expenses %}
             <tr class="hover:bg-blue-50/50 transition-colors">
-              <td class="py-3 px-4 font-mono text-[11px] text-slate-500 whitespace-nowrap">{{ exp.date|date:"Y-m-d" }}</td>
-              <td class="py-3 px-4 font-bold text-slate-900">{{ exp.title }}</td>
+              <td class="py-3 px-4">
+                <div class="font-bold text-slate-900">{{ exp.title }}</div>
+                <div class="text-[10px] text-slate-400 font-mono mt-0.5">
+                  {{ exp.date|date:"Y-m-d" }}
+                  {% if exp.reference_number %} &bull; Ref: {{ exp.reference_number }}{% endif %}
+                </div>
+              </td>
               <td class="py-3 px-4 whitespace-nowrap">
                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">
                   {{ exp.category.name }}
                 </span>
               </td>
-              <td class="py-3 px-4 font-mono text-slate-500 whitespace-nowrap">{{ exp.reference_number|default:"-" }}</td>
               <td class="py-3 px-4 whitespace-nowrap">{{ exp.payment_method }}</td>
               <td class="py-3 px-4 text-right font-black font-mono text-slate-900 whitespace-nowrap">{{ company_settings.currency_symbol|default:'$' }}{{ exp.amount|floatformat:2|intcomma }}</td>
             </tr>
           {% empty %}
             <tr>
-              <td colspan="6" class="py-12 text-center text-slate-400">No expenses recorded for this timeframe.</td>
+              <td colspan="4" class="py-12 text-center text-slate-400">No expenses recorded for this timeframe.</td>
             </tr>
           {% endfor %}
         </tbody>
@@ -290,34 +292,41 @@
       <table class="w-full text-left text-xs border-collapse">
         <thead class="sticky top-0 z-20 bg-slate-100 border-b border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
           <tr>
-            <th class="py-3 px-4">Product Name</th>
-            <th class="py-3 px-4">Category</th>
-            <th class="py-3 px-4 text-center">Available Qty</th>
+            <th class="py-3 px-4">Product &amp; Category</th>
+            <th class="py-3 px-4 text-center">Available Stock</th>
             <th class="py-3 px-4 text-right">Selling Price</th>
-            <th class="py-3 px-4 text-right">Expected Value</th>
-            <th class="py-3 px-4 text-center">Stock Status</th>
+            <th class="py-3 px-4 text-right">Expected Valuation</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
           {% for p in products %}
             <tr class="hover:bg-blue-50/50 transition-colors">
-              <td class="py-3 px-4 font-bold text-slate-900">{{ p.name }}</td>
-              <td class="py-3 px-4 text-slate-500">{{ p.category.name|default:"—" }}</td>
-              <td class="py-3 px-4 font-mono font-bold text-center">{{ p.available_quantity|intcomma }}</td>
-              <td class="py-3 px-4 text-right font-bold font-mono text-slate-900">{{ company_settings.currency_symbol|default:'$' }}{{ p.current_selling_price|floatformat:2|intcomma }}</td>
-              <td class="py-3 px-4 text-right font-black font-mono text-blue-600">{{ company_settings.currency_symbol|default:'$' }}{{ p.current_selling_price|floatformat:2|intcomma }}</td>
-              <td class="py-3 px-4 text-center">
-                {% if p.available_quantity > 5 %}
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-900 border border-blue-200">In Stock</span>
-                {% elif p.available_quantity > 0 %}
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-[#0a192f] border border-sky-300">Low Stock</span>
-                {% else %}
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-[#0a192f] text-white border border-sky-400">Out of Stock</span>
-                {% endif %}
+              <td class="py-3 px-4">
+                <div class="font-bold text-slate-900 leading-tight">{{ p.name }}</div>
+                <div class="text-[10px] text-slate-400 mt-0.5">{{ p.category.name|default:"General" }}</div>
               </td>
+              <td class="py-3 px-4 text-center whitespace-nowrap">
+                <span class="font-mono font-bold">{{ p.available_quantity|intcomma }}</span>
+                <span class="ml-1">
+                  {% if p.available_quantity > 5 %}
+                    <span class="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-blue-100 text-blue-900">In Stock</span>
+                  {% elif p.available_quantity > 0 %}
+                    <span class="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-sky-100 text-[#0a192f]">Low</span>
+                  {% else %}
+                    <span class="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-[#0a192f] text-white">Out</span>
+                  {% endif %}
+                </span>
+              </td>
+              <td class="py-3 px-4 text-right font-bold font-mono text-slate-900 whitespace-nowrap">{{ company_settings.currency_symbol|default:'$' }}{{ p.current_selling_price|floatformat:2|intcomma }}</td>
+              <td class="py-3 px-4 text-right font-black font-mono text-blue-600 whitespace-nowrap">{{ company_settings.currency_symbol|default:'$' }}{{ p.current_selling_price|floatformat:2|intcomma }}</td>
             </tr>
           {% empty %}
             <tr>
+              <td colspan="4" class="py-12 text-center text-slate-400">No products available in catalog.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
               <td colspan="6" class="py-12 text-center text-slate-400">No products available in catalog.</td>
             </tr>
           {% endfor %}

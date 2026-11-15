@@ -4,46 +4,58 @@
   <table class="w-full text-left border-collapse text-xs">
     <thead class="sticky top-0 z-20 bg-slate-100 border-b border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
       <tr>
-        <th class="py-3 px-4">Product Name</th>
-        <th class="py-3 px-4">Category</th>
-        <th class="py-3 px-4">SKU / Code</th>
-        <th class="py-3 px-4 text-right">Selling Price</th>
+        <th class="py-3 px-4">Product &amp; Category</th>
         <th class="py-3 px-4 text-center">Available Stock</th>
-        <th class="py-3 px-4 text-center">Status</th>
-        <th class="py-3 px-4 text-center">Actions</th>
+        <th class="py-3 px-4 text-right">Selling Price</th>
+        <th class="py-3 px-4 text-center w-32">Actions</th>
       </tr>
     </thead>
     <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
       {% for product in products %}
         <tr class="hover:bg-blue-50/50 transition-colors">
           
-          <!-- Product Name -->
+          <!-- Product, Category & SKU Combined -->
           <td class="py-3 px-4">
-            <div class="truncate max-w-xs font-bold text-slate-900">{{ product.name }}</div>
-            {% if product.description %}
-              <div class="text-[10px] text-slate-400 truncate max-w-xs">{{ product.description }}</div>
-            {% endif %}
+            <div class="font-bold text-slate-900 truncate max-w-sm">{{ product.name }}</div>
+            <div class="flex items-center space-x-2 mt-0.5 text-[10px]">
+              <span class="inline-flex items-center px-1.5 py-0.2 rounded font-bold bg-blue-100 text-blue-800">
+                {{ product.category.name }}
+              </span>
+              {% if product.sku %}
+                <span class="font-mono text-slate-400">SKU: {{ product.sku }}</span>
+              {% endif %}
+            </div>
           </td>
 
-          <!-- Category -->
-          <td class="py-3 px-4 whitespace-nowrap">
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">
-              {{ product.category.name }}
-            </span>
-          </td>
-
-          <!-- SKU -->
-          <td class="py-3 px-4 whitespace-nowrap font-mono text-slate-500">
-            {{ product.sku|default:"—" }}
+          <!-- Available Stock & Status Pill -->
+          <td class="py-3 px-4 text-center">
+            <div class="font-bold font-mono text-sm {% if product.available_quantity == 0 %}text-slate-400{% elif product.available_quantity <= 5 %}text-blue-700{% else %}text-slate-900{% endif %}">
+              {{ product.available_quantity|intcomma }} units
+            </div>
+            <div class="mt-0.5">
+              {% if product.available_quantity > 5 %}
+                <span class="inline-flex items-center px-2 py-0.2 rounded-full text-[9px] font-bold bg-blue-100 text-blue-800">
+                  <span class="w-1.5 h-1.5 rounded-full bg-blue-600 mr-1"></span> In Stock
+                </span>
+              {% elif product.available_quantity > 0 %}
+                <span class="inline-flex items-center px-2 py-0.2 rounded-full text-[9px] font-bold bg-sky-100 text-[#0a192f] border border-sky-300">
+                  <span class="w-1.5 h-1.5 rounded-full bg-sky-500 mr-1"></span> Low Stock
+                </span>
+              {% else %}
+                <span class="inline-flex items-center px-2 py-0.2 rounded-full text-[9px] font-bold bg-slate-100 text-slate-500">
+                  Out of Stock
+                </span>
+              {% endif %}
+            </div>
           </td>
 
           <!-- Selling Price -->
-          <td class="py-3 px-4 whitespace-nowrap text-right">
-            <div class="inline-flex items-center space-x-1.5">
+          <td class="py-3 px-4 text-right">
+            <div class="inline-flex items-center space-x-1.5 justify-end">
               <span class="font-black font-mono text-slate-900 text-sm">
                 {{ company_settings.currency_symbol|default:'$' }}{{ product.current_selling_price|floatformat:2|intcomma }}
               </span>
-              {% if product.stock %}
+              {% if product.stock and request.user.is_supervisor_role %}
               <button type="button" 
                       data-modal-url="{% url 'inventory:stock_price_modal' product.stock.id %}"
                       data-modal-size="max-w-md"
@@ -55,40 +67,17 @@
             </div>
           </td>
 
-          <!-- Available Stock -->
-          <td class="py-3 px-4 whitespace-nowrap text-center">
-            <span class="font-bold font-mono text-sm {% if product.available_quantity == 0 %}text-slate-400{% elif product.available_quantity <= 5 %}text-blue-700{% else %}text-slate-900{% endif %}">
-              {{ product.available_quantity|intcomma }} units
-            </span>
-          </td>
-
-          <!-- Status Pill -->
-          <td class="py-3 px-4 whitespace-nowrap text-center">
-            {% if product.available_quantity > 5 %}
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">
-                <span class="w-1.5 h-1.5 rounded-full bg-blue-600 mr-1.5"></span> In Stock
-              </span>
-            {% elif product.available_quantity > 0 %}
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-[#0a192f] border border-sky-300">
-                <span class="w-1.5 h-1.5 rounded-full bg-sky-500 mr-1.5"></span> Low Stock
-              </span>
-            {% else %}
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">
-                Out of Stock
-              </span>
-            {% endif %}
-          </td>
-
-          <!-- Actions (All Blue Shades & White Text) -->
-          <td class="py-3 px-4 whitespace-nowrap text-center">
+          <!-- Actions: Detail Modal + Edit + Delete -->
+          <td class="py-3 px-4 text-center">
             <div class="inline-flex items-center justify-center space-x-1.5">
-              <!-- Detail -->
+              <!-- Detail Modal -->
               <button type="button" 
                       data-modal-url="{% url 'inventory:product_detail_modal' product.id %}"
                       data-modal-size="max-w-2xl"
                       title="View Details & Batches"
-                      class="w-7 h-7 rounded-lg bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center text-xs shadow-sm transition-all">
-                <i class="fas fa-eye"></i>
+                      class="px-2 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white flex items-center space-x-1 text-xs font-bold shadow-sm transition-all">
+                <i class="fas fa-eye text-[10px]"></i>
+                <span>Details</span>
               </button>
 
               {% if request.user.is_supervisor_role %}
@@ -105,12 +94,11 @@
               {% if request.user.is_manager_role %}
               <!-- Delete -->
               <button type="button" 
-                      data-action-url="{% url 'inventory:product_delete' product.id %}"
-                      data-confirm-title="Delete Product?"
-                      data-confirm-message="Are you sure you want to delete '{{ product.name }}'?"
-                      data-refresh-target="#product-table-container"
+                      data-delete-url="{% url 'inventory:product_delete' product.id %}"
+                      data-item-title="{{ product.name }}"
+                      data-refresh-table="#product-table-container"
                       title="Delete Product"
-                      class="btn-delete-confirm w-7 h-7 rounded-lg bg-blue-900 hover:bg-[#0a192f] text-white flex items-center justify-center text-xs shadow-sm transition-all">
+                      class="w-7 h-7 rounded-lg bg-blue-900 hover:bg-[#0a192f] text-white flex items-center justify-center text-xs shadow-sm transition-all">
                 <i class="fas fa-trash-alt"></i>
               </button>
               {% endif %}
@@ -120,13 +108,13 @@
         </tr>
       {% empty %}
         <tr>
-          <td colspan="7" class="py-12 text-center text-slate-400">
+          <td colspan="4" class="py-12 text-center text-slate-400">
             <div class="flex flex-col items-center justify-center">
               <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
                 <i class="fas fa-box-open text-lg"></i>
               </div>
               <p class="font-bold text-slate-600">No products found</p>
-              <p class="text-xs text-slate-400">Click 'Add Product' to create catalog items.</p>
+              <p class="text-xs text-slate-400">Try adjusting your search criteria or add a new product.</p>
             </div>
           </td>
         </tr>
@@ -137,31 +125,31 @@
 
 <!-- Pagination Footer -->
 {% if paginator.num_pages > 1 %}
-  <div class="py-2.5 px-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 flex-shrink-0">
-    <div>
-      Showing <span class="font-bold text-slate-700">{{ products.start_index }}</span> to <span class="font-bold text-slate-700">{{ products.end_index }}</span> of <span class="font-bold text-slate-700">{{ total_count }}</span> items
-    </div>
-    
-    <div class="inline-flex space-x-1">
-      {% if products.has_previous %}
-        <button type="button" 
-                onclick="refreshTable('#product-table-container', {page: {{ products.previous_page_number }}})"
-                class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all">
-          <i class="fas fa-chevron-left mr-1"></i> Prev
-        </button>
-      {% endif %}
-
-      <span class="px-2.5 py-1 text-xs font-bold text-slate-700">
-        Page {{ products.number }} of {{ paginator.num_pages }}
-      </span>
-
-      {% if products.has_next %}
-        <button type="button" 
-                onclick="refreshTable('#product-table-container', {page: {{ products.next_page_number }}})"
-                class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all">
-          Next <i class="fas fa-chevron-right ml-1"></i>
-        </button>
-      {% endif %}
-    </div>
+<div class="py-2.5 px-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 flex-shrink-0">
+  <div>
+    Showing <span class="font-bold text-slate-700">{{ products.start_index|default:0 }}</span> to <span class="font-bold text-slate-700">{{ products.end_index|default:0 }}</span> of <span class="font-bold text-slate-700">{{ total_count|default:0 }}</span> items
   </div>
+
+  <div class="inline-flex space-x-1">
+    {% if products.has_previous %}
+      <button type="button" 
+              onclick="refreshTable('#product-table-container', {page: {{ products.previous_page_number }}})"
+              class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all">
+        <i class="fas fa-chevron-left mr-1"></i> Prev
+      </button>
+    {% endif %}
+
+    <span class="px-2.5 py-1 text-xs font-bold text-slate-700">
+      Page {{ products.number }} of {{ paginator.num_pages }}
+    </span>
+
+    {% if products.has_next %}
+      <button type="button" 
+              onclick="refreshTable('#product-table-container', {page: {{ products.next_page_number }}})"
+              class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all">
+        Next <i class="fas fa-chevron-right ml-1"></i>
+      </button>
+    {% endif %}
+  </div>
+</div>
 {% endif %}

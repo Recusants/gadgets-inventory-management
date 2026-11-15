@@ -3,48 +3,53 @@
   <table class="w-full text-left border-collapse text-xs">
     <thead class="sticky top-0 z-20 bg-slate-100 border-b border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
       <tr>
-        <th class="py-3 px-4">#</th>
-        <th class="py-3 px-4">Category Name</th>
-        <th class="py-3 px-4">Description</th>
-        <th class="py-3 px-4 text-right">Default Amount</th>
-        <th class="py-3 px-4 text-center">Recurring</th>
-        <th class="py-3 px-4 text-center">Expenses Count</th>
+        <th class="py-3 px-4">Category &amp; Description</th>
+        <th class="py-3 px-4">Default Amount &amp; Type</th>
+        <th class="py-3 px-4 text-center">Expenses</th>
         <th class="py-3 px-4 text-center">Actions</th>
       </tr>
     </thead>
     <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
       {% for cat in categories %}
       <tr class="hover:bg-blue-50/50 transition-colors">
-        <td class="py-3 px-4 whitespace-nowrap font-mono text-slate-400 text-[11px]">
-          {{ forloop.counter }}
-        </td>
+        <!-- Category & Description -->
         <td class="py-3 px-4">
-          <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-100 text-blue-800">
-            <i class="fas fa-tag mr-1.5 text-[10px]"></i> {{ cat.name }}
-          </span>
-        </td>
-        <td class="py-3 px-4 text-slate-600">
-          {{ cat.description|default:"—" }}
-        </td>
-        <td class="py-3 px-4 whitespace-nowrap text-right font-mono font-bold text-slate-900">
-          {{ company_settings.currency_symbol|default:'$' }}{{ cat.default_amount|floatformat:2|intcomma }}
-        </td>
-        <td class="py-3 px-4 whitespace-nowrap text-center">
-          {% if cat.is_recurring %}
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-[#0a192f] border border-blue-200 uppercase">
-              <i class="fas fa-sync-alt fa-spin-pulse mr-1 text-[9px]"></i> {{ cat.recurring_interval }}
+          <div class="flex items-center space-x-2">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-100 text-blue-800">
+              <i class="fas fa-tag mr-1.5 text-[10px]"></i> {{ cat.name }}
             </span>
-          {% else %}
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-500">
-              Manual
-            </span>
+          </div>
+          {% if cat.description %}
+            <div class="text-[10px] text-slate-500 mt-1 max-w-sm truncate">{{ cat.description }}</div>
           {% endif %}
         </td>
+
+        <!-- Default Amount & Recurring Type -->
+        <td class="py-3 px-4 whitespace-nowrap">
+          <div class="font-mono font-bold text-slate-900">
+            {{ company_settings.currency_symbol|default:'$' }}{{ cat.default_amount|floatformat:2|intcomma }}
+          </div>
+          <div class="mt-0.5">
+            {% if cat.is_recurring %}
+              <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-black bg-blue-100 text-[#0a192f] border border-blue-200 uppercase">
+                <i class="fas fa-sync-alt fa-spin-pulse mr-1 text-[8px]"></i> {{ cat.recurring_interval }}
+              </span>
+            {% else %}
+              <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-semibold bg-slate-100 text-slate-500">
+                Manual
+              </span>
+            {% endif %}
+          </div>
+        </td>
+
+        <!-- Linked Expenses Count -->
         <td class="py-3 px-4 whitespace-nowrap text-center">
           <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-800">
-            {{ cat.expenses.count|intcomma }}
+            {{ cat.expenses.count|intcomma }} items
           </span>
         </td>
+
+        <!-- Actions -->
         <td class="py-3 px-4 whitespace-nowrap text-center">
           <div class="inline-flex items-center justify-center space-x-1.5">
             <!-- Action buttons in blue shades with white text -->
@@ -73,7 +78,7 @@
       </tr>
       {% empty %}
       <tr>
-        <td colspan="5" class="py-12 text-center text-slate-400">
+        <td colspan="4" class="py-12 text-center text-slate-400">
           <div class="flex flex-col items-center justify-center">
             <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
               <i class="fas fa-tags text-lg"></i>

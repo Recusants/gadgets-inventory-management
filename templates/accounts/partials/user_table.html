@@ -2,10 +2,8 @@
   <table class="w-full text-left border-collapse text-xs">
     <thead class="sticky top-0 z-20 bg-slate-100 border-b border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
       <tr>
-        <th class="py-3 px-4">User</th>
-        <th class="py-3 px-4">Role</th>
-        <th class="py-3 px-4">Contact Details</th>
-        <th class="py-3 px-4 text-center">Status</th>
+        <th class="py-3 px-4">User &amp; Contact</th>
+        <th class="py-3 px-4">Role &amp; Status</th>
         <th class="py-3 px-4">Activity / Joined</th>
         <th class="py-3 px-4 text-center">Actions</th>
       </tr>
@@ -14,8 +12,8 @@
       {% for u in users %}
       <tr class="hover:bg-blue-50/50 transition-colors {% if not u.is_active %}opacity-60 bg-slate-50/50{% endif %}">
         
-        <!-- User Info -->
-        <td class="py-3 px-4 whitespace-nowrap">
+        <!-- User Info & Contact -->
+        <td class="py-3 px-4">
           <div class="flex items-center space-x-2.5">
             <div class="w-8 h-8 rounded-full {% if 'ADMIN' in u.roles or u.is_superuser %}bg-[#0a192f] border border-sky-400{% elif 'MANAGER' in u.roles %}bg-blue-800 border border-sky-300{% else %}bg-blue-950 border border-blue-900{% endif %} text-white font-black text-xs flex items-center justify-center shadow-sm flex-shrink-0">
               {{ u.first_name|default:u.username|slice:":1"|upper }}
@@ -28,29 +26,37 @@
                 {% endif %}
               </div>
               <div class="font-mono text-[11px] text-slate-500 font-semibold">@{{ u.username }}</div>
+              <div class="flex items-center gap-2 mt-0.5 text-[10px] text-slate-400 font-mono">
+                {% if u.email %}
+                  <span><i class="fas fa-envelope text-[9px] mr-1"></i>{{ u.email }}</span>
+                {% endif %}
+                {% if u.phone %}
+                  <span><i class="fas fa-phone text-[9px] mr-1"></i>{{ u.phone }}</span>
+                {% endif %}
+              </div>
             </div>
           </div>
         </td>
 
-        <!-- Role Badges (Supports Multiple Roles) -->
+        <!-- Role & Status Badges -->
         <td class="py-3 px-4 whitespace-nowrap">
           <div class="flex flex-wrap items-center gap-1.5">
             {% for r in u.roles %}
               {% if r == 'ADMIN' %}
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#0a192f] text-white border border-sky-400">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#0a192f] text-white border border-sky-400">
                   <i class="fas fa-shield-alt mr-1 text-[9px] text-sky-300"></i> Admin
                 </span>
               {% elif r == 'MANAGER' %}
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-[#0a192f] border border-sky-300">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-[#0a192f] border border-sky-300">
                   <i class="fas fa-user-tie mr-1 text-[9px] text-sky-600"></i> Manager
                 </span>
               {% else %}
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-[#0a192f] border border-sky-200">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-[#0a192f] border border-sky-200">
                   <i class="fas fa-user mr-1 text-[9px] text-sky-500"></i> Staff
                 </span>
               {% endif %}
             {% empty %}
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-[#0a192f] border border-sky-200">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-[#0a192f] border border-sky-200">
                 <i class="fas fa-user mr-1 text-[9px] text-sky-500"></i> Staff
               </span>
             {% endfor %}
@@ -59,36 +65,18 @@
                 <i class="fas fa-crown mr-1 text-[9px] text-sky-600"></i> Superuser
               </span>
             {% endif %}
+
+            <!-- Active Status badge inline -->
+            {% if u.is_active %}
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-[#0a192f] border border-blue-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-blue-600 mr-1.5"></span> Active
+              </span>
+            {% else %}
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-slate-200 text-slate-700">
+                <span class="w-1.5 h-1.5 rounded-full bg-slate-500 mr-1.5"></span> Disabled
+              </span>
+            {% endif %}
           </div>
-        </td>
-
-        <!-- Contact Info -->
-        <td class="py-3 px-4 whitespace-nowrap text-xs">
-          {% if u.phone %}
-            <div class="text-slate-800 font-mono text-[11px] flex items-center">
-              <i class="fas fa-phone mr-1.5 text-[10px] text-slate-400"></i>{{ u.phone }}
-            </div>
-          {% endif %}
-          {% if u.email %}
-            <div class="text-[11px] text-slate-500 font-medium flex items-center mt-0.5">
-              <i class="fas fa-envelope mr-1.5 text-[10px] text-slate-400"></i>{{ u.email }}
-            </div>
-          {% elif not u.phone %}
-            <span class="text-slate-400">—</span>
-          {% endif %}
-        </td>
-
-        <!-- Active Status -->
-        <td class="py-3 px-4 whitespace-nowrap text-center">
-          {% if u.is_active %}
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-[#0a192f] border border-blue-200 border border-sky-200">
-              <span class="w-1.5 h-1.5 rounded-full bg-sky-500 mr-1.5"></span> Active
-            </span>
-          {% else %}
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-[#0a192f] text-white border border-sky-400 border border-sky-300">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#0a192f] mr-1.5"></span> Disabled
-            </span>
-          {% endif %}
         </td>
 
         <!-- Activity Times -->

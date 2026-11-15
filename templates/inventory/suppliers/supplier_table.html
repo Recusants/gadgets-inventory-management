@@ -2,43 +2,53 @@
   <table class="w-full text-left border-collapse text-xs">
     <thead class="sticky top-0 z-20 bg-slate-100 border-b border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
       <tr>
-        <th class="py-3 px-4">Supplier Name</th>
-        <th class="py-3 px-4">Contact Person</th>
-        <th class="py-3 px-4">Phone</th>
-        <th class="py-3 px-4">Email</th>
-        <th class="py-3 px-4 text-center">Invoices</th>
-        <th class="py-3 px-4 text-center">Batches Supplied</th>
+        <th class="py-3 px-4">Supplier &amp; Contact</th>
+        <th class="py-3 px-4">Phone &amp; Email</th>
+        <th class="py-3 px-4 text-center">Activity</th>
         <th class="py-3 px-4 text-center">Actions</th>
       </tr>
     </thead>
     <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
       {% for sup in suppliers %}
       <tr class="hover:bg-blue-50/50 transition-colors">
+        <!-- Supplier Name & Contact Person -->
         <td class="py-3 px-4">
           <div class="font-bold text-slate-900">{{ sup.name }}</div>
-          {% if sup.address %}
-            <div class="text-[10px] text-slate-400 truncate max-w-xs">{{ sup.address }}</div>
+          <div class="text-[10px] text-slate-500 mt-0.5">
+            {% if sup.contact_person %}
+              <span><i class="fas fa-user-circle text-[9px] mr-1 text-slate-400"></i>{{ sup.contact_person }}</span>
+            {% endif %}
+            {% if sup.address %}
+              <span class="text-slate-400 truncate max-w-xs block">{{ sup.address }}</span>
+            {% endif %}
+          </div>
+        </td>
+
+        <!-- Phone & Email -->
+        <td class="py-3 px-4 whitespace-nowrap text-xs font-mono">
+          {% if sup.phone %}
+            <div class="text-slate-800 font-semibold">{{ sup.phone }}</div>
+          {% endif %}
+          {% if sup.email %}
+            <div class="text-[10px] text-slate-500">{{ sup.email }}</div>
+          {% elif not sup.phone %}
+            <span class="text-slate-400">—</span>
           {% endif %}
         </td>
-        <td class="py-3 px-4 whitespace-nowrap text-slate-600">
-          {{ sup.contact_person|default:"—" }}
-        </td>
-        <td class="py-3 px-4 whitespace-nowrap font-mono text-slate-700">
-          {{ sup.phone|default:"—" }}
-        </td>
-        <td class="py-3 px-4 whitespace-nowrap text-slate-500 font-mono text-[11px]">
-          {{ sup.email|default:"—" }}
-        </td>
+
+        <!-- Invoices & Batches Activity -->
         <td class="py-3 px-4 whitespace-nowrap text-center">
-          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">
-            {{ sup.invoice_count }}
-          </span>
+          <div class="inline-flex items-center space-x-1.5">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800" title="Invoices">
+              <i class="fas fa-file-invoice mr-1 text-[9px]"></i> {{ sup.invoice_count }}
+            </span>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700" title="Batches">
+              <i class="fas fa-boxes mr-1 text-[9px]"></i> {{ sup.batch_count }}
+            </span>
+          </div>
         </td>
-        <td class="py-3 px-4 whitespace-nowrap text-center">
-          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-800">
-            {{ sup.batch_count }}
-          </span>
-        </td>
+
+        <!-- Actions -->
         <td class="py-3 px-4 whitespace-nowrap text-center">
           <div class="inline-flex items-center justify-center space-x-1.5">
             <!-- Buttons in shades of blue with white text -->
@@ -67,7 +77,7 @@
       </tr>
       {% empty %}
       <tr>
-        <td colspan="7" class="py-12 text-center text-slate-400">
+        <td colspan="4" class="py-12 text-center text-slate-400">
           <div class="flex flex-col items-center justify-center">
             <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
               <i class="fas fa-truck-loading text-lg"></i>

@@ -4,17 +4,11 @@
   <table class="w-full text-left border-collapse text-xs">
     <thead class="sticky top-0 z-20 bg-slate-100 border-b border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
       <tr>
-        <th class="py-3 px-4">Date</th>
-        <th class="py-3 px-4">Receipt / Invoice #</th>
-        <th class="py-3 px-4">Customer</th>
+        <th class="py-3 px-4">Receipt # &amp; Date</th>
+        <th class="py-3 px-4">Customer &amp; Payment</th>
         <th class="py-3 px-4 text-center">Items</th>
-        <th class="py-3 px-4 text-right">Total Amount</th>
-        {% if request.user.is_supervisor_role %}
-        <th class="py-3 px-4 text-right">Profit</th>
-        {% endif %}
-        <th class="py-3 px-4 text-center">Payment</th>
-        <th class="py-3 px-4 text-left">Cashier</th>
-        <th class="py-3 px-4 text-center">Actions</th>
+        <th class="py-3 px-4 text-right">Amount &amp; Profit</th>
+        <th class="py-3 px-4 text-center w-36">Actions</th>
       </tr>
     </thead>
 
@@ -22,65 +16,53 @@
       {% for sale in transactions %}
         <tr class="hover:bg-blue-50/50 transition-colors">
           
-          <!-- Date -->
-          <td class="py-3 px-4 whitespace-nowrap font-mono text-slate-500 text-[11px]">
-            <div>{{ sale.date_sold|date:"Y-m-d" }}</div>
-            <div class="text-[10px] text-slate-400">{{ sale.created_at|date:"H:i" }}</div>
-          </td>
-
-          <!-- Invoice Number -->
-          <td class="py-3 px-4 whitespace-nowrap font-mono font-bold text-blue-700">
+          <!-- Receipt # & Date -->
+          <td class="py-3 px-4">
             <button type="button" 
                     data-modal-url="{% url 'sales:sale_detail_modal' sale.id %}"
                     data-modal-size="max-w-xl"
                     title="View Receipt Details"
-                    class="hover:underline font-mono font-black text-blue-600 focus:outline-none">
+                    class="hover:underline font-mono font-black text-blue-700 text-xs focus:outline-none">
               {{ sale.invoice_number }}
             </button>
+            <div class="font-mono text-[10px] text-slate-400 mt-0.5">
+              {{ sale.date_sold|date:"Y-m-d" }} {{ sale.created_at|date:"H:i" }}
+            </div>
           </td>
 
-          <!-- Customer -->
-          <td class="py-3 px-4 whitespace-nowrap">
-            <div class="font-bold text-slate-900">{{ sale.customer.name }}</div>
-            <div class="text-[10px] text-slate-400 font-mono">{{ sale.customer.phone }}</div>
+          <!-- Customer & Payment / Cashier -->
+          <td class="py-3 px-4">
+            <div class="font-bold text-slate-900 truncate max-w-xs">{{ sale.customer.name }}</div>
+            <div class="flex items-center space-x-1.5 mt-0.5 text-[10px]">
+              <span class="inline-flex items-center px-1.5 py-0.2 rounded font-semibold bg-slate-100 text-slate-700">
+                {{ sale.payment_method }}
+              </span>
+              <span class="text-slate-400">•</span>
+              <span class="text-slate-500 font-medium">{{ sale.user.get_full_name|default:sale.user.username|default:"System" }}</span>
+            </div>
           </td>
 
           <!-- Items Count -->
-          <td class="py-3 px-4 text-center whitespace-nowrap">
+          <td class="py-3 px-4 text-center">
             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
               <i class="fas fa-boxes-stacked mr-1 text-[9px]"></i> {{ sale.items.count }} item{{ sale.items.count|pluralize }}
             </span>
           </td>
 
-          <!-- Amount Sold -->
-          <td class="py-3 px-4 text-right whitespace-nowrap font-black font-mono text-slate-900 text-sm">
-            {{ company_settings.currency_symbol|default:'$' }}{{ sale.total_amount|floatformat:2|intcomma }}
-          </td>
-
-          <!-- Net Profit -->
-          {% if request.user.is_supervisor_role %}
-          <td class="py-3 px-4 text-right whitespace-nowrap font-black font-mono text-blue-600">
-            +{{ company_settings.currency_symbol|default:'$' }}{{ sale.total_profit|floatformat:2|intcomma }}
-          </td>
-          {% endif %}
-
-          <!-- Payment -->
-          <td class="py-3 px-4 text-center whitespace-nowrap">
-            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700">
-              {{ sale.payment_method }}
-            </span>
-          </td>
-
-          <!-- Cashier -->
-          <td class="py-3 px-4 whitespace-nowrap font-medium text-slate-600 text-[11px]">
-            <div class="flex items-center space-x-1.5">
-              <i class="fas fa-user-circle text-slate-400 text-xs"></i>
-              <span>{{ sale.user.get_full_name|default:sale.user.username|default:"System" }}</span>
+          <!-- Amount & Net Profit -->
+          <td class="py-3 px-4 text-right">
+            <div class="font-black font-mono text-slate-900 text-sm">
+              {{ company_settings.currency_symbol|default:'$' }}{{ sale.total_amount|floatformat:2|intcomma }}
             </div>
+            {% if request.user.is_supervisor_role %}
+            <div class="font-bold font-mono text-[11px] text-blue-600 mt-0.5">
+              +{{ company_settings.currency_symbol|default:'$' }}{{ sale.total_profit|floatformat:2|intcomma }}
+            </div>
+            {% endif %}
           </td>
 
-          <!-- Actions -->
-          <td class="py-3 px-4 text-center whitespace-nowrap">
+          <!-- Actions: Print Menu + Details + Void -->
+          <td class="py-3 px-4 text-center">
             <div class="inline-flex items-center justify-center space-x-1.5">
               
               <!-- Print Dropdown (POS, A5, A4, Share PDF) -->
@@ -162,11 +144,11 @@
                 </div>
               </div>
 
-              <!-- Detail Modal -->
+              <!-- Detail Modal Button -->
               <button type="button" 
                       data-modal-url="{% url 'sales:sale_detail_modal' sale.id %}"
                       data-modal-size="max-w-xl"
-                      title="View Details"
+                      title="View Full Receipt Details"
                       class="w-7 h-7 rounded-lg bg-blue-700 hover:bg-blue-800 text-white flex items-center justify-center text-xs shadow-sm transition-all">
                 <i class="fas fa-eye"></i>
               </button>
@@ -188,7 +170,7 @@
         </tr>
       {% empty %}
         <tr>
-          <td colspan="9" class="py-12 text-center text-slate-400">
+          <td colspan="5" class="py-12 text-center text-slate-400">
             <div class="flex flex-col items-center justify-center">
               <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
                 <i class="fas fa-arrow-right-arrow-left text-lg text-blue-500"></i>

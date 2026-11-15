@@ -4,11 +4,8 @@
   <table class="w-full text-left border-collapse text-xs">
     <thead class="sticky top-0 z-20 bg-slate-100 border-b border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
       <tr>
-        <th class="py-3 px-4">Date</th>
-        <th class="py-3 px-4">Expense Title</th>
-        <th class="py-3 px-4">Category</th>
-        <th class="py-3 px-4">Ref / Receipt #</th>
-        <th class="py-3 px-4">Method</th>
+        <th class="py-3 px-4">Expense &amp; Date</th>
+        <th class="py-3 px-4">Category &amp; Method</th>
         <th class="py-3 px-4 text-right">Amount</th>
         <th class="py-3 px-4 text-center">Actions</th>
       </tr>
@@ -16,31 +13,36 @@
     <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
       {% for exp in expenses %}
       <tr class="hover:bg-blue-50/50 transition-colors">
-        <td class="py-3 px-4 whitespace-nowrap font-mono text-slate-500 text-[11px]">
-          {{ exp.date|date:"Y-m-d" }}
-        </td>
+        <!-- Expense Title, Date & Reference -->
         <td class="py-3 px-4">
           <div class="font-bold text-slate-900">{{ exp.title }}</div>
-          {% if exp.notes %}
-            <div class="text-[10px] text-slate-400 truncate max-w-xs">{{ exp.notes }}</div>
-          {% endif %}
+          <div class="flex items-center space-x-2 text-[10px] text-slate-400 mt-0.5">
+            <span class="font-mono">{{ exp.date|date:"Y-m-d" }}</span>
+            {% if exp.reference_number %}
+              <span>&bull;</span>
+              <span class="font-mono">Ref: {{ exp.reference_number }}</span>
+            {% endif %}
+          </div>
         </td>
+
+        <!-- Category & Payment Method -->
         <td class="py-3 px-4 whitespace-nowrap">
-          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">
-            <i class="fas fa-tag mr-1 text-[9px]"></i> {{ exp.category.name }}
-          </span>
+          <div class="flex items-center space-x-1.5">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">
+              <i class="fas fa-tag mr-1 text-[9px]"></i> {{ exp.category.name }}
+            </span>
+            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600">
+              {{ exp.payment_method }}
+            </span>
+          </div>
         </td>
-        <td class="py-3 px-4 whitespace-nowrap font-mono text-slate-500">
-          {{ exp.reference_number|default:"-" }}
-        </td>
-        <td class="py-3 px-4 whitespace-nowrap">
-          <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700">
-            {{ exp.payment_method }}
-          </span>
-        </td>
+
+        <!-- Amount -->
         <td class="py-3 px-4 whitespace-nowrap text-right font-black font-mono text-slate-900 text-sm">
           {{ company_settings.currency_symbol|default:'$' }}{{ exp.amount|floatformat:2|intcomma }}
         </td>
+
+        <!-- Actions -->
         <td class="py-3 px-4 whitespace-nowrap text-center">
           <div class="inline-flex items-center justify-center space-x-1.5">
             <!-- Blue shades with white text for table action buttons -->
@@ -76,7 +78,7 @@
       </tr>
       {% empty %}
       <tr>
-        <td colspan="7" class="py-12 text-center text-slate-400">
+        <td colspan="4" class="py-12 text-center text-slate-400">
           <div class="flex flex-col items-center justify-center">
             <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
               <i class="fas fa-receipt text-lg"></i>

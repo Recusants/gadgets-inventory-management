@@ -4,17 +4,10 @@
   <table class="w-full text-left border-collapse text-xs">
     <thead class="sticky top-0 z-20 bg-slate-100 border-b border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
       <tr>
-        <th class="py-3 px-4">Date</th>
-        <th class="py-3 px-4">Receipt / Trans #</th>
+        <th class="py-3 px-4">Receipt # &amp; Date</th>
         <th class="py-3 px-4">Product / Item</th>
-        <th class="py-3 px-4">Category</th>
-        <th class="py-3 px-4">Serial / Identifiers</th>
-        <th class="py-3 px-4 text-center">Qty</th>
-        <th class="py-3 px-4 text-right">Unit Price</th>
+        <th class="py-3 px-4 text-center">Qty &amp; Price</th>
         <th class="py-3 px-4 text-right">Line Total</th>
-        {% if request.user.is_supervisor_role %}
-        <th class="py-3 px-4 text-right">Profit</th>
-        {% endif %}
         <th class="py-3 px-4">Customer</th>
         <th class="py-3 px-4 text-center">Receipt</th>
       </tr>
@@ -24,14 +17,8 @@
       {% for item in sales %}
         <tr class="hover:bg-blue-50/50 transition-colors">
           
-          <!-- Date -->
-          <td class="py-3 px-4 whitespace-nowrap font-mono text-slate-500 text-[11px]">
-            <div>{{ item.sale.date_sold|date:"Y-m-d" }}</div>
-            <div class="text-[10px] text-slate-400">{{ item.created_at|date:"H:i" }}</div>
-          </td>
-
-          <!-- Parent Transaction / Invoice Number (Clickable to open receipt) -->
-          <td class="py-3 px-4 whitespace-nowrap font-mono font-bold">
+          <!-- Receipt # & Date -->
+          <td class="py-3 px-4 whitespace-nowrap">
             <button type="button" 
                     data-modal-url="{% url 'sales:sale_detail_modal' item.sale.id %}"
                     data-modal-size="max-w-xl"
@@ -40,69 +27,56 @@
               <i class="fas fa-receipt text-[10px] text-blue-500"></i>
               <span>{{ item.sale.invoice_number }}</span>
             </button>
-          </td>
-
-          <!-- Product / Item Details -->
-          <td class="py-3 px-4 whitespace-nowrap">
-            <div class="font-bold text-slate-900 flex items-center space-x-1.5">
-              <span>{{ item.product.name }}</span>
-            </div>
-            <div class="text-[10px] text-slate-400 font-mono">
-              SKU: {{ item.product.sku|default:"N/A" }}
+            <div class="text-[10px] text-slate-400 font-mono mt-0.5">
+              {{ item.sale.date_sold|date:"Y-m-d" }} {{ item.created_at|date:"H:i" }}
             </div>
           </td>
 
-          <!-- Category -->
-          <td class="py-3 px-4 whitespace-nowrap">
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700">
-              {{ item.product.category.name|default:"General" }}
-            </span>
+          <!-- Product / Item Details (Name, Category, SKU, Serial) -->
+          <td class="py-3 px-4">
+            <div class="font-bold text-slate-900 leading-tight">
+              {{ item.product.name }}
+            </div>
+            <div class="flex flex-wrap items-center gap-1.5 mt-0.5">
+              <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-semibold bg-slate-100 text-slate-700">
+                {{ item.product.category.name|default:"General" }}
+              </span>
+              {% if item.product.sku %}
+                <span class="text-[10px] text-slate-400 font-mono">SKU: {{ item.product.sku }}</span>
+              {% endif %}
+              {% if item.serial_number %}
+                <span class="inline-flex items-center space-x-1 text-[10px] font-mono font-bold text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-200">
+                  <i class="fas fa-barcode text-[9px] text-blue-500"></i>
+                  <span>{{ item.serial_number }}</span>
+                </span>
+              {% endif %}
+            </div>
           </td>
 
-          <!-- Serial / Identifiers -->
-          <td class="py-3 px-4 whitespace-nowrap font-mono text-[11px]">
-            {% if item.serial_number %}
-              <div class="text-blue-700 font-bold flex items-center space-x-1">
-                <i class="fas fa-barcode text-[10px] text-blue-500"></i>
-                <span>{{ item.serial_number }}</span>
+          <!-- Quantity & Unit Price -->
+          <td class="py-3 px-4 text-center whitespace-nowrap font-mono">
+            <span class="font-black text-slate-900 text-xs">{{ item.quantity }}</span>
+            <span class="text-slate-400 text-[10px]"> &times; {{ company_settings.currency_symbol|default:'$' }}{{ item.unit_price|floatformat:2|intcomma }}</span>
+          </td>
+
+          <!-- Line Total & Net Profit -->
+          <td class="py-3 px-4 text-right whitespace-nowrap font-mono">
+            <div class="font-black text-slate-900 text-sm">
+              {{ company_settings.currency_symbol|default:'$' }}{{ item.total_price|floatformat:2|intcomma }}
+            </div>
+            {% if request.user.is_supervisor_role %}
+              <div class="text-[10px] font-bold text-blue-600">
+                +{{ company_settings.currency_symbol|default:'$' }}{{ item.profit|floatformat:2|intcomma }} profit
               </div>
             {% endif %}
-            {% if item.email %}
-              <div class="text-[10px] text-slate-500">
-                <i class="fas fa-at text-[9px] text-slate-400"></i> {{ item.email }}
-              </div>
-            {% endif %}
-            {% if not item.serial_number and not item.email %}
-              <span class="text-slate-300">—</span>
-            {% endif %}
           </td>
-
-          <!-- Quantity -->
-          <td class="py-3 px-4 text-center whitespace-nowrap font-black font-mono text-slate-900 text-xs">
-            {{ item.quantity }}
-          </td>
-
-          <!-- Unit Price -->
-          <td class="py-3 px-4 text-right whitespace-nowrap font-mono text-slate-600">
-            {{ company_settings.currency_symbol|default:'$' }}{{ item.unit_price|floatformat:2|intcomma }}
-          </td>
-
-          <!-- Line Total -->
-          <td class="py-3 px-4 text-right whitespace-nowrap font-black font-mono text-slate-900 text-sm">
-            {{ company_settings.currency_symbol|default:'$' }}{{ item.total_price|floatformat:2|intcomma }}
-          </td>
-
-          <!-- Net Profit -->
-          {% if request.user.is_supervisor_role %}
-          <td class="py-3 px-4 text-right whitespace-nowrap font-black font-mono text-blue-600">
-            +{{ company_settings.currency_symbol|default:'$' }}{{ item.profit|floatformat:2|intcomma }}
-          </td>
-          {% endif %}
 
           <!-- Customer -->
           <td class="py-3 px-4 whitespace-nowrap">
             <div class="font-bold text-slate-900">{{ item.sale.customer.name }}</div>
-            <div class="text-[10px] text-slate-400 font-mono">{{ item.sale.customer.phone }}</div>
+            {% if item.sale.customer.phone %}
+              <div class="text-[10px] text-slate-400 font-mono">{{ item.sale.customer.phone }}</div>
+            {% endif %}
           </td>
 
           <!-- Actions / Receipt Modal Shortcut -->
@@ -120,7 +94,7 @@
         </tr>
       {% empty %}
         <tr>
-          <td colspan="11" class="py-12 text-center text-slate-400">
+          <td colspan="6" class="py-12 text-center text-slate-400">
             <div class="flex flex-col items-center justify-center">
               <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
                 <i class="fas fa-shopping-bag text-lg text-blue-500"></i>
