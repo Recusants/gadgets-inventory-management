@@ -584,19 +584,29 @@ function initSidebar() {
     $('#app-sidebar').addClass('sidebar-ready');
   }, 50);
 
-  $(document).off('click', '#sidebar-toggle-btn')
-    .on('click', '#sidebar-toggle-btn', function (e) {
-      e.preventDefault();
-      const willCollapse = !$('#app-sidebar').hasClass('collapsed');
-      if (willCollapse) {
-        $('html').addClass('sidebar-is-collapsed');
-        $('#app-sidebar').addClass('collapsed');
-      } else {
-        $('html').removeClass('sidebar-is-collapsed');
-        $('#app-sidebar').removeClass('collapsed');
+  function toggleSidebar(e) {
+    if (e) e.preventDefault();
+    const willCollapse = !$('#app-sidebar').hasClass('collapsed');
+    if (willCollapse) {
+      $('html').addClass('sidebar-is-collapsed');
+      $('#app-sidebar').addClass('collapsed');
+    } else {
+      $('html').removeClass('sidebar-is-collapsed');
+      $('#app-sidebar').removeClass('collapsed');
+    }
+    updateSidebarToggleIcon(willCollapse);
+    localStorage.setItem('21void_sidebar_collapsed', willCollapse ? 'true' : 'false');
+  }
+
+  $(document).off('click', '#sidebar-toggle-btn, #topbar-sidebar-toggle-btn, .btn-toggle-sidebar')
+    .on('click', '#sidebar-toggle-btn, #topbar-sidebar-toggle-btn, .btn-toggle-sidebar', toggleSidebar);
+
+  // Clicking brand logo when sidebar is collapsed expands it
+  $(document).off('click', '#sidebar-brand-logo')
+    .on('click', '#sidebar-brand-logo', function (e) {
+      if ($('#app-sidebar').hasClass('collapsed')) {
+        toggleSidebar(e);
       }
-      updateSidebarToggleIcon(willCollapse);
-      localStorage.setItem('21void_sidebar_collapsed', willCollapse ? 'true' : 'false');
     });
 }
 

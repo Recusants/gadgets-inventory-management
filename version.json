@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.23",
-  "build": "v2.4.23-48a3192",
-  "commit_count": 23,
-  "commit_hash": "48a3192",
+  "version": "v2.4.24",
+  "build": "v2.4.24-d6936ff",
+  "commit_count": 24,
+  "commit_hash": "d6936ff",
   "branch": "main",
-  "commit_subject": "Remove splash screen and apply Apple minimalist design system inspired by Fixoria dashboard",
-  "updated_at": "2026-11-15 16:13",
-  "last_pushed_at": "2026-11-15 16:21:17"
+  "commit_subject": "Implement 4-option print popup on checkout with preselection persistence (POS print, PDF, A4, No print)",
+  "updated_at": "2026-11-15 16:24",
+  "last_pushed_at": "2026-11-15 16:28:05"
 }

@@ -17,7 +17,7 @@
 
 
   <!-- Core App & Vendor CSS (100% Offline Local Assets with cache-buster) -->
-  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=20260922.8">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=20261115.1">
 
 
   <script>
@@ -39,7 +39,7 @@
   <script src="{% static 'vendor/jquery.min.js' %}"></script>
   <script src="{% static 'vendor/sweetalert2.all.min.js' %}"></script>
   <script src="{% static 'vendor/chart.umd.min.js' %}"></script>
-  <script src="{% static 'js/app.js' %}?v=20261006.1"></script>
+  <script src="{% static 'js/app.js' %}?v=20261115.1"></script>
 
 
 
@@ -75,13 +75,11 @@
       <!-- Topbar Header -->
       {% include 'partials/topbar.html' %}
 
-      <!-- Scrollable Main Content Area -->
-      <main id="app-main" class="flex-1 min-h-0 flex flex-col overflow-hidden bg-[#f5f6f8]">
-        <section id="app-content-panel" class="flex-1 min-h-0 flex flex-col p-4 sm:p-6 overflow-hidden">
-          <div class="h-full w-full flex-1 min-h-0 flex flex-col overflow-hidden">
-            {% block content %}{% endblock %}
-          </div>
-        </section>
+      <!-- Main Content Viewport -->
+      <main id="app-main" class="flex-1 min-h-0 overflow-y-auto custom-scrollbar bg-[#f5f6f8]">
+        <div id="app-content-panel" class="p-4 sm:p-6 min-h-full flex flex-col w-full">
+          {% block content %}{% endblock %}
+        </div>
       </main>
 
     </div>
