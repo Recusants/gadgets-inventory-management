@@ -1,12 +1,12 @@
 {
   "system_name": "Clarity Retail: Gadgets store",
   "short_name": "Clarity Retail",
-  "version": "v2.4.38",
-  "build": "v2.4.38-2bc6ea0",
-  "commit_count": 38,
-  "commit_hash": "2bc6ea0",
+  "version": "v2.4.39",
+  "build": "v2.4.39-730b55c",
+  "commit_count": 39,
+  "commit_hash": "730b55c",
   "branch": "main",
-  "commit_subject": "Add Business Performance Graphics and Analytics dashboard section",
-  "updated_at": "2026-11-15 19:19",
-  "last_pushed_at": "2026-11-15 19:19:15"
+  "commit_subject": "Add Transactions journal and itemize Sales table as child line items under Daily Operations",
+  "updated_at": "2026-11-15 19:33",
+  "last_pushed_at": "2026-11-15 19:33:47"
 }

@@ -161,15 +161,22 @@
       </div>
     </div>
 
-    <!-- Fixoria-style "..." More Options Rounded Squircle Button -->
+    <!-- User Profile in a Circle with Settings Dropdown -->
     <div class="relative" x-data="{ open: false }">
       <button @click="open = !open" 
               type="button" 
-              class="w-8 h-8 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-900 flex items-center justify-center transition-all focus:outline-none"
-              title="More Actions">
-        <i class="fas fa-ellipsis-h text-xs"></i>
+              class="relative flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#0a192f] hover:bg-blue-900 text-white shadow-sm ring-2 ring-blue-500/25 hover:ring-blue-500/60 transition-all focus:outline-none cursor-pointer"
+              title="{{ request.user.get_full_name|default:request.user.username }} ({{ request.user.role|default:'Staff' }})">
+        {% if request.user.avatar %}
+          <img src="{{ request.user.avatar.url }}" alt="{{ request.user.username }}" class="w-full h-full rounded-full object-cover">
+        {% else %}
+          <i class="fas fa-user text-xs text-blue-200"></i>
+        {% endif %}
+        <!-- Live status green dot indicator -->
+        <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white"></span>
       </button>
 
+      <!-- Dropdown Menu Card -->
       <div x-show="open" 
            @click.away="open = false" 
            x-transition:enter="transition ease-out duration-100"
@@ -178,30 +185,139 @@
            x-transition:leave="transition ease-in duration-75"
            x-transition:leave-start="transform opacity-100 scale-100"
            x-transition:leave-end="transform opacity-0 scale-95"
-           class="absolute right-0 mt-2 w-48 rounded-2xl bg-white shadow-xl border border-slate-100 py-1.5 z-50 text-xs">
-        <a href="{% url 'sales:checkout' %}" class="flex items-center px-3.5 py-2 text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-medium">
-          <i class="fas fa-cash-register w-4 mr-2 text-slate-400"></i> POS Checkout
-        </a>
-        <a href="{% url 'inventory:product_list' %}" class="flex items-center px-3.5 py-2 text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-medium">
-          <i class="fas fa-boxes w-4 mr-2 text-slate-400"></i> Product Catalog
-        </a>
-        {% if request.user.is_manager_role %}
-        <a href="{% url 'core:settings' %}" class="flex items-center px-3.5 py-2 text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-medium">
-          <i class="fas fa-sliders-h w-4 mr-2 text-slate-400"></i> Settings
-        </a>
-        <div class="border-t border-slate-100 my-1"></div>
-        <a href="{% url 'core:system' %}" class="flex items-center px-3.5 py-2 text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-medium">
-          <i class="fas fa-server w-4 mr-2 text-slate-400"></i> System Status
-        </a>
-        {% endif %}
+           class="absolute right-0 mt-2 w-72 rounded-2xl bg-white shadow-2xl border border-slate-200 py-0 z-50 overflow-hidden divide-y divide-slate-100">
+        
+        <!-- User Profile Header Card -->
+        <div class="px-4 py-3 bg-gradient-to-br from-slate-50 to-blue-50/50 flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-full bg-[#0a192f] text-white flex items-center justify-center font-black text-sm flex-shrink-0 shadow-sm ring-2 ring-blue-600/30">
+            {% if request.user.avatar %}
+              <img src="{{ request.user.avatar.url }}" alt="{{ request.user.username }}" class="w-full h-full rounded-full object-cover">
+            {% else %}
+              <span>{{ request.user.first_name|first|upper|default:request.user.username|first|upper }}</span>
+            {% endif %}
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="text-xs font-bold text-slate-900 truncate">
+              {{ request.user.get_full_name|default:request.user.username }}
+            </div>
+            <div class="text-[10px] text-slate-500 truncate font-mono">
+              {{ request.user.email|default:request.user.username }}
+            </div>
+            <div class="mt-1">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-100/70 text-blue-800 border border-blue-200/60">
+                <i class="fas fa-shield-alt mr-1 text-[8px] text-blue-600"></i>
+                {% if request.user.is_admin_role %}Administrator{% elif request.user.is_manager_role %}Store Manager{% elif request.user.is_supervisor_role %}Supervisor{% else %}Cashier / Staff{% endif %}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Settings & Navigation Links -->
+        <div class="p-1.5 space-y-0.5 text-xs">
+          {% if request.user.is_manager_role %}
+          <!-- Store Settings -->
+          <a href="{% url 'core:settings' %}" 
+             @click="open = false"
+             class="flex items-center px-3 py-2 rounded-xl text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors group">
+            <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-2.5 flex-shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+              <i class="fas fa-sliders-h text-xs"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-xs text-slate-800 group-hover:text-blue-700">Store Settings</div>
+              <div class="text-[10px] text-slate-400">Profile, receipts &amp; currency</div>
+            </div>
+          </a>
+          {% endif %}
+
+          {% if request.user.is_admin_role %}
+          <!-- User Management -->
+          <a href="{% url 'accounts:user_list' %}" 
+             @click="open = false"
+             class="flex items-center px-3 py-2 rounded-xl text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors group">
+            <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-2.5 flex-shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+              <i class="fas fa-users-cog text-xs"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-xs text-slate-800 group-hover:text-blue-700">Staff &amp; Users</div>
+              <div class="text-[10px] text-slate-400">User accounts, roles &amp; PINs</div>
+            </div>
+          </a>
+          {% endif %}
+
+          {% if request.user.is_manager_role %}
+          <!-- System Status -->
+          <a href="{% url 'core:system' %}" 
+             @click="open = false"
+             class="flex items-center px-3 py-2 rounded-xl text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors group">
+            <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-2.5 flex-shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+              <i class="fas fa-server text-xs"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-xs text-slate-800 group-hover:text-blue-700">System Information</div>
+              <div class="text-[10px] text-slate-400">Diagnostics, environment &amp; DB</div>
+            </div>
+          </a>
+          {% endif %}
+
+          {% if request.user.is_supervisor_role %}
+          <!-- Business Visualizer Graphs -->
+          <a href="{% url 'reports:business_graphs' %}" 
+             @click="open = false"
+             class="flex items-center px-3 py-2 rounded-xl text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors group">
+            <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-2.5 flex-shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+              <i class="fas fa-chart-line text-xs"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-xs text-slate-800 group-hover:text-blue-700">Business Analytics</div>
+              <div class="text-[10px] text-slate-400">Interactive charts &amp; visualizations</div>
+            </div>
+          </a>
+          {% endif %}
+
+          <!-- What's New -->
+          <a href="{% url 'core:whats_new' %}" 
+             @click="open = false"
+             class="flex items-center px-3 py-2 rounded-xl text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors group">
+            <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-2.5 flex-shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+              <i class="fas fa-bullhorn text-xs"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-xs text-slate-800 group-hover:text-blue-700">What's New</div>
+              <div class="text-[10px] text-slate-400">Release updates &amp; changelog</div>
+            </div>
+          </a>
+
+          <!-- POS Checkout Quick Terminal -->
+          <a href="{% url 'sales:checkout' %}" 
+             @click="open = false"
+             class="flex items-center px-3 py-2 rounded-xl text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors group">
+            <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-2.5 flex-shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+              <i class="fas fa-cash-register text-xs"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-xs text-slate-800 group-hover:text-blue-700">POS Checkout</div>
+              <div class="text-[10px] text-slate-400">Open register &amp; sell</div>
+            </div>
+          </a>
+        </div>
+
         {% if request.user.is_authenticated %}
-          <div class="border-t border-slate-100 my-1"></div>
+        <!-- Sign Out Footer -->
+        <div class="p-1.5 bg-slate-50/60">
           <form action="{% url 'accounts:logout' %}" method="POST" class="m-0 p-0">
             {% csrf_token %}
-            <button type="submit" class="w-full text-left flex items-center px-3.5 py-2 text-rose-600 hover:bg-rose-50 font-medium transition-colors cursor-pointer">
-              <i class="fas fa-sign-out-alt w-4 mr-2 text-rose-500"></i> Sign Out
+            <button type="submit" 
+                    class="w-full flex items-center px-3 py-2 rounded-xl text-rose-600 hover:bg-rose-50 hover:text-rose-700 font-semibold transition-colors cursor-pointer text-xs group">
+              <div class="w-7 h-7 rounded-lg bg-rose-50 text-rose-500 flex items-center justify-center mr-2.5 flex-shrink-0 group-hover:bg-rose-600 group-hover:text-white transition-colors">
+                <i class="fas fa-arrow-right-from-bracket text-xs"></i>
+              </div>
+              <div class="flex-1 min-w-0 text-left">
+                <div class="font-bold text-xs text-rose-600">Sign Out</div>
+                <div class="text-[10px] text-slate-400">End session safely</div>
+              </div>
             </button>
           </form>
+        </div>
         {% endif %}
       </div>
     </div>
